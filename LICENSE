@@ -1,21 +1,115 @@
-MIT License
+CONSOLE BRIDGE PROPRIETARY LICENSE
 
 Copyright (c) 2025 Console Bridge Contributors
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+TERMS AND CONDITIONS
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. GRANT OF RIGHTS
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+   Subject to the terms and conditions of this License, the copyright holders
+   grant you a limited, non-exclusive, non-transferable license to:
+
+   a) Use the Software for personal, educational, or internal business purposes
+   b) Modify the Software for your own use
+
+2. RESTRICTIONS
+
+   You may NOT:
+
+   a) Redistribute the Software or any modified versions thereof, in source or
+      binary form, without explicit written permission from the copyright holders
+
+   b) Publish, share, or make available the Software or modified versions to
+      third parties through any means (including but not limited to: package
+      registries, version control hosting, file sharing, or embedding in other
+      software products)
+
+   c) Use the Software or modified versions as a component, library, or
+      dependency in any software that is distributed, sold, or made available
+      to third parties
+
+3. MODIFICATIONS AND DERIVATIVE WORKS
+
+   If you create modifications or derivative works of this Software:
+
+   a) You must retain all copyright notices and this license in the modified work
+
+   b) You must provide clear attribution to the original Software and its
+      copyright holders in any modified version
+
+   c) Any software that incorporates, embeds, or uses modified versions of this
+      Software must grant the original copyright holders:
+
+      i)  Co-ownership rights to the modifications
+      ii) Co-ownership stake in the derivative software or product that
+          incorporates the Software or its modifications
+
+   d) Modifications may only be used internally and may not be redistributed
+      without explicit written permission from the copyright holders
+
+4. ATTRIBUTION
+
+   All uses of the Software, whether modified or unmodified, must include
+   prominent attribution to Console Bridge and its copyright holders in:
+
+   a) Source code comments
+   b) Documentation
+   c) User-facing interfaces (where applicable)
+   d) Credits or acknowledgments sections
+
+5. COMMERCIAL USE
+
+   Commercial use of the Software requires a separate commercial license
+   agreement. Contact the copyright holders for licensing inquiries.
+
+6. CO-OWNERSHIP AGREEMENT
+
+   By creating derivative works or modifications, you agree that:
+
+   a) The original copyright holders retain full ownership rights to the
+      original Software
+
+   b) The copyright holders are automatically granted co-ownership rights to
+      any modifications, improvements, or derivative works
+
+   c) Any software product that incorporates this Software or its modifications
+      becomes subject to co-ownership by the original copyright holders
+
+   d) You will negotiate in good faith to formalize co-ownership arrangements
+      upon request from the copyright holders
+
+7. TERMINATION
+
+   This license automatically terminates if you fail to comply with any of its
+   terms and conditions. Upon termination, you must:
+
+   a) Cease all use of the Software and any modified versions
+   b) Delete or destroy all copies in your possession
+   c) Provide written confirmation of compliance to the copyright holders
+
+8. NO WARRANTY
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+   WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+   OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+
+9. GOVERNING LAW
+
+   This License shall be governed by and construed in accordance with the laws
+   of the jurisdiction in which the copyright holders reside, without regard
+   to conflict of law provisions.
+
+10. CONTACT
+
+    For licensing inquiries, permissions, or questions about this License,
+    please contact the copyright holders through the official Console Bridge
+    repository or project contacts.
+
+---
+
+BY USING THIS SOFTWARE, YOU ACKNOWLEDGE THAT YOU HAVE READ THIS LICENSE,
+UNDERSTAND IT, AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
