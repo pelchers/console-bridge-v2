@@ -22,7 +22,12 @@ class BridgeManager {
     this.options = {
       maxInstances: options.maxInstances || 10,
       headless: options.headless !== false,
-      levels: options.levels || ['log', 'info', 'warning', 'error', 'debug'],
+      levels: options.levels || [
+        'log', 'info', 'warning', 'error', 'debug',
+        'dir', 'dirxml', 'table', 'trace', 'clear',
+        'startGroup', 'startGroupCollapsed', 'endGroup',
+        'assert', 'profile', 'profileEnd', 'count', 'timeEnd'
+      ],
       output: options.output || console.log,
     };
   }

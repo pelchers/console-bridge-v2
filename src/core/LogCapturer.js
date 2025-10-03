@@ -7,7 +7,12 @@ class LogCapturer {
   constructor(page, url, options = {}) {
     this.page = page;
     this.url = url;
-    this.levels = options.levels || ['log', 'info', 'warning', 'error', 'debug'];
+    this.levels = options.levels || [
+      'log', 'info', 'warning', 'error', 'debug',
+      'dir', 'dirxml', 'table', 'trace', 'clear',
+      'startGroup', 'startGroupCollapsed', 'endGroup',
+      'assert', 'profile', 'profileEnd', 'count', 'timeEnd'
+    ];
     this.callback = null;
   }
 
