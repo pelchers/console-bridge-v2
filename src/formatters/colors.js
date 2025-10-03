@@ -9,7 +9,7 @@ const chalk = require('chalk');
 const LOG_LEVEL_COLORS = {
   log: chalk.white,
   info: chalk.blue,
-  warn: chalk.yellow,
+  warning: chalk.yellow,
   error: chalk.red,
   debug: chalk.gray,
 };

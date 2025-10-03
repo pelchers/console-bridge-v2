@@ -15,7 +15,7 @@ describe('Color Utilities', () => {
     test('defines colors for all log levels', () => {
       expect(LOG_LEVEL_COLORS.log).toBeDefined();
       expect(LOG_LEVEL_COLORS.info).toBeDefined();
-      expect(LOG_LEVEL_COLORS.warn).toBeDefined();
+      expect(LOG_LEVEL_COLORS.warning).toBeDefined();
       expect(LOG_LEVEL_COLORS.error).toBeDefined();
       expect(LOG_LEVEL_COLORS.debug).toBeDefined();
     });
@@ -23,7 +23,7 @@ describe('Color Utilities', () => {
     test('all colors are chalk functions', () => {
       expect(typeof LOG_LEVEL_COLORS.log).toBe('function');
       expect(typeof LOG_LEVEL_COLORS.info).toBe('function');
-      expect(typeof LOG_LEVEL_COLORS.warn).toBe('function');
+      expect(typeof LOG_LEVEL_COLORS.warning).toBe('function');
       expect(typeof LOG_LEVEL_COLORS.error).toBe('function');
       expect(typeof LOG_LEVEL_COLORS.debug).toBe('function');
     });
@@ -126,8 +126,8 @@ describe('Color Utilities', () => {
       expect(getLogLevelColor('info')).toBe(LOG_LEVEL_COLORS.info);
     });
 
-    test('returns correct color for warn', () => {
-      expect(getLogLevelColor('warn')).toBe(LOG_LEVEL_COLORS.warn);
+    test('returns correct color for warning', () => {
+      expect(getLogLevelColor('warning')).toBe(LOG_LEVEL_COLORS.warning);
     });
 
     test('returns correct color for error', () => {

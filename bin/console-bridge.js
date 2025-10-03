@@ -185,7 +185,7 @@ program
     '-l, --levels <levels>',
     'Comma-separated log levels to capture',
     parseLevels,
-    ['log', 'info', 'warn', 'error', 'debug']
+    ['log', 'info', 'warning', 'error', 'debug']
   )
   .option('--no-headless', 'Show browser windows (default: headless)')
   .option(

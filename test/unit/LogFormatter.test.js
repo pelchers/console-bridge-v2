@@ -69,7 +69,7 @@ describe('LogFormatter', () => {
     });
 
     test('formats different log levels', () => {
-      const levels = ['log', 'info', 'warn', 'error', 'debug'];
+      const levels = ['log', 'info', 'warning', 'error', 'debug'];
 
       levels.forEach((level) => {
         const logData = {
@@ -194,9 +194,9 @@ describe('LogFormatter', () => {
       expect(result).toContain('log:');
     });
 
-    test('formats warn level', () => {
-      const result = formatter.formatLevel('warn');
-      expect(result).toContain('warn:');
+    test('formats warning level', () => {
+      const result = formatter.formatLevel('warning');
+      expect(result).toContain('warning:');
     });
 
     test('formats error level', () => {
@@ -329,7 +329,7 @@ describe('LogFormatter', () => {
   describe('integration', () => {
     test('formats complete log entry', () => {
       const logData = {
-        type: 'warn',
+        type: 'warning',
         args: ['Warning message', { data: 'value' }],
         source: 'http://localhost:5555/',
         timestamp: Date.now(),
@@ -348,7 +348,7 @@ describe('LogFormatter', () => {
       // Should contain all parts
       expect(result).toMatch(/\[\d{2}:\d{2}:\d{2}\]/); // timestamp
       expect(result).toContain('localhost:5555'); // source
-      expect(result).toContain('warn:'); // level
+      expect(result).toContain('warning:'); // level
       expect(result).toContain('Warning message'); // message
       expect(result).toContain('data'); // object
       expect(result).toContain('app.js:10'); // location

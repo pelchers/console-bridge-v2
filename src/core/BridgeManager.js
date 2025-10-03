@@ -22,7 +22,7 @@ class BridgeManager {
     this.options = {
       maxInstances: options.maxInstances || 10,
       headless: options.headless !== false,
-      levels: options.levels || ['log', 'info', 'warn', 'error', 'debug'],
+      levels: options.levels || ['log', 'info', 'warning', 'error', 'debug'],
       output: options.output || console.log,
     };
   }

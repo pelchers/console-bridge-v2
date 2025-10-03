@@ -74,7 +74,7 @@ describe('BridgeManager', () => {
       expect(defaultManager.options.levels).toEqual([
         'log',
         'info',
-        'warn',
+        'warning',
         'error',
         'debug',
       ]);

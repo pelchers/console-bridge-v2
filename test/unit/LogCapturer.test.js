@@ -18,7 +18,7 @@ describe('LogCapturer', () => {
 
     callback = jest.fn();
     capturer = new LogCapturer(mockPage, 'http://localhost:5555/', {
-      levels: ['log', 'info', 'warn', 'error', 'debug'],
+      levels: ['log', 'info', 'warning', 'error', 'debug'],
     });
   });
 
@@ -36,7 +36,7 @@ describe('LogCapturer', () => {
       expect(defaultCapturer.levels).toEqual([
         'log',
         'info',
-        'warn',
+        'warning',
         'error',
         'debug',
       ]);
@@ -112,7 +112,7 @@ describe('LogCapturer', () => {
     });
 
     test('calls callback for different log levels', async () => {
-      const levels = ['log', 'info', 'warn', 'error', 'debug'];
+      const levels = ['log', 'info', 'warning', 'error', 'debug'];
 
       for (const level of levels) {
         callback.mockClear();

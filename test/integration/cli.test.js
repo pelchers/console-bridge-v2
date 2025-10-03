@@ -128,7 +128,7 @@ describe('CLI', () => {
   describe('option parsing', () => {
     test('parses --levels option', async () => {
       // This will fail to connect but should parse options correctly
-      const { child } = await runCLI(['start', 'localhost:9999', '--levels', 'error,warn'], {
+      const { child } = await runCLI(['start', 'localhost:9999', '--levels', 'error,warning'], {
         returnChild: true,
       });
 
