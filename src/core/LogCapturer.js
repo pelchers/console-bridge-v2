@@ -23,34 +23,50 @@ class LogCapturer {
   async start(callback) {
     this.callback = callback;
 
-    // Use CDP (Chrome DevTools Protocol) to capture ALL console types
-    const client = await this.page.target().createCDPSession();
-    await client.send('Runtime.enable');
+    // Define event handlers
+    this.consoleHandler = async (msg) => {
+      await this.handleConsoleMessage(msg);
+    };
 
-    // Listen for Runtime.consoleAPICalled (captures ALL console methods)
-    client.on('Runtime.consoleAPICalled', async (event) => {
-      await this.handleCDPConsoleMessage(event);
-    });
-
-    this.cdpClient = client;
-
-    // Listen for page errors (uncaught exceptions)
-    this.page.on('pageerror', (error) => {
+    this.pageErrorHandler = (error) => {
       this.handlePageError(error);
-    });
+    };
 
-    // Listen for request failures
-    this.page.on('requestfailed', (request) => {
+    this.requestFailedHandler = (request) => {
       this.handleRequestFailed(request);
+    };
+
+    // Attach event listeners
+    this.attachListeners();
+
+    // Re-attach listeners on framenavigated (handles SPA navigation, hot reload, etc.)
+    this.page.on('framenavigated', () => {
+      // Detach old listeners
+      this.page.off('console', this.consoleHandler);
+      this.page.off('pageerror', this.pageErrorHandler);
+      this.page.off('requestfailed', this.requestFailedHandler);
+
+      // Re-attach listeners
+      this.attachListeners();
     });
   }
 
   /**
-   * Handle CDP console API called event
-   * @param {Object} event - CDP Runtime.consoleAPICalled event
+   * Attach console event listeners
+   * @private
    */
-  async handleCDPConsoleMessage(event) {
-    const type = event.type;
+  attachListeners() {
+    this.page.on('console', this.consoleHandler);
+    this.page.on('pageerror', this.pageErrorHandler);
+    this.page.on('requestfailed', this.requestFailedHandler);
+  }
+
+  /**
+   * Handle Puppeteer console message
+   * @param {ConsoleMessage} msg - Puppeteer ConsoleMessage object
+   */
+  async handleConsoleMessage(msg) {
+    const type = msg.type();
 
     // Filter by log level if specified
     if (!this.levels.includes(type)) {
@@ -58,20 +74,16 @@ class LogCapturer {
     }
 
     try {
-      // Extract arguments from CDP format
-      const args = await this.extractCDPArgs(event.args);
+      // Extract arguments from JSHandles
+      const args = await this.extractPuppeteerArgs(msg.args());
 
       // Create log data object
       const logData = {
         type,
         args,
         source: this.url,
-        timestamp: event.timestamp || Date.now(),
-        location: event.stackTrace && event.stackTrace.callFrames[0] ? {
-          url: event.stackTrace.callFrames[0].url,
-          lineNumber: event.stackTrace.callFrames[0].lineNumber,
-          columnNumber: event.stackTrace.callFrames[0].columnNumber,
-        } : {},
+        timestamp: Date.now(),
+        location: msg.location() || {},
       };
 
       // Call callback
@@ -79,7 +91,7 @@ class LogCapturer {
         this.callback(logData);
       }
     } catch (error) {
-      console.error('Error processing CDP console message:', error.message);
+      console.error('Error processing console message:', error.message);
     }
   }
 
@@ -129,50 +141,21 @@ class LogCapturer {
   }
 
   /**
-   * Extract arguments from CDP Remote objects
-   * @param {Array} remoteObjects - CDP RemoteObject array
+   * Extract arguments from Puppeteer JSHandles
+   * @param {Array} jsHandles - Array of JSHandles
    * @returns {Promise<Array>} Serialized arguments
    */
-  async extractCDPArgs(remoteObjects) {
+  async extractPuppeteerArgs(jsHandles) {
     const args = [];
 
-    for (const obj of remoteObjects) {
+    for (const handle of jsHandles) {
       try {
-        // Handle different types of RemoteObjects
-        if (obj.type === 'undefined') {
-          args.push(undefined);
-        } else if (obj.type === 'null') {
-          args.push(null);
-        } else if (obj.type === 'string' || obj.type === 'number' || obj.type === 'boolean') {
-          args.push(obj.value);
-        } else if (obj.type === 'object') {
-          // Try to get object properties via CDP
-          if (obj.objectId && this.cdpClient) {
-            try {
-              const properties = await this.cdpClient.send('Runtime.getProperties', {
-                objectId: obj.objectId,
-                ownProperties: true,
-              });
-
-              // Build object from properties
-              const result = {};
-              for (const prop of properties.result) {
-                if (prop.enumerable && prop.value) {
-                  result[prop.name] = await this.serializeCDPValue(prop.value);
-                }
-              }
-              args.push(result);
-            } catch {
-              args.push(obj.description || '[Object]');
-            }
-          } else {
-            args.push(obj.description || '[Object]');
-          }
-        } else if (obj.type === 'function') {
-          args.push(obj.description || '[Function]');
-        } else {
-          args.push(obj.description || String(obj.value));
-        }
+        // Use jsonValue() to extract the value from JSHandle
+        const value = await handle.jsonValue().catch(() => {
+          // If jsonValue() fails (functions, symbols, etc.), get string representation
+          return handle.toString();
+        });
+        args.push(value);
       } catch (error) {
         args.push('[Error serializing]');
       }
@@ -182,44 +165,14 @@ class LogCapturer {
   }
 
   /**
-   * Serialize a CDP RemoteObject value
-   * @param {Object} obj - CDP RemoteObject
-   * @returns {Promise<any>} Serialized value
-   */
-  async serializeCDPValue(obj) {
-    if (obj.type === 'undefined') return undefined;
-    if (obj.type === 'null') return null;
-    if (obj.type === 'string' || obj.type === 'number' || obj.type === 'boolean') {
-      return obj.value;
-    }
-    if (obj.type === 'object' && obj.objectId && this.cdpClient) {
-      try {
-        const properties = await this.cdpClient.send('Runtime.getProperties', {
-          objectId: obj.objectId,
-          ownProperties: true,
-        });
-        const result = {};
-        for (const prop of properties.result) {
-          if (prop.enumerable && prop.value) {
-            result[prop.name] = await this.serializeCDPValue(prop.value);
-          }
-        }
-        return result;
-      } catch {
-        return obj.description || '[Object]';
-      }
-    }
-    return obj.description || String(obj.value);
-  }
-
-  /**
    * Stop capturing console logs
    */
   stop() {
-    // Remove all listeners
-    this.page.removeAllListeners('console');
-    this.page.removeAllListeners('pageerror');
-    this.page.removeAllListeners('requestfailed');
+    // Remove specific listeners
+    this.page.off('console', this.consoleHandler);
+    this.page.off('pageerror', this.pageErrorHandler);
+    this.page.off('requestfailed', this.requestFailedHandler);
+    this.page.removeAllListeners('framenavigated');
     this.callback = null;
   }
 }

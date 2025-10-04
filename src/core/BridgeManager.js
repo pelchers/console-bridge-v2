@@ -50,22 +50,22 @@ class BridgeManager {
       // Create browser instance
       const { page } = await this.browserPool.create(normalizedUrl);
 
+      // Navigate to URL FIRST (before creating CDP session)
+      await page.goto(normalizedUrl, {
+        waitUntil: 'domcontentloaded',
+        timeout: 30000,
+      });
+
       // Create log capturer
       const capturer = new LogCapturer(page, normalizedUrl, {
         levels: this.options.levels,
       });
 
-      // Start capturing logs
-      capturer.start((logData) => this.handleLog(logData));
+      // Start capturing logs (creates CDP session on the loaded page)
+      await capturer.start((logData) => this.handleLog(logData));
 
       // Store capturer
       this.capturers.set(normalizedUrl, capturer);
-
-      // Navigate to URL
-      await page.goto(normalizedUrl, {
-        waitUntil: 'domcontentloaded',
-        timeout: 30000,
-      });
     } catch (error) {
       // Clean up on failure
       await this.removeUrl(normalizedUrl);
