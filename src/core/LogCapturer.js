@@ -20,13 +20,19 @@ class LogCapturer {
    * Start capturing console logs
    * @param {Function} callback - Callback function for each log
    */
-  start(callback) {
+  async start(callback) {
     this.callback = callback;
 
-    // Listen for console events
-    this.page.on('console', async (msg) => {
-      await this.handleConsoleMessage(msg);
+    // Use CDP (Chrome DevTools Protocol) to capture ALL console types
+    const client = await this.page.target().createCDPSession();
+    await client.send('Runtime.enable');
+
+    // Listen for Runtime.consoleAPICalled (captures ALL console methods)
+    client.on('Runtime.consoleAPICalled', async (event) => {
+      await this.handleCDPConsoleMessage(event);
     });
+
+    this.cdpClient = client;
 
     // Listen for page errors (uncaught exceptions)
     this.page.on('pageerror', (error) => {
@@ -40,11 +46,11 @@ class LogCapturer {
   }
 
   /**
-   * Handle a console message
-   * @param {ConsoleMessage} msg - Puppeteer console message
+   * Handle CDP console API called event
+   * @param {Object} event - CDP Runtime.consoleAPICalled event
    */
-  async handleConsoleMessage(msg) {
-    const type = msg.type();
+  async handleCDPConsoleMessage(event) {
+    const type = event.type;
 
     // Filter by log level if specified
     if (!this.levels.includes(type)) {
@@ -52,16 +58,20 @@ class LogCapturer {
     }
 
     try {
-      // Extract arguments
-      const args = await this.extractArgs(msg);
+      // Extract arguments from CDP format
+      const args = await this.extractCDPArgs(event.args);
 
       // Create log data object
       const logData = {
         type,
         args,
         source: this.url,
-        timestamp: Date.now(),
-        location: msg.location(),
+        timestamp: event.timestamp || Date.now(),
+        location: event.stackTrace && event.stackTrace.callFrames[0] ? {
+          url: event.stackTrace.callFrames[0].url,
+          lineNumber: event.stackTrace.callFrames[0].lineNumber,
+          columnNumber: event.stackTrace.callFrames[0].columnNumber,
+        } : {},
       };
 
       // Call callback
@@ -69,7 +79,7 @@ class LogCapturer {
         this.callback(logData);
       }
     } catch (error) {
-      console.error('Error processing console message:', error.message);
+      console.error('Error processing CDP console message:', error.message);
     }
   }
 
@@ -119,38 +129,87 @@ class LogCapturer {
   }
 
   /**
-   * Extract and serialize console message arguments
-   * @param {ConsoleMessage} msg - Console message
+   * Extract arguments from CDP Remote objects
+   * @param {Array} remoteObjects - CDP RemoteObject array
    * @returns {Promise<Array>} Serialized arguments
    */
-  async extractArgs(msg) {
+  async extractCDPArgs(remoteObjects) {
     const args = [];
-    const jsHandles = msg.args();
 
-    for (const handle of jsHandles) {
+    for (const obj of remoteObjects) {
       try {
-        // Try to serialize the argument
-        const json = await handle.jsonValue();
-        args.push(json);
-      } catch (error) {
-        // If serialization fails, try to get string representation
-        try {
-          const text = await handle.evaluate((obj) => {
-            if (obj === null) return 'null';
-            if (obj === undefined) return 'undefined';
-            if (typeof obj === 'function') return obj.toString();
-            if (typeof obj === 'symbol') return obj.toString();
-            return String(obj);
-          });
-          args.push(text);
-        } catch {
-          // Last resort: use toString from Puppeteer
-          args.push(handle.toString());
+        // Handle different types of RemoteObjects
+        if (obj.type === 'undefined') {
+          args.push(undefined);
+        } else if (obj.type === 'null') {
+          args.push(null);
+        } else if (obj.type === 'string' || obj.type === 'number' || obj.type === 'boolean') {
+          args.push(obj.value);
+        } else if (obj.type === 'object') {
+          // Try to get object properties via CDP
+          if (obj.objectId && this.cdpClient) {
+            try {
+              const properties = await this.cdpClient.send('Runtime.getProperties', {
+                objectId: obj.objectId,
+                ownProperties: true,
+              });
+
+              // Build object from properties
+              const result = {};
+              for (const prop of properties.result) {
+                if (prop.enumerable && prop.value) {
+                  result[prop.name] = await this.serializeCDPValue(prop.value);
+                }
+              }
+              args.push(result);
+            } catch {
+              args.push(obj.description || '[Object]');
+            }
+          } else {
+            args.push(obj.description || '[Object]');
+          }
+        } else if (obj.type === 'function') {
+          args.push(obj.description || '[Function]');
+        } else {
+          args.push(obj.description || String(obj.value));
         }
+      } catch (error) {
+        args.push('[Error serializing]');
       }
     }
 
     return args;
+  }
+
+  /**
+   * Serialize a CDP RemoteObject value
+   * @param {Object} obj - CDP RemoteObject
+   * @returns {Promise<any>} Serialized value
+   */
+  async serializeCDPValue(obj) {
+    if (obj.type === 'undefined') return undefined;
+    if (obj.type === 'null') return null;
+    if (obj.type === 'string' || obj.type === 'number' || obj.type === 'boolean') {
+      return obj.value;
+    }
+    if (obj.type === 'object' && obj.objectId && this.cdpClient) {
+      try {
+        const properties = await this.cdpClient.send('Runtime.getProperties', {
+          objectId: obj.objectId,
+          ownProperties: true,
+        });
+        const result = {};
+        for (const prop of properties.result) {
+          if (prop.enumerable && prop.value) {
+            result[prop.name] = await this.serializeCDPValue(prop.value);
+          }
+        }
+        return result;
+      } catch {
+        return obj.description || '[Object]';
+      }
+    }
+    return obj.description || String(obj.value);
   }
 
   /**
