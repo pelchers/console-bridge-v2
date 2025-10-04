@@ -157,8 +157,10 @@ class BridgeManager {
       // Format the log
       const formatted = this.formatter.format(logData);
 
-      // Output to terminal
-      this.options.output(formatted);
+      // Output to terminal (skip if null - e.g., console.time() has no output)
+      if (formatted !== null) {
+        this.options.output(formatted);
+      }
     } catch (error) {
       console.error('Error formatting log:', error.message);
     }
