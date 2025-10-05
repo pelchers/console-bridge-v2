@@ -251,6 +251,8 @@ Complete documentation suite:
 
 - **2025-10-04:** ADR created and accepted
 - **2025-10-04:** Version 1.0.0 released
+- **2025-10-05:** Planning documents moved to .claude/ folder (PRD.md, TRD.md, PROJECT_SUMMARY.md, IMPLEMENTATION_PLAN.md)
+- **2025-10-05:** Planning documents corrected to accurately reflect v1.0.0 implementation (Puppeteer + CDP architecture instead of original WebSocket design from planning phase)
 
 ---
 
