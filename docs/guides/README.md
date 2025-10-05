@@ -2,10 +2,41 @@
 
 Complete documentation for using Console Bridge in your development workflow.
 
-## 📚 Available Guides
+## 🚀 Quick Start (For Beginners)
+
+**New to Console Bridge?** Follow these numbered guides in order:
+
+### 1. [Setup Guide](./1-setup-guide.md)
+**Install and configure Console Bridge from scratch**
+
+Step-by-step instructions:
+- Install Console Bridge globally
+- Install concurrently in your project
+- Add unified terminal script
+- Verify everything works
+- Fix common setup issues
+
+👉 **[Read Setup Guide →](./1-setup-guide.md)**
+
+---
+
+### 2. [Usage Guide](./2-usage-guide.md)
+**Learn the 4 ways to run Console Bridge**
+
+Choose your method:
+- **Method 1:** Basic (2 terminals) - Simple learning
+- **Method 2:** Manual merge (2 terminals) - Advanced
+- **Method 3:** Unified terminal (1 terminal) - **Recommended**
+- **Method 4:** Headful debug - Visual debugging
+
+👉 **[Read Usage Guide →](./2-usage-guide.md)**
+
+---
+
+## 📚 Comprehensive Guides
 
 ### [Getting Started](./getting-started.md)
-**Start here if you're new to Console Bridge**
+**Detailed introduction to Console Bridge**
 
 Learn how to:
 - Install Console Bridge
