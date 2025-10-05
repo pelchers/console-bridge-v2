@@ -104,6 +104,11 @@ class BridgeManager {
   async start(urls) {
     const urlArray = Array.isArray(urls) ? urls : [urls];
 
+    // Attempt terminal attachment if merge-output is enabled
+    if (this.mergeOutput && urlArray.length > 0) {
+      await this.attemptTerminalAttachment(urlArray[0]);
+    }
+
     // Add all URLs in parallel
     const addPromises = urlArray.map((url) =>
       this.addUrl(url).catch((error) => {
@@ -115,10 +120,51 @@ class BridgeManager {
   }
 
   /**
+   * Attempt to attach to dev server terminal for unified output
+   * @param {string} url - First URL being monitored
+   * @returns {Promise<void>}
+   * @private
+   */
+  async attemptTerminalAttachment(url) {
+    try {
+      // Extract port from URL
+      const normalizedUrl = normalizeUrl(url);
+      const match = normalizedUrl.match(/:(\d+)/);
+      
+      if (!match) {
+        console.log('⚠️  --merge-output: Could not extract port from URL. Using standard output.');
+        return;
+      }
+
+      const port = parseInt(match[1], 10);
+
+      // Create TerminalAttacher and attempt to attach
+      this.terminalAttacher = new TerminalAttacher({ port });
+      const result = await this.terminalAttacher.attach(port, this.options.output);
+
+      if (result.success) {
+        // Use the unified output function
+        this.options.output = result.outputFn;
+        console.log(`✓ ${result.message}`);
+      } else {
+        // Graceful fallback - use original output
+        console.log(`ℹ️  ${result.message}`);
+      }
+    } catch (error) {
+      console.log(`⚠️  --merge-output: ${error.message}. Using standard output.`);
+    }
+  }
+
+  /**
    * Stop all monitoring
    * @returns {Promise<void>}
    */
   async stop() {
+    // Detach from terminal if attached
+    if (this.terminalAttacher) {
+      this.terminalAttacher.detach();
+    }
+
     // Stop all capturers
     for (const capturer of this.capturers.values()) {
       capturer.stop();
