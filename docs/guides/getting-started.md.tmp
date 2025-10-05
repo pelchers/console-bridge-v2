@@ -166,53 +166,7 @@ Each log line follows this format:
 
 ## Common Workflows
 
-### Unified Terminal Workflow (Recommended)
-
-For the best developer experience, use `concurrently` to run both your dev server and Console Bridge in a **single terminal**:
-
-**Setup:**
-```bash
-npm install --save-dev concurrently
-```
-
-**package.json:**
-```json
-{
-  "scripts": {
-    "dev": "next dev",
-    "dev:all": "concurrently \"npm run dev\" \"console-bridge start localhost:3000\""
-  }
-}
-```
-
-**Usage:**
-```bash
-npm run dev:all
-```
-
-**Output (single terminal):**
-```
-[0] ▲ Next.js 14.0.0
-[0] - Local: http://localhost:3000
-[1] 🌉 Console Bridge v1.0.0
-[1] Monitoring 1 URL...
-[0] ○ Compiling /...
-[1] [14:32:15] [localhost:3000] log: App loaded!
-```
-
-**Benefits:**
-- ✅ Single terminal to monitor everything
-- ✅ No context switching between terminals
-- ✅ Logs from dev server and browser appear together
-- ✅ Cleaner workspace
-
----
-
-### Traditional Two-Terminal Workflow
-
-Alternatively, run in separate terminals:
-
-**React Development:**
+### React Development
 ```bash
 # Terminal 1
 npm run dev
@@ -221,7 +175,7 @@ npm run dev
 console-bridge start localhost:3000
 ```
 
-**Next.js Projects:**
+### Next.js Projects
 ```bash
 # Terminal 1
 next dev
@@ -230,7 +184,7 @@ next dev
 console-bridge start localhost:3000
 ```
 
-**Vite Projects:**
+### Vite Projects
 ```bash
 # Terminal 1
 npm run dev

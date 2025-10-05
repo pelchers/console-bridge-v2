@@ -7,6 +7,7 @@
 const BrowserPool = require('./BrowserPool');
 const LogCapturer = require('./LogCapturer');
 const LogFormatter = require('../formatters/LogFormatter');
+const TerminalAttacher = require('./TerminalAttacher');
 const { normalizeUrl } = require('../utils/url');
 
 class BridgeManager {
@@ -18,6 +19,8 @@ class BridgeManager {
 
     this.capturers = new Map();
     this.formatter = new LogFormatter(options.formatterOptions);
+    this.terminalAttacher = null;
+    this.mergeOutput = options.mergeOutput || false;
 
     this.options = {
       maxInstances: options.maxInstances || 10,
@@ -29,6 +32,7 @@ class BridgeManager {
         'assert', 'profile', 'profileEnd', 'count', 'timeEnd'
       ],
       output: options.output || console.log,
+      mergeOutput: options.mergeOutput || false,
     };
   }
 
