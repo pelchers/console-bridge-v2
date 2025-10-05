@@ -2,7 +2,7 @@
 ## Browser Console to Terminal Bridge
 
 ### Product Overview
-A developer-focused npm package that streams browser console output from localhost applications to the terminal in real-time. This tool bridges the gap between browser development tools and terminal-based workflows, allowing developers to monitor multiple applications simultaneously from a single terminal window.
+A developer-focused npm package that captures browser console output from localhost applications and streams it to the terminal in real-time. This tool bridges the gap between browser development tools and terminal-based workflows, allowing developers to monitor console logs directly in their terminal without switching contexts.
 
 ### Target Users
 - **Primary**: Front-end developers working on localhost applications
@@ -10,152 +10,194 @@ A developer-focused npm package that streams browser console output from localho
 - **Tertiary**: QA engineers monitoring application logs during testing
 
 ### Problem Statement
-Developers working with multiple localhost applications often need to switch between browser tabs to monitor console outputs. This context switching reduces productivity and makes it difficult to correlate logs across different applications or services running on different ports.
+Developers working with localhost applications need to constantly switch between their code editor/terminal and browser DevTools to monitor console output. This context switching reduces productivity and makes it difficult to maintain focus on the code while debugging.
 
 ### Solution
-A lightweight npm package that:
-1. Captures browser console output using WebSocket connections
-2. Streams logs to a unified terminal interface
-3. Labels each log with its source (localhost address)
-4. Provides easy start/stop controls
+A zero-configuration npm package that:
+1. Captures browser console output using Puppeteer and Chrome DevTools Protocol
+2. Streams logs to the terminal interface
+3. Labels each log with its source URL
+4. Provides unified terminal output with dev server logs
+5. Requires no browser integration or code changes
 
 ### Core Features
 
-#### 1. Multi-Source Log Streaming
-- **Description**: Stream console logs from multiple localhost addresses simultaneously
-- **User Story**: As a developer, I want to monitor console output from multiple localhost apps in one terminal window
+#### 1. Zero-Configuration Console Capture
+- **Description**: Automatically capture console logs without any browser setup
+- **User Story**: As a developer, I want to see console output in my terminal without adding scripts to my app
 - **Acceptance Criteria**:
-  - Support unlimited concurrent connections
-  - Each log entry clearly labeled with source URL
-  - Maintain chronological order across all sources
+  - No browser integration required
+  - No code modifications needed
+  - Works with any localhost URL
+  - Automatic Puppeteer browser management
 
-#### 2. Console Method Support
-- **Description**: Capture all standard console methods
-- **User Story**: As a developer, I want all console outputs (log, error, warn, info, debug) to be captured
+#### 2. Comprehensive Console Method Support
+- **Description**: Capture all 18 console methods
+- **User Story**: As a developer, I want all console outputs captured automatically
 - **Acceptance Criteria**:
-  - Support console.log, console.error, console.warn, console.info, console.debug
+  - Support all 18 console methods: log, info, warn, error, debug, dir, dirxml, table, trace, clear, group, groupCollapsed, groupEnd, assert, profile, profileEnd, count, timeEnd
   - Preserve original formatting and data types
-  - Handle complex objects and circular references
+  - Handle complex objects and circular references via CDP
 
-#### 3. Terminal Formatting
+#### 3. Unified Terminal Output
+- **Description**: Merge browser console logs with dev server output
+- **User Story**: As a developer, I want to see both dev server logs and browser console logs in one terminal
+- **Acceptance Criteria**:
+  - `--merge-output` flag for unified output
+  - Cross-platform process discovery (Windows, macOS, Linux)
+  - Graceful fallback when dev server not found
+  - Seamless integration without disrupting dev server
+
+#### 4. Terminal Formatting
 - **Description**: Color-coded and formatted output for easy reading
 - **User Story**: As a developer, I want to quickly identify log types and sources
 - **Acceptance Criteria**:
   - Color-code by log type (error=red, warn=yellow, info=blue, etc.)
   - Include timestamps
-  - Display source URL/port prominently
+  - Display source URL prominently
   - Support for light/dark terminal themes
 
-#### 4. Simple CLI Interface
+#### 5. Simple CLI Interface
 - **Description**: Easy-to-use command line interface
-- **User Story**: As a developer, I want to start/stop the bridge with simple commands
+- **User Story**: As a developer, I want to start console capture with a simple command
 - **Acceptance Criteria**:
-  - `console-bridge start` - starts the server
-  - `console-bridge stop` - stops the server
-  - Ctrl+C twice to exit
-  - Clear status messages
+  - `console-bridge start <url>` - starts console capture
+  - `--merge-output` - unified terminal with dev server
+  - `--no-headless` - visible browser for debugging
+  - `--levels` - filter by log levels
+  - `--location` - show file locations
+  - Ctrl+C to exit gracefully
 
-#### 5. Browser Integration
-- **Description**: Easy integration with any localhost application
-- **User Story**: As a developer, I want minimal setup to connect my app
+#### 6. Multi-URL Support
+- **Description**: Monitor multiple localhost apps simultaneously
+- **User Story**: As a developer, I want to monitor console output from multiple localhost apps
 - **Acceptance Criteria**:
-  - Single script tag or JavaScript snippet
-  - Auto-reconnection on disconnect
-  - No interference with existing code
-  - Works with all modern browsers
+  - Support multiple URLs in single command
+  - Independent browser instances per URL
+  - Clear source labeling for each URL
+  - Maintain chronological order across sources
 
 ### Non-Functional Requirements
 
 #### Performance
-- Minimal latency (<50ms) between console call and terminal display
+- Minimal latency between console call and terminal display (via CDP)
 - Low CPU and memory footprint
 - Handle high-frequency logging without dropping messages
+- Efficient browser lifecycle management
 
 #### Reliability
-- Graceful handling of connection drops
-- Auto-reconnection capability
-- No data loss during reconnection
+- Graceful handling of browser crashes
+- Automatic browser cleanup on exit
+- No data loss during normal operation
+- Graceful fallback when terminal attachment fails
 
 #### Compatibility
 - Node.js 14.x and above
-- Support for Chrome, Firefox, Safari, Edge
-- Works with all JavaScript frameworks
+- Chrome/Chromium via Puppeteer
+- Works with all JavaScript frameworks (React, Next.js, Vue, Svelte, etc.)
+- Cross-platform: Windows, macOS, Linux
 
 #### Security
-- Only accept connections from localhost
-- Optional authentication token
-- No execution of arbitrary code
+- Localhost-only operation
+- No remote code execution
+- No network exposure beyond localhost
 
 ### User Experience
 
 #### Installation Flow
 1. `npm install -g console-bridge`
-2. `console-bridge start`
-3. Add script to HTML: `<script src="http://localhost:9999/bridge.js"></script>`
-4. Console output appears in terminal
+2. `console-bridge start localhost:3000`
+3. Console output appears in terminal automatically
 
-#### Configuration
-- Default port: 9999 (configurable)
-- Config file support for persistent settings
-- Environment variable overrides
+#### Usage Patterns
+
+**Basic Usage:**
+```bash
+console-bridge start localhost:3000
+```
+
+**Unified Terminal:**
+```bash
+console-bridge start localhost:3000 --merge-output
+```
+
+**Multiple URLs:**
+```bash
+console-bridge start localhost:3000 localhost:8080
+```
+
+**Filtered Output:**
+```bash
+console-bridge start localhost:3000 --levels error,warn
+```
+
+**Visible Browser:**
+```bash
+console-bridge start localhost:3000 --no-headless
+```
 
 ### Success Metrics
 - Installation count growth
 - GitHub stars and community engagement
 - Average session duration
-- Number of concurrent connections per session
+- Number of users using --merge-output flag
+- Cross-platform adoption rates
 
 ### Future Enhancements
-1. **Filtering**: Regex-based log filtering
-2. **Search**: Real-time search across logs
-3. **Export**: Save logs to file
-4. **Remote Debugging**: Support for non-localhost URLs
-5. **Browser Extension**: Alternative to script injection
+1. **Filtering**: Regex-based log filtering in real-time
+2. **Search**: Real-time search across captured logs
+3. **Export**: Save logs to file with formatting
+4. **Remote Debugging**: Support for non-localhost URLs (with security)
+5. **Browser Extension**: Alternative capture method
 6. **Log Persistence**: Optional database storage
-7. **Web UI**: Browser-based dashboard option
+7. **Performance Monitoring**: Capture performance metrics
+8. **Network Monitoring**: Capture network requests
 
-### MVP Scope
-For initial release, focus on:
-1. Basic multi-source streaming
-2. All console methods support
-3. Terminal color formatting
-4. Simple start/stop commands
-5. Basic browser integration script
+### MVP Scope (v1.0.0 - Achieved)
+1. ✅ Zero-configuration console capture via Puppeteer + CDP
+2. ✅ All 18 console methods supported
+3. ✅ Terminal color formatting
+4. ✅ CLI interface with multiple flags
+5. ✅ Unified terminal output (--merge-output)
+6. ✅ Multi-URL support
+7. ✅ Cross-platform compatibility
+8. ✅ Headless/headful mode
 
 ### Constraints
 - Must not interfere with existing console functionality
-- Should work without modifying application code (beyond adding script)
+- Should work without modifying application code
 - Terminal-only interface for MVP (no GUI)
+- Requires Chrome/Chromium via Puppeteer
 
 ### Dependencies
-- WebSocket library for real-time communication
-- Chalk for terminal colors
-- Commander for CLI
+- **puppeteer** - Browser automation and CDP access
+- **chalk** - Terminal colors
+- **commander** - CLI framework
 - Minimal external dependencies for reliability
+
+### Architecture
+- **Puppeteer + Chrome DevTools Protocol** for console capture
+- **Cross-platform process utilities** for dev server discovery
+- **BridgeManager** orchestrates browser instances
+- **BrowserPool** manages Puppeteer lifecycle
+- **LogCapturer** captures console events via CDP
+- **LogFormatter** formats logs for terminal
+- **TerminalAttacher** merges output with dev server
 
 ---
 
-## v1.0.0 Implementation Note
+## Version History
 
-**Date:** October 5, 2025  
-**Status:** Moved from deprecated folder to `.claude/` for historical reference
+**v1.0.0 (October 5, 2025) - "Unified Terminal"**
+- Zero-configuration console capture
+- All 18 console methods supported
+- Unified terminal output feature
+- Cross-platform support (Windows, macOS, Linux)
+- 96.68% test coverage
+- Comprehensive documentation
 
-**Final Implementation Changes:**  
-The v1.0.0 release pivoted from the WebSocket-based architecture described above to a **Puppeteer-based solution** using Chrome DevTools Protocol. This architectural change eliminated the need for browser integration scripts and enabled zero-configuration console capture.
+---
 
-**Key differences in v1.0.0:**
-- ✅ Uses Puppeteer + Chrome DevTools Protocol (not WebSocket)
-- ✅ Zero browser integration required (no script tags needed)
-- ✅ Automatic console capture from all 18 console methods
-- ✅ Unified terminal output feature (`--merge-output`)
-- ✅ Headless/headful mode support
-- ✅ Multi-URL monitoring with independent browser instances
-- ✅ Cross-platform process discovery and attachment
-
-**Current Documentation:**
-- See `/IMPLEMENTATION_PLAN.md` for final architecture
-- See `/docs/adr/` for architecture decisions
-- See `/docs/versions/1.0.0.md` for release documentation
-- See `/docs/guides/` for user documentation
-
-This PRD represents the original vision. The final product exceeded these requirements by eliminating setup complexity while maintaining all core functionality.
+**Document Status:** Production (v1.0.0)
+**Last Updated:** October 5, 2025
+**Location:** `.claude/PRD.md`
