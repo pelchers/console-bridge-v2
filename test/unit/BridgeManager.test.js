@@ -72,11 +72,10 @@ describe('BridgeManager', () => {
       expect(defaultManager.options.maxInstances).toBe(10);
       expect(defaultManager.options.headless).toBe(true);
       expect(defaultManager.options.levels).toEqual([
-        'log',
-        'info',
-        'warn',
-        'error',
-        'debug',
+        'log', 'info', 'warning', 'error', 'debug',
+        'dir', 'dirxml', 'table', 'trace', 'clear',
+        'startGroup', 'startGroupCollapsed', 'endGroup',
+        'assert', 'profile', 'profileEnd', 'count', 'timeEnd'
       ]);
     });
 

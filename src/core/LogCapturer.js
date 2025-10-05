@@ -7,7 +7,12 @@ class LogCapturer {
   constructor(page, url, options = {}) {
     this.page = page;
     this.url = url;
-    this.levels = options.levels || ['log', 'info', 'warn', 'error', 'debug'];
+    this.levels = options.levels || [
+      'log', 'info', 'warning', 'error', 'debug',
+      'dir', 'dirxml', 'table', 'trace', 'clear',
+      'startGroup', 'startGroupCollapsed', 'endGroup',
+      'assert', 'profile', 'profileEnd', 'count', 'timeEnd'
+    ];
     this.callback = null;
   }
 
@@ -15,28 +20,50 @@ class LogCapturer {
    * Start capturing console logs
    * @param {Function} callback - Callback function for each log
    */
-  start(callback) {
+  async start(callback) {
     this.callback = callback;
 
-    // Listen for console events
-    this.page.on('console', async (msg) => {
+    // Define event handlers
+    this.consoleHandler = async (msg) => {
       await this.handleConsoleMessage(msg);
-    });
+    };
 
-    // Listen for page errors (uncaught exceptions)
-    this.page.on('pageerror', (error) => {
+    this.pageErrorHandler = (error) => {
       this.handlePageError(error);
-    });
+    };
 
-    // Listen for request failures
-    this.page.on('requestfailed', (request) => {
+    this.requestFailedHandler = (request) => {
       this.handleRequestFailed(request);
+    };
+
+    // Attach event listeners
+    this.attachListeners();
+
+    // Re-attach listeners on framenavigated (handles SPA navigation, hot reload, etc.)
+    this.page.on('framenavigated', () => {
+      // Detach old listeners
+      this.page.off('console', this.consoleHandler);
+      this.page.off('pageerror', this.pageErrorHandler);
+      this.page.off('requestfailed', this.requestFailedHandler);
+
+      // Re-attach listeners
+      this.attachListeners();
     });
   }
 
   /**
-   * Handle a console message
-   * @param {ConsoleMessage} msg - Puppeteer console message
+   * Attach console event listeners
+   * @private
+   */
+  attachListeners() {
+    this.page.on('console', this.consoleHandler);
+    this.page.on('pageerror', this.pageErrorHandler);
+    this.page.on('requestfailed', this.requestFailedHandler);
+  }
+
+  /**
+   * Handle Puppeteer console message
+   * @param {ConsoleMessage} msg - Puppeteer ConsoleMessage object
    */
   async handleConsoleMessage(msg) {
     const type = msg.type();
@@ -47,8 +74,8 @@ class LogCapturer {
     }
 
     try {
-      // Extract arguments
-      const args = await this.extractArgs(msg);
+      // Extract arguments from JSHandles
+      const args = await this.extractPuppeteerArgs(msg.args());
 
       // Create log data object
       const logData = {
@@ -56,7 +83,7 @@ class LogCapturer {
         args,
         source: this.url,
         timestamp: Date.now(),
-        location: msg.location(),
+        location: msg.location() || {},
       };
 
       // Call callback
@@ -114,34 +141,23 @@ class LogCapturer {
   }
 
   /**
-   * Extract and serialize console message arguments
-   * @param {ConsoleMessage} msg - Console message
+   * Extract arguments from Puppeteer JSHandles
+   * @param {Array} jsHandles - Array of JSHandles
    * @returns {Promise<Array>} Serialized arguments
    */
-  async extractArgs(msg) {
+  async extractPuppeteerArgs(jsHandles) {
     const args = [];
-    const jsHandles = msg.args();
 
     for (const handle of jsHandles) {
       try {
-        // Try to serialize the argument
-        const json = await handle.jsonValue();
-        args.push(json);
+        // Use jsonValue() to extract the value from JSHandle
+        const value = await handle.jsonValue().catch(() => {
+          // If jsonValue() fails (functions, symbols, etc.), get string representation
+          return handle.toString();
+        });
+        args.push(value);
       } catch (error) {
-        // If serialization fails, try to get string representation
-        try {
-          const text = await handle.evaluate((obj) => {
-            if (obj === null) return 'null';
-            if (obj === undefined) return 'undefined';
-            if (typeof obj === 'function') return obj.toString();
-            if (typeof obj === 'symbol') return obj.toString();
-            return String(obj);
-          });
-          args.push(text);
-        } catch {
-          // Last resort: use toString from Puppeteer
-          args.push(handle.toString());
-        }
+        args.push('[Error serializing]');
       }
     }
 
@@ -152,10 +168,11 @@ class LogCapturer {
    * Stop capturing console logs
    */
   stop() {
-    // Remove all listeners
-    this.page.removeAllListeners('console');
-    this.page.removeAllListeners('pageerror');
-    this.page.removeAllListeners('requestfailed');
+    // Remove specific listeners
+    this.page.off('console', this.consoleHandler);
+    this.page.off('pageerror', this.pageErrorHandler);
+    this.page.off('requestfailed', this.requestFailedHandler);
+    this.page.removeAllListeners('framenavigated');
     this.callback = null;
   }
 }

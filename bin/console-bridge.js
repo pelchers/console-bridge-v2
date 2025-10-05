@@ -139,6 +139,7 @@ async function startCommand(urls, options) {
       headless: options.headless,
       levels: options.levels,
       output: customOutput,
+      mergeOutput: options.mergeOutput,
       formatterOptions: {
         showTimestamp: options.showTimestamp,
         showSource: options.showSource,
@@ -185,7 +186,12 @@ program
     '-l, --levels <levels>',
     'Comma-separated log levels to capture',
     parseLevels,
-    ['log', 'info', 'warn', 'error', 'debug']
+    [
+      'log', 'info', 'warning', 'error', 'debug',
+      'dir', 'dirxml', 'table', 'trace', 'clear',
+      'startGroup', 'startGroupCollapsed', 'endGroup',
+      'assert', 'profile', 'profileEnd', 'count', 'timeEnd'
+    ]
   )
   .option('--no-headless', 'Show browser windows (default: headless)')
   .option(
@@ -205,6 +211,10 @@ program
   .option(
     '-o, --output <file>',
     'Save logs to file (appends if file exists)'
+  )
+  .option(
+    '--merge-output',
+    'Merge Console Bridge logs with dev server terminal (use with concurrently)'
   )
   .action(startCommand);
 

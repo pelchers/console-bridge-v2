@@ -9,9 +9,22 @@ const chalk = require('chalk');
 const LOG_LEVEL_COLORS = {
   log: chalk.white,
   info: chalk.blue,
-  warn: chalk.yellow,
+  warning: chalk.yellow,
   error: chalk.red,
   debug: chalk.gray,
+  dir: chalk.cyan,
+  dirxml: chalk.cyan,
+  table: chalk.green,
+  trace: chalk.magenta,
+  clear: chalk.white,
+  startGroup: chalk.blue,
+  startGroupCollapsed: chalk.blue,
+  endGroup: chalk.blue,
+  assert: chalk.red,
+  profile: chalk.yellow,
+  profileEnd: chalk.yellow,
+  count: chalk.green,
+  timeEnd: chalk.green,
 };
 
 // Source colors (cycling through these for different URLs)
