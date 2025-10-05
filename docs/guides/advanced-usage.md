@@ -4,6 +4,7 @@ Master Console Bridge with advanced features, CLI options, and configuration.
 
 ## Table of Contents
 - [CLI Options](#cli-options)
+- [Unified Terminal Output](#unified-terminal-output-merge-output)
 - [Headless vs Headful Mode](#headless-vs-headful-mode)
 - [Output Formats](#output-formats)
 - [Log Filtering](#log-filtering)
@@ -28,12 +29,205 @@ console-bridge start [options] <urls...>
 | `--levels <levels>` | `-l` | Comma-separated log levels to capture | All types |
 | `--no-headless` | - | Show browser windows | Headless (hidden) |
 | `--max-instances <number>` | `-m` | Maximum concurrent browser instances | 10 |
+| `--merge-output` | - | Merge console output with dev server terminal | Disabled |
 | `--no-timestamp` | - | Hide timestamps in output | Timestamps shown |
 | `--no-source` | - | Hide source URLs in output | Source shown |
 | `--location` | - | Show file location for each log | Hidden |
 | `--timestamp-format <format>` | - | Timestamp format: "time" or "iso" | "time" |
 | `--output <file>` | `-o` | Save logs to file (appends) | Terminal output |
 | `--help` | `-h` | Display help | - |
+
+---
+
+## Unified Terminal Output (`--merge-output`)
+
+### Overview
+
+The `--merge-output` flag enables **unified terminal output**, merging browser console logs directly into the same terminal as your dev server. This creates a seamless development experience where all output appears in one place.
+
+**Recommended workflow:** Use with `concurrently` to run both dev server and Console Bridge in a single terminal.
+
+---
+
+### Quick Start
+
+**package.json:**
+```json
+{
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "dev:debug": "concurrently \"npm run dev\" \"console-bridge start localhost:3000 --merge-output\""
+  }
+}
+```
+
+**Usage:**
+```bash
+npm run dev:debug
+```
+
+**Result:**
+```
+[Next.js] ready - started server on localhost:3000
+[Next.js] compiled successfully
+[localhost:3000] log: App initialized
+[localhost:3000] info: User logged in
+[localhost:3000] error: API call failed
+```
+
+Both dev server logs AND browser console logs appear in the same terminal! ✨
+
+---
+
+### How It Works
+
+1. **Process Discovery:** Console Bridge finds the dev server process by port number
+2. **Terminal Attachment:** Attaches to the dev server's terminal output stream
+3. **Merged Output:** Browser console logs appear alongside dev server logs
+4. **Graceful Fallback:** Falls back to standard output if attachment fails
+
+**Supported platforms:**
+- ✅ Windows (netstat + tasklist)
+- ✅ macOS (lsof + ps)
+- ✅ Linux (lsof + ps)
+
+---
+
+### Usage Examples
+
+**Next.js:**
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "dev:debug": "concurrently \"npm run dev\" \"console-bridge start localhost:3000 --merge-output\""
+  }
+}
+```
+
+**Vite:**
+```json
+{
+  "scripts": {
+    "dev": "vite",
+    "dev:debug": "concurrently \"npm run dev\" \"console-bridge start localhost:5173 --merge-output\""
+  }
+}
+```
+
+**Create React App:**
+```json
+{
+  "scripts": {
+    "start": "react-scripts start",
+    "dev:debug": "concurrently \"npm start\" \"console-bridge start localhost:3000 --merge-output\""
+  }
+}
+```
+
+**Express:**
+```json
+{
+  "scripts": {
+    "dev": "nodemon server.js",
+    "dev:debug": "concurrently \"npm run dev\" \"console-bridge start localhost:8080 --merge-output\""
+  }
+}
+```
+
+---
+
+### Requirements
+
+1. **Dev server must be running:** Console Bridge discovers the process by port
+2. **Same terminal session:** Works when both processes share the same terminal (via `concurrently`)
+3. **Process permissions:** Console Bridge must have permission to read process info
+4. **lsof (Unix only):** macOS/Linux require `lsof` for process discovery
+
+---
+
+### Graceful Fallback
+
+If terminal attachment fails, Console Bridge automatically falls back to standard output:
+
+**No process found:**
+```
+ℹ️  No process found listening on port 3000. Using separate terminal.
+✓ http://localhost:3000/
+```
+
+**Permission denied:**
+```
+ℹ️  Permission denied to access process 12345. Using separate terminal.
+✓ http://localhost:3000/
+```
+
+**lsof not found (Unix):**
+```
+ℹ️  Failed to attach: lsof not found. Using separate terminal.
+✓ http://localhost:3000/
+```
+
+Your Console Bridge session continues normally, just in a separate output stream.
+
+---
+
+### Multiple URLs
+
+When using `--merge-output` with multiple URLs, only the **first URL** will have terminal attachment attempted:
+
+```bash
+console-bridge start localhost:3000 localhost:8080 --merge-output
+# Attaches to port 3000 only
+# localhost:8080 uses standard output
+```
+
+This is intentional to avoid conflicts with multiple dev servers.
+
+---
+
+### Programmatic API
+
+```javascript
+const BridgeManager = require('console-bridge/src/core/BridgeManager');
+
+const bridge = new BridgeManager({
+  mergeOutput: true,
+  output: console.log,
+  headless: true,
+});
+
+await bridge.start('localhost:3000');
+
+// Check if attached
+if (bridge.terminalAttacher?.isAttached()) {
+  console.log('Successfully attached to dev server process');
+}
+
+await bridge.stop();
+```
+
+---
+
+### Troubleshooting
+
+**Issue:** "No process found listening on port"
+- **Cause:** Dev server isn't running yet
+- **Fix:** Ensure dev server starts before Console Bridge, or use `concurrently` which handles timing
+
+**Issue:** "Permission denied to access process"
+- **Cause:** Process owned by different user
+- **Fix:** Run with same user, or use separate terminal (fallback works fine)
+
+**Issue:** "lsof not found" (Unix)
+- **Cause:** `lsof` not installed
+- **Fix:** Install lsof: `brew install lsof` (macOS) or `sudo apt-get install lsof` (Linux)
+
+**Issue:** Not seeing merged output
+- **Cause:** Running in separate terminals
+- **Fix:** Use `concurrently` to run both in same terminal
+
+See [Troubleshooting Guide](./troubleshooting.md#merge-output-issues) for more details.
 
 ---
 

@@ -4,6 +4,7 @@ This guide helps you diagnose and fix common issues with Console Bridge.
 
 ## Table of Contents
 - [Common Issues](#common-issues)
+- [Merge Output Issues](#merge-output-issues)
 - [Error Messages](#error-messages)
 - [Performance Issues](#performance-issues)
 - [Advanced Debugging](#advanced-debugging)
@@ -303,6 +304,291 @@ setInterval(() => {
   console.log('Health check');
 }, 30000); // Every 30 seconds
 ```
+
+---
+
+## Merge Output Issues
+
+Issues specific to the `--merge-output` flag for unified terminal output.
+
+### 1. "No process found listening on port"
+
+**Symptom:**
+```
+ℹ️  No process found listening on port 3000. Using separate terminal.
+```
+
+**Causes & Solutions:**
+
+#### A. Dev Server Not Running Yet
+The most common cause - Console Bridge starts before the dev server.
+
+**Solution:** Use `concurrently` to start both at the same time:
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "dev:debug": "concurrently \"npm run dev\" \"console-bridge start localhost:3000 --merge-output\""
+  }
+}
+```
+
+`concurrently` handles timing automatically.
+
+---
+
+#### B. Wrong Port Number
+Console Bridge is looking at the wrong port.
+
+**Solution:** Verify the dev server port:
+```bash
+# Check what port your dev server is using
+npm run dev
+# Output: "ready - started server on 0.0.0.0:3000, url: http://localhost:3000"
+
+# Use the exact port with Console Bridge
+console-bridge start localhost:3000 --merge-output
+```
+
+---
+
+#### C. Platform-Specific Commands Failed
+Process discovery uses platform-specific commands (`netstat` on Windows, `lsof` on Unix).
+
+**Solution (Windows):** Ensure `netstat` and `tasklist` are available:
+```bash
+netstat -ano | findstr :3000  # Should show process
+tasklist | findstr PID        # Should show node.exe
+```
+
+**Solution (macOS/Linux):** Ensure `lsof` is installed:
+```bash
+# macOS
+brew install lsof
+
+# Ubuntu/Debian
+sudo apt-get install lsof
+
+# Test it
+lsof -t -i :3000  # Should return PID
+```
+
+---
+
+### 2. "Permission denied to access process"
+
+**Symptom:**
+```
+ℹ️  Permission denied to access process 12345. Using separate terminal.
+```
+
+**Cause:** Process is owned by a different user.
+
+**Solutions:**
+
+#### A. Run as Same User
+Ensure both dev server and Console Bridge run as the same user:
+```bash
+# Check current user
+whoami
+
+# Run dev server as same user
+npm run dev
+
+# Run Console Bridge as same user
+console-bridge start localhost:3000 --merge-output
+```
+
+---
+
+#### B. Use Sudo (Not Recommended)
+```bash
+sudo console-bridge start localhost:3000 --merge-output
+```
+
+**Warning:** This gives Console Bridge elevated permissions. Only use if necessary.
+
+---
+
+#### C. Accept the Fallback
+The "Using separate terminal" fallback works fine - you'll still see all logs, just in a separate output stream.
+
+```bash
+# This works without attachment
+console-bridge start localhost:3000 --merge-output
+# Logs appear normally, just not merged with dev server
+```
+
+---
+
+### 3. "Not seeing merged output"
+
+**Symptoms:**
+- `--merge-output` flag is used
+- No error messages
+- Logs appear in separate terminal
+
+**Causes & Solutions:**
+
+#### A. Running in Separate Terminals
+Unified terminal only works when both processes share the same terminal.
+
+**Wrong:**
+```bash
+# Terminal 1
+npm run dev
+
+# Terminal 2
+console-bridge start localhost:3000 --merge-output
+```
+
+**Right:**
+```bash
+# Single terminal with concurrently
+npm run dev:debug
+```
+
+Where `dev:debug` is:
+```json
+"dev:debug": "concurrently \"npm run dev\" \"console-bridge start localhost:3000 --merge-output\""
+```
+
+---
+
+#### B. Multiple URLs
+Only the first URL gets terminal attachment.
+
+```bash
+console-bridge start localhost:3000 localhost:8080 --merge-output
+# Only localhost:3000 is attached
+# localhost:8080 uses separate output
+```
+
+**Solution:** This is intentional. To merge multiple dev servers, run separate Console Bridge instances.
+
+---
+
+### 4. "lsof not found" (Unix only)
+
+**Symptom:**
+```
+ℹ️  Failed to attach: lsof not found. Using separate terminal.
+```
+
+**Cause:** `lsof` command is not installed (required for Unix process discovery).
+
+**Solutions:**
+
+**macOS:**
+```bash
+# Install with Homebrew
+brew install lsof
+
+# Verify
+lsof -v
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get update
+sudo apt-get install lsof
+
+# Verify
+lsof -v
+```
+
+**Linux (Fedora/RHEL):**
+```bash
+sudo yum install lsof
+
+# Verify
+lsof -v
+```
+
+---
+
+### 5. "Attachment succeeded but logs still separate"
+
+**Symptom:**
+```
+✓ Successfully attached to process 12345 (node.exe) on port 3000
+```
+But logs still appear in separate output.
+
+**Causes:**
+
+#### A. Technical Limitation
+Current implementation writes to `process.stdout`, not the target process's stdout. This works when both processes share the same terminal (Scenario 2 with `concurrently`), but not across different terminals.
+
+**Expected Behavior:**
+- ✅ Works: `concurrently` running both processes
+- ❌ Doesn't work: Two separate terminal windows
+
+**Solution:** Use `concurrently` as documented in [Getting Started](./getting-started.md#unified-terminal-workflow-recommended).
+
+---
+
+#### B. Dev Server Using Different Output Stream
+Some dev servers write to stderr instead of stdout.
+
+**Solution:** This is automatically handled. If you still see issues, the graceful fallback ensures logs still appear.
+
+---
+
+### 6. Debugging Process Discovery
+
+To manually test process discovery:
+
+**Windows:**
+```bash
+# Find process on port 3000
+netstat -ano | findstr :3000
+
+# Example output:
+#   TCP    0.0.0.0:3000    0.0.0.0:0    LISTENING    12345
+
+# Verify process exists
+tasklist | findstr 12345
+
+# Example output:
+#   node.exe    12345 Console    1    50,000 K
+```
+
+**macOS/Linux:**
+```bash
+# Find process on port 3000
+lsof -t -i :3000
+
+# Example output:
+#   12345
+
+# Verify process exists
+ps -p 12345
+
+# Example output:
+#   PID   TTY      TIME CMD
+#   12345 ttys001  0:05.23 node
+```
+
+If these commands fail, Console Bridge will also fail to attach (but gracefully falls back).
+
+---
+
+### Quick Checklist for --merge-output
+
+Before reporting issues with `--merge-output`:
+
+- [ ] Using `concurrently` to run both dev server and Console Bridge
+- [ ] Dev server is running BEFORE Console Bridge attempts attachment
+- [ ] Using correct port number (check dev server output)
+- [ ] `lsof` is installed (macOS/Linux only): `which lsof`
+- [ ] Running as same user for both processes
+- [ ] Not running in separate terminal windows
+- [ ] Checked for "Successfully attached" success message
+- [ ] Checked for "Using separate terminal" fallback message
+- [ ] Reviewed graceful fallback behavior in logs
+
+**Remember:** The graceful fallback ensures Console Bridge works even if attachment fails. You'll still see all logs, just in separate output.
 
 ---
 

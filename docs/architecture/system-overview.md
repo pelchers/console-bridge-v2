@@ -187,7 +187,7 @@ console-bridge start localhost:3847 --no-headless
 
 ---
 
-### Option 3: Headless + Unified Terminal (FUTURE - NOT YET AVAILABLE)
+### Option 3: Headless + Unified Terminal (AVAILABLE v1.0.0+)
 ```bash
 console-bridge start localhost:3847 --merge-output
 # Invisible browser, logs to dev server terminal
@@ -197,18 +197,29 @@ console-bridge start localhost:3847 --merge-output
 - ✅ Lightweight (no GUI rendering)
 - ✅ Single terminal view
 - ✅ Seamless integration with dev workflow
-- 🚧 Requires new CLI flag implementation
-- 🚧 Requires process attachment logic
+- ✅ Cross-platform support (Windows, macOS, Linux)
+- ✅ Graceful fallback when attachment fails
 
-**Implementation requirements:**
-- New `--merge-output` or `--attach` CLI flag
-- Process discovery (find dev server terminal)
-- Output stream redirection
-- Graceful handling when dev server stops
+**Implementation:**
+- `--merge-output` CLI flag ✅
+- Cross-platform process discovery (netstat/lsof) ✅
+- TerminalAttacher component ✅
+- processUtils for platform detection ✅
+- Automatic graceful fallback ✅
+
+**Best practice:**
+```json
+{
+  "scripts": {
+    "dev": "next dev",
+    "dev:debug": "concurrently \"npm run dev\" \"console-bridge start localhost:3000 --merge-output\""
+  }
+}
+```
 
 ---
 
-### Option 4: Headful + Unified Terminal (FUTURE - NOT YET AVAILABLE)
+### Option 4: Headful + Unified Terminal (AVAILABLE v1.0.0+)
 ```bash
 console-bridge start localhost:3847 --no-headless --merge-output
 # Visible browser window, logs to dev server terminal
@@ -219,7 +230,7 @@ console-bridge start localhost:3847 --no-headless --merge-output
 - ✅ Manual interaction possible
 - ✅ Single terminal view
 - ❌ More resource intensive
-- 🚧 Requires new CLI flag implementation
+- ✅ Fully implemented
 
 ---
 
@@ -594,13 +605,15 @@ console-bridge-c-s-4.5/
 │   ├── core/
 │   │   ├── BridgeManager.js      # Central orchestrator
 │   │   ├── BrowserPool.js        # Browser lifecycle
-│   │   └── LogCapturer.js        # Event capture
+│   │   ├── LogCapturer.js        # Event capture
+│   │   └── TerminalAttacher.js   # Terminal output attachment
 │   ├── formatters/
 │   │   ├── LogFormatter.js       # Log formatting
 │   │   └── colors.js             # Color schemes
 │   └── utils/
 │       ├── url.js                # URL utilities
-│       └── validation.js         # Input validation
+│       ├── validation.js         # Input validation
+│       └── processUtils.js       # Cross-platform process discovery
 ├── tests/
 │   ├── unit/                     # Unit tests
 │   └── integration/              # Integration tests
@@ -625,18 +638,18 @@ console-bridge-c-s-4.5/
 ┌─────────────────────────────────────────┐
 │      src/core/BridgeManager.js          │
 └─────────────────────────────────────────┘
-       │               │              │
-       │ requires      │ requires     │ requires
-       ▼               ▼              ▼
-┌────────────┐  ┌────────────┐  ┌──────────────┐
-│ BrowserPool│  │LogCapturer │  │LogFormatter  │
-└────────────┘  └────────────┘  └──────────────┘
-                                       │
-                                       │ requires
-                                       ▼
-                                ┌──────────────┐
-                                │  colors.js   │
-                                └──────────────┘
+       │               │              │              │
+       │ requires      │ requires     │ requires     │ requires (optional)
+       ▼               ▼              ▼              ▼
+┌────────────┐  ┌────────────┐  ┌──────────────┐  ┌──────────────────┐
+│ BrowserPool│  │LogCapturer │  │LogFormatter  │  │TerminalAttacher  │
+└────────────┘  └────────────┘  └──────────────┘  └──────────────────┘
+                                       │                    │
+                                       │ requires           │ requires
+                                       ▼                    ▼
+                                ┌──────────────┐  ┌──────────────────┐
+                                │  colors.js   │  │  processUtils.js │
+                                └──────────────┘  └──────────────────┘
 ```
 
 ---
@@ -649,6 +662,7 @@ interface BridgeManagerOptions {
   maxInstances?: number;           // Default: 10
   headless?: boolean;              // Default: true
   levels?: string[];               // Default: all 18 types
+  mergeOutput?: boolean;           // Default: false (v1.0.0+)
   output?: (log: string) => void;  // Default: console.log
   formatterOptions?: {
     showTimestamp?: boolean;       // Default: true
@@ -682,7 +696,7 @@ interface LogData {
 **A:** Both modes use **Chromium** (open-source). Chrome is Google's branded version with extras.
 
 ### Q: Can Console Bridge output to the same terminal as my dev server?
-**A:** Not built-in yet (Options 3 & 4). Currently requires `concurrently` package or custom scripting. This would be a valuable future feature.
+**A:** Yes! Use the `--merge-output` flag (available in v1.0.0+). Works best with `concurrently` to run both dev server and Console Bridge in the same terminal. See [Advanced Usage Guide](../guides/advanced-usage.md#unified-terminal-output-merge-output) for details.
 
 ### Q: What does the headful mode browser window show?
 **A:** Your **actual application** running in Chromium. NOT a separate Console Bridge UI.
