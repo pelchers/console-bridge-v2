@@ -45,6 +45,38 @@ We will implement a **process discovery and stream redirection** mechanism that:
 
 ### Implementation Strategy
 
+#### Intended Use Case
+
+**IMPORTANT:** The `--merge-output` flag is designed to work when Console Bridge and the dev server run in the **same terminal session** using tools like `concurrently`.
+
+**✅ Recommended Workflow (Scenario 2):**
+```json
+// package.json
+{
+  "scripts": {
+    "dev": "next dev",
+    "dev:all": "concurrently \"npm run dev\" \"console-bridge start localhost:3000 --merge-output\""
+  }
+}
+```
+
+```bash
+npm run dev:all
+# Both dev server and Console Bridge output appear in single terminal
+```
+
+**❌ NOT Intended (Scenario 1):**
+```bash
+# Terminal 1
+npm run dev
+
+# Terminal 2 (separate window)
+console-bridge start localhost:3000 --merge-output
+# This won't merge output between separate terminal windows
+```
+
+**Why?** Node.js cannot redirect stdout between different terminal windows. The `--merge-output` flag works by writing to the same stdout stream, which only works when both processes share the same terminal session.
+
 #### New CLI Flag
 ```bash
 # Headless + Unified Terminal (Option 3)
@@ -368,5 +400,5 @@ consoleBridge.start({ port: 3000 });
 | Date | Change | Author |
 |------|--------|--------|
 | 2025-10-04 | Initial ADR created | Claude |
-| | | |
+| 2025-10-04 | Added "Intended Use Case" section clarifying Scenario 2 (concurrently) as recommended workflow | Claude |
 | | | |
