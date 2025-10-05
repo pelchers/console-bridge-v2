@@ -1,0 +1,96 @@
+name: Automated Test Workflow
+
+# This workflow runs automatically every 3 hours and can also be triggered manually
+# Purpose: Demonstrates automated GitHub Actions that run unattended
+
+on:
+  # Schedule: Runs every 3 hours
+  schedule:
+    - cron: '0 */3 * * *'  # Every 3 hours at minute 0
+  
+  # Manual trigger: Can be run from GitHub web, mobile, or API
+  workflow_dispatch:
+    inputs:
+      test_message:
+        description: 'Custom test message'
+        required: false
+        default: 'Running automated test'
+      
+jobs:
+  automated-test-job:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Display workflow info
+        run: |
+          echo "==================================="
+          echo "Automated Test Workflow"
+          echo "==================================="
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "Timestamp: $(date)"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit SHA: ${{ github.sha }}"
+          echo "Runner OS: ${{ runner.os }}"
+          echo "==================================="
+      
+      - name: Display custom message
+        if: github.event.inputs.test_message
+        run: |
+          echo "Custom Message: ${{ github.event.inputs.test_message }}"
+      
+      - name: Run basic system checks
+        run: |
+          echo "Running system checks..."
+          echo "Node.js version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Git version: $(git --version)"
+          echo "Python version: $(python3 --version)"
+          echo "Current directory: $(pwd)"
+          echo "Available space: $(df -h . | tail -1 | awk '{print $4}')"
+      
+      - name: List repository structure
+        run: |
+          echo "Repository structure:"
+          ls -la
+          echo ""
+          echo "Checking for .claude directory:"
+          if [ -d ".claude" ]; then
+            echo "✅ .claude directory exists"
+            ls -la .claude/
+          else
+            echo "❌ .claude directory not found"
+          fi
+      
+      - name: Create test artifact
+        run: |
+          mkdir -p test-results
+          echo "Automated test run at $(date)" > test-results/test-log.txt
+          echo "Workflow: ${{ github.workflow }}" >> test-results/test-log.txt
+          echo "Run ID: ${{ github.run_id }}" >> test-results/test-log.txt
+          echo "Run Number: ${{ github.run_number }}" >> test-results/test-log.txt
+          cat test-results/test-log.txt
+      
+      - name: Upload test artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: automated-test-results-${{ github.run_number }}
+          path: test-results/
+          retention-days: 7
+      
+      - name: Workflow completion
+        run: |
+          echo "==================================="
+          echo "✅ Automated test workflow complete!"
+          echo "Run number: ${{ github.run_number }}"
+          echo "Duration: Completed at $(date)"
+          echo "==================================="
+      
+      # Optional: Add notification step (uncomment to use)
+      # - name: Send notification
+      #   if: failure()
+      #   run: |
+      #     echo "❌ Workflow failed! Consider setting up notifications."

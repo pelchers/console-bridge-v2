@@ -1,0 +1,241 @@
+# Claude Code Interactive Workflow
+#
+# This workflow enables Claude Code integration for GitHub Actions.
+# Responds to @claude mentions in issues and pull requests.
+#
+# Setup Required:
+# 1. Add ANTHROPIC_API_KEY to repository secrets
+# 2. Ensure this workflow file is on the default branch
+# 3. Tag @claude in any issue or PR comment to activate
+#
+# Testing Instructions:
+# - Create an issue and comment: "@claude analyze this"
+# - Comment on PR: "@claude review this code"
+# - Ask questions: "@claude what does this function do?"
+
+name: Claude Code - Interactive
+
+on:
+  # Respond to issue comments
+  issue_comment:
+    types: [created]
+  
+  # Respond to PR review comments
+  pull_request_review_comment:
+    types: [created]
+  
+  # Allow manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      test_prompt:
+        description: 'Test prompt for Claude (simulation mode)'
+        required: false
+        type: string
+        default: 'Analyze the repository structure'
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  claude-interactive:
+    # Only run if comment contains @claude mention
+    if: |
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      github.event_name == 'workflow_dispatch'
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Display interaction information
+        run: |
+          echo "================================================"
+          echo "  Claude Code Interactive Mode"
+          echo "================================================"
+          echo ""
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "🧪 Mode: Manual Test"
+            echo "Test Prompt: ${{ github.event.inputs.test_prompt }}"
+          else
+            echo "💬 Mode: Comment Response"
+            echo "Event: ${{ github.event_name }}"
+            echo "Actor: @${{ github.actor }}"
+            if [ "${{ github.event_name }}" == "issue_comment" ]; then
+              echo "Issue: #${{ github.event.issue.number }}"
+              echo "Comment ID: ${{ github.event.comment.id }}"
+            elif [ "${{ github.event_name }}" == "pull_request_review_comment" ]; then
+              echo "PR: #${{ github.event.pull_request.number }}"
+              echo "Comment ID: ${{ github.event.comment.id }}"
+            fi
+          fi
+          echo "================================================"
+      
+      # NOTE: To actually use Claude Code, uncomment this step and add ANTHROPIC_API_KEY to secrets
+      # - name: Run Claude Code
+      #   uses: anthropics/claude-code-action@v1
+      #   with:
+      #     anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+      #     # Claude will automatically detect the context and respond appropriately
+      
+      - name: Simulate Claude response (placeholder)
+        run: |
+          echo "🤖 Claude Code Response Simulation"
+          echo ""
+          echo "This is a placeholder for Claude Code integration."
+          echo "To enable actual Claude Code functionality:"
+          echo ""
+          echo "1. Add your Anthropic API key to repository secrets as ANTHROPIC_API_KEY"
+          echo "2. Uncomment the 'Run Claude Code' step in this workflow"
+          echo "3. Ensure you're using Claude Code v1.0 or later"
+          echo ""
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "📝 Test prompt: ${{ github.event.inputs.test_prompt }}"
+          else
+            echo "💬 Would respond to @claude mention in:"
+            if [ "${{ github.event_name }}" == "issue_comment" ]; then
+              echo "   Issue #${{ github.event.issue.number }}"
+            else
+              echo "   PR #${{ github.event.pull_request.number }}"
+            fi
+          fi
+          echo ""
+          echo "Example capabilities:"
+          echo "  • Code review and suggestions"
+          echo "  • Answer technical questions"
+          echo "  • Implement features from descriptions"
+          echo "  • Fix bugs and errors"
+          echo "  • Generate documentation"
+      
+      - name: Create example response
+        run: |
+          cat > claude-response-example.md << 'EOF'
+# Claude Code Example Response
+
+## What Claude Can Do
+
+When properly configured with an API key, Claude Code can:
+
+### Code Review
+- Analyze pull requests for bugs and issues
+- Suggest improvements and optimizations
+- Check for security vulnerabilities
+- Verify code style and conventions
+
+### Implementation
+- Implement features from issue descriptions
+- Write tests for existing code
+- Refactor code for better maintainability
+- Generate boilerplate and scaffolding
+
+### Analysis
+- Answer questions about the codebase
+- Explain complex functions or algorithms
+- Document undocumented code
+- Find similar patterns across files
+
+### Automation
+- Triage and label issues
+- Update documentation automatically
+- Generate changelogs from commits
+- Create progress tracking comments
+
+## Usage Examples
+
+### In Issues:
+```
+@claude analyze the performance bottleneck in src/api/handler.js
+@claude generate tests for the UserService class
+@claude explain how authentication works in this project
+```
+
+### In Pull Requests:
+```
+@claude review this PR for security issues
+@claude check if this follows our coding standards
+@claude suggest optimizations for the database queries
+```
+
+### In Comments:
+```
+@claude how should I implement user authentication?
+@claude fix the TypeError in the dashboard component
+@claude add error handling to this function
+```
+
+## Configuration
+
+Add to repository secrets:
+- `ANTHROPIC_API_KEY`: Your Anthropic API key
+
+Optional environment variables:
+- `CLAUDE_MODEL`: Model to use (default: claude-sonnet-4-5-20250929)
+- `CLAUDE_MAX_TURNS`: Maximum conversation turns (default: 10)
+
+EOF
+          echo "📄 Example response documentation created"
+          cat claude-response-example.md
+      
+      - name: Workflow summary
+        run: |
+          echo "## 🤖 Claude Code Interactive Mode" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "**Mode:** Manual Test" >> $GITHUB_STEP_SUMMARY
+            echo "**Prompt:** ${{ github.event.inputs.test_prompt }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Mode:** Comment Response" >> $GITHUB_STEP_SUMMARY
+            echo "**Triggered by:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ github.event_name }}" == "issue_comment" ]; then
+              echo "**Issue:** #${{ github.event.issue.number }}" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "**PR:** #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Note:** This is running in simulation mode." >> $GITHUB_STEP_SUMMARY
+          echo "Add \`ANTHROPIC_API_KEY\` to secrets to enable full Claude Code functionality." >> $GITHUB_STEP_SUMMARY
+
+# Setup Instructions:
+#
+# 1. Get Anthropic API Key:
+#    - Visit: https://console.anthropic.com/
+#    - Create account or sign in
+#    - Generate API key from Settings > API Keys
+#
+# 2. Add to GitHub Secrets:
+#    - Repository Settings > Secrets and variables > Actions
+#    - Click "New repository secret"
+#    - Name: ANTHROPIC_API_KEY
+#    - Value: your-api-key-here
+#
+# 3. Uncomment Claude Code Action:
+#    - Edit this workflow file
+#    - Uncomment the "Run Claude Code" step
+#    - Commit and push changes
+#
+# 4. Test the Integration:
+#    - Create a test issue
+#    - Comment: "@claude hello, can you help me?"
+#    - Claude will analyze and respond
+#
+# Platform Testing:
+# - GitHub Web: Create issues/PRs, add @claude comments
+# - GitHub Mobile: Same as web, works from mobile app
+# - Claude Desktop: Can view workflow, can't trigger directly
+# - Claude Code CLI: Can trigger via git push with comments
+# - Claude Mobile App: Can view via GitHub integration
+#
+# Advanced Usage:
+# - @claude review this PR for security issues
+# - @claude implement feature X from the issue description
+# - @claude fix the bug in file.js line 42
+# - @claude generate tests for the UserService class
+# - @claude update documentation for the API endpoints
+#
+# Learn more: https://docs.claude.com/en/docs/claude-code/github-actions

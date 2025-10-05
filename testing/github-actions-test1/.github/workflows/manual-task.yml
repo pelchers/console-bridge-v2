@@ -1,0 +1,185 @@
+name: Manual Task Workflow
+
+# This workflow is designed for incremental tasks and fixes
+# Can be triggered from: GitHub Web, GitHub Mobile, GitHub API, or via gh CLI
+# Perfect for: Quick fixes, testing, incremental development work
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_type:
+        description: 'Type of task to perform'
+        required: true
+        type: choice
+        options:
+          - test
+          - build
+          - lint
+          - format
+          - custom
+      
+      task_description:
+        description: 'Description of the task'
+        required: false
+        default: 'Manual task execution'
+      
+      files_to_process:
+        description: 'Files or directories to process (comma-separated)'
+        required: false
+        default: '.'
+      
+      verbose:
+        description: 'Enable verbose output'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  manual-task-job:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Display task information
+        run: |
+          echo "================================================"
+          echo "🚀 MANUAL TASK WORKFLOW"
+          echo "================================================"
+          echo "Task Type: ${{ github.event.inputs.task_type }}"
+          echo "Description: ${{ github.event.inputs.task_description }}"
+          echo "Files/Dirs: ${{ github.event.inputs.files_to_process }}"
+          echo "Verbose: ${{ github.event.inputs.verbose }}"
+          echo ""
+          echo "Triggered by: ${{ github.actor }}"
+          echo "Timestamp: $(date)"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "================================================"
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies (if package.json exists)
+        run: |
+          if [ -f "package.json" ]; then
+            echo "📦 Installing dependencies..."
+            npm install
+          else
+            echo "ℹ️ No package.json found, skipping dependency installation"
+          fi
+      
+      - name: Execute task - Test
+        if: github.event.inputs.task_type == 'test'
+        run: |
+          echo "🧪 Running tests..."
+          if [ -f "package.json" ] && grep -q "\"test\"" package.json; then
+            npm test
+          else
+            echo "✅ Test task selected but no test script found"
+            echo "Creating sample test output..."
+            mkdir -p test-output
+            echo "Test executed at $(date)" > test-output/test-results.txt
+          fi
+      
+      - name: Execute task - Build
+        if: github.event.inputs.task_type == 'build'
+        run: |
+          echo "🔨 Running build..."
+          if [ -f "package.json" ] && grep -q "\"build\"" package.json; then
+            npm run build
+          else
+            echo "✅ Build task selected but no build script found"
+            echo "Creating sample build output..."
+            mkdir -p build-output
+            echo "Build executed at $(date)" > build-output/build-info.txt
+          fi
+      
+      - name: Execute task - Lint
+        if: github.event.inputs.task_type == 'lint'
+        run: |
+          echo "🔍 Running linter..."
+          if [ -f "package.json" ] && grep -q "\"lint\"" package.json; then
+            npm run lint
+          else
+            echo "✅ Lint task selected but no lint script found"
+            echo "Files to lint: ${{ github.event.inputs.files_to_process }}"
+          fi
+      
+      - name: Execute task - Format
+        if: github.event.inputs.task_type == 'format'
+        run: |
+          echo "✨ Running formatter..."
+          if [ -f "package.json" ] && grep -q "\"format\"" package.json; then
+            npm run format
+          else
+            echo "✅ Format task selected but no format script found"
+            echo "Files to format: ${{ github.event.inputs.files_to_process }}"
+          fi
+      
+      - name: Execute task - Custom
+        if: github.event.inputs.task_type == 'custom'
+        run: |
+          echo "⚙️ Running custom task..."
+          echo "Description: ${{ github.event.inputs.task_description }}"
+          echo "Target: ${{ github.event.inputs.files_to_process }}"
+          echo ""
+          echo "Add your custom commands here!"
+          echo "This is a flexible workflow for any task you need."
+      
+      - name: Verbose output
+        if: github.event.inputs.verbose == 'true'
+        run: |
+          echo "================================================"
+          echo "📋 VERBOSE OUTPUT"
+          echo "================================================"
+          echo "Repository structure:"
+          ls -laR
+          echo ""
+          echo "Environment variables:"
+          env | sort
+          echo "================================================"
+      
+      - name: Create task summary
+        run: |
+          mkdir -p task-results
+          echo "Task Summary" > task-results/summary.md
+          echo "============" >> task-results/summary.md
+          echo "" >> task-results/summary.md
+          echo "- **Task Type**: ${{ github.event.inputs.task_type }}" >> task-results/summary.md
+          echo "- **Description**: ${{ github.event.inputs.task_description }}" >> task-results/summary.md
+          echo "- **Triggered by**: ${{ github.actor }}" >> task-results/summary.md
+          echo "- **Timestamp**: $(date)" >> task-results/summary.md
+          echo "- **Run ID**: ${{ github.run_id }}" >> task-results/summary.md
+          echo "- **Status**: Completed" >> task-results/summary.md
+          echo "" >> task-results/summary.md
+          cat task-results/summary.md
+      
+      - name: Upload task results
+        uses: actions/upload-artifact@v4
+        with:
+          name: manual-task-results-${{ github.run_number }}
+          path: |
+            task-results/
+            test-output/
+            build-output/
+          retention-days: 14
+      
+      - name: Task completion
+        run: |
+          echo "================================================"
+          echo "✅ Manual task completed successfully!"
+          echo "Task: ${{ github.event.inputs.task_type }}"
+          echo "Run number: ${{ github.run_number }}"
+          echo "================================================"
+          echo ""
+          echo "💡 TIP: Download artifacts to see detailed results"
+          echo "📱 This workflow can be triggered from:"
+          echo "   - GitHub Web UI"
+          echo "   - GitHub Mobile App"
+          echo "   - Claude Desktop App (via GitHub integration)"
+          echo "   - Claude Code CLI"
+          echo "   - Claude Mobile App"

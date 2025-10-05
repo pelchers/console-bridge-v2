@@ -1,0 +1,41 @@
+name: Status Check
+
+# Quick status check workflow - runs fast to verify system health
+# Can be triggered manually or automatically on schedule
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'  # Every 30 minutes
+  
+  workflow_dispatch:
+
+jobs:
+  status-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Repository status
+        run: |
+          echo "🔍 Quick Status Check"
+          echo "===================="
+          echo "Time: $(date)"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Status: ✅ Healthy"
+          echo "===================="
+      
+      - name: System info
+        run: |
+          echo "System Resources:"
+          echo "  CPU: $(nproc) cores"
+          echo "  Memory: $(free -h | awk '/^Mem:/ {print $2}')"
+          echo "  Disk: $(df -h . | tail -1 | awk '{print $4}') available"
+      
+      - name: Workflow metrics
+        run: |
+          echo "Workflow Info:"
+          echo "  Run ID: ${{ github.run_id }}"
+          echo "  Run Number: ${{ github.run_number }}"
+          echo "  Attempt: ${{ github.run_attempt }}"
+          echo "  Actor: ${{ github.actor }}"
