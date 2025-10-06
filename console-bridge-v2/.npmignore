@@ -1,0 +1,45 @@
+# Test files
+test/
+*.test.js
+*.spec.js
+coverage/
+.nyc_output/
+
+# Implementation and planning docs (keep user-facing docs and examples)
+IMPLEMENTATION_PLAN.md
+PRD.md
+TRD.md
+PROJECT_SETUP.md
+
+# Development files
+.eslintrc.json
+.prettierrc
+jest.config.js
+nodemon.json
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+tmp/
+temp/
+.cache/
+
+# Claude workflow files
+.claude/
+
+# Example output files (keep example code, not generated output)
+examples/**/output/
+examples/**/*.txt
+examples/**/*.log
