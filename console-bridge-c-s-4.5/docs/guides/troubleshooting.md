@@ -3,11 +3,75 @@
 This guide helps you diagnose and fix common issues with Console Bridge.
 
 ## Table of Contents
+- [Critical Limitation (v1.0.0)](#critical-limitation-v100)
 - [Common Issues](#common-issues)
 - [Merge Output Issues](#merge-output-issues)
 - [Error Messages](#error-messages)
 - [Performance Issues](#performance-issues)
 - [Advanced Debugging](#advanced-debugging)
+
+---
+
+## Critical Limitation (v1.0.0)
+
+**⚠️ Console Bridge v1.0.0 ONLY monitors the Puppeteer-controlled Chromium browser.**
+
+This is the most common source of confusion and "bug reports" that are actually expected behavior.
+
+### The Limitation Explained
+
+**What DOESN'T work:**
+```
+1. User starts Console Bridge in headless mode
+2. User opens THEIR Chrome browser and visits localhost:3000
+3. User clicks buttons in THEIR Chrome browser
+4. User expects console logs to appear in terminal
+
+Result: ❌ No logs appear (this is NOT a bug)
+Reason: Console Bridge only monitors Puppeteer browser, not personal Chrome
+```
+
+**What DOES work:**
+```
+1. User starts Console Bridge in headful mode (--no-headless)
+2. Puppeteer opens its own Chromium window showing localhost:3000
+3. User clicks buttons in PUPPETEER Chromium window
+4. Console logs appear in terminal
+
+Result: ✅ Logs appear correctly
+Reason: User is interacting with the Puppeteer browser being monitored
+```
+
+### Common Misconceptions
+
+**Misconception #1:** "Headless means the site's frontend is hidden"
+- **Reality:** "Headless" means the browser window is hidden, not your site
+
+**Misconception #2:** "I can use my Chrome browser with Console Bridge headless mode"
+- **Reality:** You must interact with the Puppeteer browser (use `--no-headless` to see it)
+
+**Misconception #3:** "This is a bug - Console Bridge should monitor all browsers"
+- **Reality:** This is a v1.0.0 architectural limitation. v2.0.0 will support personal browsers via browser extension.
+
+### When to Use Console Bridge v1.0.0
+
+**✅ Ideal for:**
+- CI/CD pipelines and automated testing
+- AI-assisted development workflows
+- Debugging with Puppeteer headful mode
+- Scenarios where browser extensions aren't needed
+
+**❌ NOT ideal for:**
+- Testing with personal Chrome/Firefox/Safari browsers
+- Using browser extensions (React DevTools, Vue DevTools)
+- Cross-browser compatibility testing
+
+### For More Information
+
+- [REQUIREMENTS.md](../REQUIREMENTS.md) - Complete v1.0.0 requirements and limitations
+- [Headless Implications](../explainer/headless-implications.md) - In-depth explanation
+
+**v2.0.0 (planned Q1 2026) will solve this with browser extension support.**
 
 ---
 
@@ -91,54 +155,17 @@ console-bridge start localhost:3000
 - Periodic logs work
 - Button click logs don't appear
 
-**Common Misunderstanding:**
-Console Bridge runs its **own browser** (Puppeteer). It doesn't capture logs from your personal Chrome browser.
+**Cause:** You're clicking buttons in your personal Chrome browser, not the Puppeteer browser.
 
-**Solutions:**
+**Solution:** See [Critical Limitation (v1.0.0)](#critical-limitation-v100) above for complete explanation.
 
-#### A. Understand the Architecture
-```
-Your Chrome Browser (localhost:3000)
-  ❌ NOT monitored by Console Bridge
-
-Puppeteer Browser (localhost:3000)
-  ✅ Monitored by Console Bridge
-```
-
-Console Bridge launches a Puppeteer browser in the background. Logs from that browser appear in your terminal.
-
----
-
-#### B. Using Headful Mode for Manual Testing
-If you need to manually click buttons in the Puppeteer browser:
-
+**Quick fix:**
 ```bash
-# Show the Puppeteer browser window
+# Use headful mode to see and interact with Puppeteer browser
 console-bridge start localhost:3000 --no-headless
 ```
 
-Now you can:
-1. See the Puppeteer browser window
-2. Click buttons in that window
-3. See logs in your terminal
-
-**Important:** Headful mode is only for debugging. Normal usage doesn't require it.
-
----
-
-#### C. Automated Testing Solution
-For real development, trigger logs programmatically:
-
-```javascript
-// Auto-click for testing
-useEffect(() => {
-  setTimeout(() => {
-    document.querySelector('#my-button')?.click();
-  }, 2000);
-}, []);
-```
-
-This ensures Console Bridge captures the clicks without manual interaction.
+Then click buttons in the **Puppeteer Chromium window** (not your Chrome browser).
 
 ---
 

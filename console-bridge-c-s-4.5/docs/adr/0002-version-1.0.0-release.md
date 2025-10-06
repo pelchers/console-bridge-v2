@@ -260,6 +260,12 @@ Complete documentation suite:
 - **2025-10-06:** Created REQUIREMENTS.md documenting Puppeteer-only constraint and browser monitoring limitations
 - **2025-10-06:** Created headless-implications.md explainer for headless vs headful modes and use cases
 - **2025-10-06:** v2.0.0 planning initiated: Browser extension approach to enable monitoring of personal Chrome/Firefox/Safari browsers
+- **2025-10-06:** Updated all user guides with critical limitation warnings:
+  - getting-started.md: Added limitation section after "What is Console Bridge?"
+  - advanced-usage.md: Added limitation section with common misconceptions
+  - troubleshooting.md: Added "Critical Limitation" section and updated "Button clicks not captured" guidance
+  - daily-development.md: Previously updated with limitation warning
+  - README.md: Added "Known Limitations (v1.0.0)" section
 
 ---
 

@@ -31,6 +31,29 @@ Console Bridge is a CLI tool that captures browser console logs from your localh
 
 ---
 
+## ⚠️ Important Limitation (v1.0.0)
+
+**Console Bridge v1.0.0 ONLY monitors the Puppeteer-controlled Chromium browser.**
+
+**What this means:**
+- ❌ Cannot monitor your personal Chrome/Firefox/Safari browsers
+- ❌ User interactions in your own browser will NOT appear in terminal
+- ✅ Must use Puppeteer headful mode (`--no-headless`) to interact and see logs
+- ✅ Puppeteer Chromium browser is the ONLY browser being monitored
+
+**Designed for:**
+- ✅ CI/CD pipelines and automated testing
+- ✅ AI-assisted development workflows
+- ✅ Debugging with Puppeteer headful mode (`--no-headless`)
+
+**For full details, see:**
+- [REQUIREMENTS.md](../REQUIREMENTS.md) - Complete limitation documentation
+- [Headless Implications](../explainer/headless-implications.md) - In-depth explanation
+
+**v2.0.0 (planned Q1 2026) will add browser extension support for personal Chrome/Firefox/Safari.**
+
+---
+
 ## Installation
 
 ### Prerequisites

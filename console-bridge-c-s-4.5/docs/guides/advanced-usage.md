@@ -3,6 +3,7 @@
 Master Console Bridge with advanced features, CLI options, and configuration.
 
 ## Table of Contents
+- [Important Limitation (v1.0.0)](#️-important-limitation-v100)
 - [CLI Options](#cli-options)
 - [Unified Terminal Output](#unified-terminal-output-merge-output)
 - [Headless vs Headful Mode](#headless-vs-headful-mode)
@@ -11,6 +12,35 @@ Master Console Bridge with advanced features, CLI options, and configuration.
 - [Multiple URLs](#multiple-urls)
 - [Integration Examples](#integration-examples)
 - [API Usage](#api-usage)
+
+---
+
+## ⚠️ Important Limitation (v1.0.0)
+
+**Console Bridge v1.0.0 ONLY monitors the Puppeteer-controlled Chromium browser.**
+
+**What this means:**
+- ❌ Cannot monitor your personal Chrome/Firefox/Safari browsers
+- ❌ User interactions in your own browser will NOT appear in terminal
+- ✅ Must use Puppeteer headful mode (`--no-headless`) to interact and see logs
+- ✅ Puppeteer Chromium browser is the ONLY browser being monitored
+
+**Common misconception:**
+> "I can run Console Bridge in headless mode, then use my Chrome browser to test, and see logs in terminal"
+
+**Reality:** This does NOT work. Headless/headful only controls Puppeteer browser visibility, not which browser is monitored.
+
+**Designed for:**
+- ✅ CI/CD pipelines and automated testing
+- ✅ AI-assisted development workflows
+- ✅ Debugging with Puppeteer headful mode (`--no-headless`)
+- ✅ Situations where browser extensions are not needed
+
+**For complete documentation, see:**
+- [REQUIREMENTS.md](../REQUIREMENTS.md) - All v1.0.0 limitations
+- [Headless Implications](../explainer/headless-implications.md) - Detailed explanation
+
+**v2.0.0 (planned Q1 2026) will add browser extension support to monitor personal Chrome/Firefox/Safari browsers.**
 
 ---
 
