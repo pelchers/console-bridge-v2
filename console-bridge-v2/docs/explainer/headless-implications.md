@@ -1,5 +1,17 @@
 # Headless vs. Headful Implications
 
+**✅ v2.0.0 UPDATE:** Extension Mode solves all limitations below!
+
+**With Extension Mode:**
+- ✅ Use YOUR personal Chrome/Firefox/Safari browser
+- ✅ Works with browser extensions (React DevTools, Vue DevTools)
+- ✅ No Puppeteer browser needed (unless using Puppeteer mode)
+- ✅ See [v2.0.0-spec/clarifications.md](../v2.0.0-spec/clarifications.md)
+
+**Below documentation explains v1.0.0 Puppeteer mode limitations (still valid for Puppeteer mode in v2.0.0):**
+
+---
+
 **Purpose:** In-depth explanation of headless vs. headful modes, use cases, and implications for Console Bridge v1.0.0
 
 **Last Updated:** October 6, 2025

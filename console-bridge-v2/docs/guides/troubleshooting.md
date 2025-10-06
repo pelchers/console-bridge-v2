@@ -12,7 +12,20 @@ This guide helps you diagnose and fix common issues with Console Bridge.
 
 ---
 
-## Critical Limitation (v1.0.0)
+## ✅ v2.0.0 Extension Mode (SOLVED)
+
+**This limitation is SOLVED in v2.0.0 Extension Mode!**
+
+Use Extension Mode to monitor your personal Chrome/Firefox/Safari browser:
+```bash
+console-bridge start --extension-mode
+```
+
+See [v2.0.0-spec/clarifications.md](../v2.0.0-spec/clarifications.md) for complete documentation.
+
+---
+
+## v1.0.0 Puppeteer Mode Limitation (For Reference)
 
 **⚠️ Console Bridge v1.0.0 ONLY monitors the Puppeteer-controlled Chromium browser.**
 

@@ -1,3 +1,28 @@
+# Console Bridge v2.0.0 - Requirements
+
+**Version:** 2.0.0 "Browser Extension Support"
+**Last Updated:** October 6, 2025
+**Status:** Development
+
+---
+
+## ✅ v2.0.0 Solves v1.0.0 Limitations
+
+**v1.0.0 Limitation (SOLVED):** Puppeteer Chromium Only
+
+**v2.0.0 Solution:** Browser Extension Mode
+- ✅ Monitor YOUR Chrome/Firefox/Safari browser
+- ✅ Works with browser extensions (React DevTools, Vue DevTools)
+- ✅ Cross-browser testing support
+- ✅ 100% backward compatible with Puppeteer mode
+
+**See [v2.0.0-spec/clarifications.md](v2.0.0-spec/clarifications.md) for complete documentation.**
+
+---
+
+# v1.0.0 Requirements (For Reference)
+
+
 # Console Bridge v1.0.0 - Requirements and Limitations
 
 **Version:** 1.0.0 "Unified Terminal"

@@ -266,6 +266,15 @@ Complete documentation suite:
   - troubleshooting.md: Added "Critical Limitation" section and updated "Button clicks not captured" guidance
   - daily-development.md: Previously updated with limitation warning
   - README.md: Added "Known Limitations (v1.0.0)" section
+- **2025-10-06:** v2.0.0 repo initialized: Duplicated v1.0.0 codebase and updated all documentation to explain Extension Mode solutions
+  - README.md: Added "v2.0.0 - Browser Extension Support ✨" section with dual-mode operation
+  - docs/REQUIREMENTS.md: Added v2.0.0 solution header explaining Extension Mode solves v1.0.0 limitations
+  - docs/explainer/headless-implications.md: Added v2.0.0 update banner with Extension Mode benefits
+  - docs/guides/troubleshooting.md: Updated "Critical Limitation" to "✅ v2.0.0 Extension Mode (SOLVED)"
+  - docs/guides/getting-started.md, advanced-usage.md, daily-development.md: Updated all v1 limitations to SOLVED status
+  - docs/v2.0.0-spec/clarifications.md: Created living document for v2.0.0 design decisions and clarifications
+  - .claude/PRD.md: Updated limitation references to show v2.0.0 solutions
+  - Remote configured: origin → git@github.com:pelchers/console-bridge-v2.git
 
 ---
 
