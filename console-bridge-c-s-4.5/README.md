@@ -91,12 +91,26 @@ console-bridge start localhost:3000 --output logs.txt
 - `--location` - Show file location for each log
 - `--timestamp-format <format>` - Use 'time' or 'iso' format (default: time)
 
+## Known Limitations (v1.0.0)
+
+**⚠️ CRITICAL: Puppeteer Chromium Only**
+
+Console Bridge v1.0.0 ONLY monitors the Puppeteer-controlled Chromium browser:
+- ❌ Cannot monitor personal Chrome/Firefox/Safari browsers
+- ❌ User interactions in personal browsers will NOT appear in terminal
+- ✅ Must use Puppeteer headful mode (`--no-headless`) for manual interaction
+- ✅ Designed for CI/CD, automated testing, and AI-assisted development
+
+**See [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) for complete limitation documentation.**
+
+**v2.0.0 (planned Q1 2026)** will add browser extension support to monitor personal Chrome/Firefox/Safari browsers.
+
 ## Development Status
 
 - ✅ **Phase 1 Complete** - Core components (BrowserPool, LogCapturer, utilities)
 - ✅ **Phase 2 Complete** - BridgeManager and LogFormatter
 - ✅ **Phase 3 Complete** - CLI implementation
-- 🔄 **Phase 4 In Progress** - Documentation, file export, npm publish preparation
+- ✅ **Phase 4 Complete** - Documentation, file export, npm publish (v1.0.0 released)
 
 **Test Coverage:** 186/186 tests passing (100%)
 

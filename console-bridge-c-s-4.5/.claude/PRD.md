@@ -147,6 +147,20 @@ console-bridge start localhost:3000 --no-headless
 1. **Filtering**: Regex-based log filtering in real-time
 2. **Search**: Real-time search across captured logs
 3. **Export**: Save logs to file with formatting
+n### Known Limitations (v1.0.0)
+
+**CRITICAL: Puppeteer Chromium Only**
+
+Console Bridge v1.0.0 ONLY monitors the Puppeteer-controlled Chromium browser:
+- ❌ Cannot monitor personal Chrome/Firefox/Safari browsers
+- ❌ User interactions in personal browsers will NOT appear in terminal
+- ✅ Must use Puppeteer headful mode (`--no-headless`) for manual interaction
+- ✅ Designed for CI/CD, automated testing, and AI-assisted development
+
+**See [REQUIREMENTS.md](../docs/REQUIREMENTS.md) for complete limitation documentation.**
+
+**v2.0.0 (planned Q1 2026)** will add browser extension support to monitor personal Chrome/Firefox/Safari browsers.
+
 4. **Remote Debugging**: Support for non-localhost URLs (with security)
 5. **Browser Extension**: Alternative capture method
 6. **Log Persistence**: Optional database storage

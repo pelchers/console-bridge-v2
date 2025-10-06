@@ -256,6 +256,10 @@ Complete documentation suite:
 - **2025-10-06:** Unified output testing completed - all 4 configurations verified working (single/dual terminal, headless/headful modes)
 - **2025-10-06:** Created daily development guide (docs/guides/daily-development.md) with recommended workflows
 - **2025-10-06:** Created testing results documentation (docs/testing/results/2025-10-06-0136-unified-output-testing.md)
+- **2025-10-06:** v1.0.0 critical limitation documented: User interaction viewing only works with Chromium headful mode (Puppeteer browser only)
+- **2025-10-06:** Created REQUIREMENTS.md documenting Puppeteer-only constraint and browser monitoring limitations
+- **2025-10-06:** Created headless-implications.md explainer for headless vs headful modes and use cases
+- **2025-10-06:** v2.0.0 planning initiated: Browser extension approach to enable monitoring of personal Chrome/Firefox/Safari browsers
 
 ---
 

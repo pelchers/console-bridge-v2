@@ -32,6 +32,24 @@ cd your-project && npx concurrently "npm run dev" "sleep 12 && console-bridge st
 
 Replace `YOUR_PORT` with your dev server port (e.g., 3000, 3847, 5173).
 
+n---
+
+## ⚠️ Important Limitation (v1.0.0)
+
+**Console Bridge v1.0.0 ONLY monitors the Puppeteer-controlled Chromium browser.**
+
+**What this means:**
+- ❌ Cannot monitor your personal Chrome/Firefox/Safari browsers
+- ❌ User interactions in your own browser will NOT appear in terminal
+- ✅ Must use Puppeteer headful mode (`--no-headless`) to interact and see logs
+- ✅ Puppeteer Chromium browser is the ONLY browser being monitored
+
+**For full details, see:**
+- [REQUIREMENTS.md](../REQUIREMENTS.md) - Complete limitation documentation
+- [Headless Implications](../explainer/headless-implications.md) - In-depth explanation
+
+**v2.0.0 (planned Q1 2026) will add browser extension support for personal Chrome/Firefox/Safari.**
+
 ---
 
 ## Setup Instructions
