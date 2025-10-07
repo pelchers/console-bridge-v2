@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Console Bridge - Advanced Serialization Test Page</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #0066cc;
+      padding-bottom: 10px;
+    }
+    h2 {
+      color: #0066cc;
+      margin-top: 30px;
+      border-left: 4px solid #0066cc;
+      padding-left: 10px;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #0052a3;
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .info {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+      border-left: 4px solid #0066cc;
+    }
+    .warning {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+      border-left: 4px solid #ff9800;
+    }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌉 Console Bridge - Advanced Serialization Test Page</h1>
+
+  <div class="info">
+    <strong>📋 Subtask 2.2 Test Coverage</strong><br>
+    This page tests all advanced serialization features:
+    <ul>
+      <li>✅ Circular reference detection</li>
+      <li>✅ Depth limiting (max 10 levels)</li>
+      <li>✅ Size limiting (strings, objects, arrays, Maps, Sets)</li>
+      <li>✅ Special types (Symbol, BigInt, Map, Set, Date, RegExp, etc.)</li>
+      <li>✅ Edge cases and error handling</li>
+    </ul>
+  </div>
+
+  <div class="warning">
+    <strong>⚠️ Testing Instructions:</strong><br>
+    1. Open Chrome DevTools (F12)<br>
+    2. Go to "Console Bridge" panel<br>
+    3. Verify the extension is active (check for initialization messages)<br>
+    4. Click test buttons below and check console for captured events<br>
+    5. Verify no errors or crashes occur
+  </div>
+
+  <!-- CIRCULAR REFERENCES -->
+  <div class="test-section">
+    <h2>🔄 Circular Reference Tests</h2>
+    <div class="button-grid">
+      <button onclick="testSimpleCircular()">Simple Circular</button>
+      <button onclick="testMutualCircular()">Mutual Circular</button>
+      <button onclick="testArrayCircular()">Array Circular</button>
+      <button onclick="testNestedCircular()">Nested Circular</button>
+      <button onclick="testCircularMap()">Circular Map</button>
+      <button onclick="testCircularSet()">Circular Set</button>
+    </div>
+  </div>
+
+  <!-- DEPTH LIMITING -->
+  <div class="test-section">
+    <h2>📊 Depth Limiting Tests</h2>
+    <div class="button-grid">
+      <button onclick="testDepth5()">Depth 5 (OK)</button>
+      <button onclick="testDepth10()">Depth 10 (Limit)</button>
+      <button onclick="testDepth11()">Depth 11 (Exceeded)</button>
+      <button onclick="testDepth15()">Depth 15 (Exceeded)</button>
+      <button onclick="testMixedDepth()">Mixed Array/Object Depth</button>
+    </div>
+  </div>
+
+  <!-- SIZE LIMITING -->
+  <div class="test-section">
+    <h2>📏 Size Limiting Tests</h2>
+    <div class="button-grid">
+      <button onclick="testSmallString()">Small String (100 chars)</button>
+      <button onclick="testMediumString()">Medium String (5KB)</button>
+      <button onclick="testLargeString()">Large String (20KB) ✂️</button>
+      <button onclick="testHugeString()">Huge String (100KB) ✂️</button>
+      <button onclick="testSmallObject()">Small Object (50 keys)</button>
+      <button onclick="testMediumObject()">Medium Object (500 keys)</button>
+      <button onclick="testLargeObject()">Large Object (2000 keys) ✂️</button>
+      <button onclick="testSmallArray()">Small Array (50 items)</button>
+      <button onclick="testLargeArray()">Large Array (2000 items) ✂️</button>
+    </div>
+  </div>
+
+  <!-- SPECIAL TYPES -->
+  <div class="test-section">
+    <h2>🎯 Special Type Tests</h2>
+    <div class="button-grid">
+      <button onclick="testSymbol()">Symbol</button>
+      <button onclick="testBigInt()">BigInt</button>
+      <button onclick="testMap()">Map (Small)</button>
+      <button onclick="testLargeMap()">Map (Large, 200 entries) ✂️</button>
+      <button onclick="testSet()">Set (Small)</button>
+      <button onclick="testLargeSet()">Set (Large, 200 values) ✂️</button>
+      <button onclick="testWeakMap()">WeakMap</button>
+      <button onclick="testWeakSet()">WeakSet</button>
+      <button onclick="testDate()">Date</button>
+      <button onclick="testRegExp()">RegExp</button>
+      <button onclick="testPromise()">Promise</button>
+      <button onclick="testTypedArray()">TypedArray</button>
+      <button onclick="testArrayBuffer()">ArrayBuffer</button>
+      <button onclick="testDataView()">DataView</button>
+    </div>
+  </div>
+
+  <!-- DOM ELEMENTS -->
+  <div class="test-section">
+    <h2>🌐 DOM Element Tests</h2>
+    <div class="button-grid">
+      <button onclick="testDOMElement()">Simple DOM Element</button>
+      <button onclick="testDOMWithId()">DOM with ID</button>
+      <button onclick="testDOMWithClass()">DOM with Classes</button>
+    </div>
+  </div>
+
+  <!-- EDGE CASES -->
+  <div class="test-section">
+    <h2>⚠️ Edge Case Tests</h2>
+    <div class="button-grid">
+      <button onclick="testNullPrototype()">Null Prototype Object</button>
+      <button onclick="testGetterError()">Getter that Throws</button>
+      <button onclick="testNonEnumerable()">Non-Enumerable Properties</button>
+      <button onclick="testSymbolKeys()">Symbol Keys</button>
+      <button onclick="testFrozenObject()">Frozen Object</button>
+      <button onclick="testSealedObject()">Sealed Object</button>
+      <button onclick="testMixedNested()">Mixed Nested Types</button>
+      <button onclick="testNaN()">NaN / Infinity</button>
+    </div>
+  </div>
+
+  <!-- STRESS TESTS -->
+  <div class="test-section">
+    <h2>🔥 Stress Tests</h2>
+    <div class="button-grid">
+      <button onclick="testComplexCircular()">Complex Circular Structure</button>
+      <button onclick="testDeepAndWide()">Deep & Wide Object</button>
+      <button onclick="testAllTypesAtOnce()">All Types at Once</button>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CIRCULAR REFERENCE TESTS
+    // ============================================================
+
+    function testSimpleCircular() {
+      const obj = { name: 'simple' };
+      obj.self = obj;
+      console.log('Simple circular:', obj);
+    }
+
+    function testMutualCircular() {
+      const obj1 = { name: 'obj1' };
+      const obj2 = { name: 'obj2' };
+      obj1.ref = obj2;
+      obj2.ref = obj1;
+      console.log('Mutual circular:', obj1, obj2);
+    }
+
+    function testArrayCircular() {
+      const arr = [1, 2, 3];
+      arr.push(arr);
+      console.log('Array circular:', arr);
+    }
+
+    function testNestedCircular() {
+      const obj = {
+        a: {
+          b: {
+            c: {
+              d: null
+            }
+          }
+        }
+      };
+      obj.a.b.c.d = obj;
+      console.log('Nested circular:', obj);
+    }
+
+    function testCircularMap() {
+      const map = new Map();
+      map.set('self', map);
+      map.set('key1', 'value1');
+      console.log('Circular Map:', map);
+    }
+
+    function testCircularSet() {
+      const set = new Set();
+      set.add(set);
+      set.add('value1');
+      console.log('Circular Set:', set);
+    }
+
+    // ============================================================
+    // DEPTH LIMITING TESTS
+    // ============================================================
+
+    function createDeepObject(depth) {
+      let obj = { value: `depth ${depth}` };
+      let current = obj;
+      for (let i = depth - 1; i > 0; i--) {
+        current.child = { value: `depth ${i}` };
+        current = current.child;
+      }
+      return obj;
+    }
+
+    function testDepth5() {
+      console.log('Depth 5:', createDeepObject(5));
+    }
+
+    function testDepth10() {
+      console.log('Depth 10 (at limit):', createDeepObject(10));
+    }
+
+    function testDepth11() {
+      console.log('Depth 11 (exceeded):', createDeepObject(11));
+    }
+
+    function testDepth15() {
+      console.log('Depth 15 (exceeded):', createDeepObject(15));
+    }
+
+    function testMixedDepth() {
+      const obj = {
+        a: {
+          b: [
+            {
+              c: {
+                d: [
+                  {
+                    e: {
+                      f: {
+                        g: {
+                          h: {
+                            i: {
+                              j: { deep: true }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      };
+      console.log('Mixed depth:', obj);
+    }
+
+    // ============================================================
+    // SIZE LIMITING TESTS
+    // ============================================================
+
+    function testSmallString() {
+      const str = 'x'.repeat(100);
+      console.log('Small string (100 chars):', str);
+    }
+
+    function testMediumString() {
+      const str = 'x'.repeat(5000);
+      console.log('Medium string (5KB):', str);
+    }
+
+    function testLargeString() {
+      const str = 'x'.repeat(20000);
+      console.log('Large string (20KB, should truncate):', str);
+    }
+
+    function testHugeString() {
+      const str = 'x'.repeat(100000);
+      console.log('Huge string (100KB, should truncate):', str);
+    }
+
+    function testSmallObject() {
+      const obj = {};
+      for (let i = 0; i < 50; i++) {
+        obj[`key${i}`] = `value${i}`;
+      }
+      console.log('Small object (50 keys):', obj);
+    }
+
+    function testMediumObject() {
+      const obj = {};
+      for (let i = 0; i < 500; i++) {
+        obj[`key${i}`] = `value${i}`;
+      }
+      console.log('Medium object (500 keys):', obj);
+    }
+
+    function testLargeObject() {
+      const obj = {};
+      for (let i = 0; i < 2000; i++) {
+        obj[`key${i}`] = `value${i}`;
+      }
+      console.log('Large object (2000 keys, should truncate):', obj);
+    }
+
+    function testSmallArray() {
+      const arr = Array.from({ length: 50 }, (_, i) => i);
+      console.log('Small array (50 items):', arr);
+    }
+
+    function testLargeArray() {
+      const arr = Array.from({ length: 2000 }, (_, i) => i);
+      console.log('Large array (2000 items, should truncate):', arr);
+    }
+
+    // ============================================================
+    // SPECIAL TYPE TESTS
+    // ============================================================
+
+    function testSymbol() {
+      const sym1 = Symbol('mySymbol');
+      const sym2 = Symbol();
+      console.log('Symbols:', sym1, sym2);
+    }
+
+    function testBigInt() {
+      const big1 = 123456789012345678901234567890n;
+      const big2 = BigInt(42);
+      console.log('BigInts:', big1, big2);
+    }
+
+    function testMap() {
+      const map = new Map();
+      map.set('key1', 'value1');
+      map.set('key2', { nested: 'object' });
+      map.set(42, 'number key');
+      console.log('Map (small):', map);
+    }
+
+    function testLargeMap() {
+      const map = new Map();
+      for (let i = 0; i < 200; i++) {
+        map.set(`key${i}`, `value${i}`);
+      }
+      console.log('Map (200 entries, should truncate):', map);
+    }
+
+    function testSet() {
+      const set = new Set();
+      set.add('value1');
+      set.add({ nested: 'object' });
+      set.add(42);
+      console.log('Set (small):', set);
+    }
+
+    function testLargeSet() {
+      const set = new Set();
+      for (let i = 0; i < 200; i++) {
+        set.add(`value${i}`);
+      }
+      console.log('Set (200 values, should truncate):', set);
+    }
+
+    function testWeakMap() {
+      const weakMap = new WeakMap();
+      const key = {};
+      weakMap.set(key, 'value');
+      console.log('WeakMap:', weakMap);
+    }
+
+    function testWeakSet() {
+      const weakSet = new WeakSet();
+      const obj = {};
+      weakSet.add(obj);
+      console.log('WeakSet:', weakSet);
+    }
+
+    function testDate() {
+      const now = new Date();
+      const past = new Date('2020-01-01T00:00:00Z');
+      console.log('Dates:', now, past);
+    }
+
+    function testRegExp() {
+      const regex1 = /test/gi;
+      const regex2 = new RegExp('\\d+', 'g');
+      console.log('RegExps:', regex1, regex2);
+    }
+
+    function testPromise() {
+      const pending = new Promise(() => {});
+      const resolved = Promise.resolve('value');
+      const rejected = Promise.reject('error');
+      console.log('Promises:', pending, resolved, rejected);
+    }
+
+    function testTypedArray() {
+      const int32 = new Int32Array([1, 2, 3, 4, 5]);
+      const float64 = new Float64Array(100);
+      const uint8 = new Uint8Array([255, 128, 0]);
+      console.log('TypedArrays:', int32, float64, uint8);
+    }
+
+    function testArrayBuffer() {
+      const buffer1 = new ArrayBuffer(16);
+      const buffer2 = new ArrayBuffer(1024);
+      console.log('ArrayBuffers:', buffer1, buffer2);
+    }
+
+    function testDataView() {
+      const buffer = new ArrayBuffer(16);
+      const view = new DataView(buffer);
+      console.log('DataView:', view);
+    }
+
+    // ============================================================
+    // DOM ELEMENT TESTS
+    // ============================================================
+
+    function testDOMElement() {
+      const div = document.createElement('div');
+      console.log('Simple DOM element:', div);
+    }
+
+    function testDOMWithId() {
+      const div = document.createElement('div');
+      div.id = 'myDiv';
+      console.log('DOM with ID:', div);
+    }
+
+    function testDOMWithClass() {
+      const div = document.createElement('div');
+      div.className = 'my-class another-class';
+      console.log('DOM with classes:', div);
+    }
+
+    // ============================================================
+    // EDGE CASE TESTS
+    // ============================================================
+
+    function testNullPrototype() {
+      const obj = Object.create(null);
+      obj.key = 'value';
+      console.log('Null prototype object:', obj);
+    }
+
+    function testGetterError() {
+      const obj = {
+        normal: 'value',
+        get problematic() {
+          throw new Error('Getter throws!');
+        }
+      };
+      console.log('Getter that throws:', obj);
+    }
+
+    function testNonEnumerable() {
+      const obj = { visible: 'yes' };
+      Object.defineProperty(obj, 'hidden', {
+        value: 'no',
+        enumerable: false
+      });
+      console.log('Non-enumerable properties:', obj);
+    }
+
+    function testSymbolKeys() {
+      const sym = Symbol('key');
+      const obj = {
+        stringKey: 'value',
+        [sym]: 'symbol value'
+      };
+      console.log('Symbol keys:', obj);
+    }
+
+    function testFrozenObject() {
+      const obj = Object.freeze({ frozen: true });
+      console.log('Frozen object:', obj);
+    }
+
+    function testSealedObject() {
+      const obj = Object.seal({ sealed: true });
+      console.log('Sealed object:', obj);
+    }
+
+    function testMixedNested() {
+      const complex = {
+        str: 'string',
+        num: 42,
+        bool: true,
+        nil: null,
+        undef: undefined,
+        sym: Symbol('test'),
+        big: 123n,
+        fn: function test() {},
+        arr: [1, 2, { nested: 'array' }],
+        obj: { nested: 'object' },
+        map: new Map([['key', 'value']]),
+        set: new Set([1, 2, 3]),
+        date: new Date(),
+        regex: /test/g,
+        err: new Error('test error')
+      };
+      console.log('Mixed nested types:', complex);
+    }
+
+    function testNaN() {
+      console.log('Special numbers:', NaN, Infinity, -Infinity, 0, -0);
+    }
+
+    // ============================================================
+    // STRESS TESTS
+    // ============================================================
+
+    function testComplexCircular() {
+      const root = { id: 'root' };
+      const child1 = { id: 'child1', parent: root };
+      const child2 = { id: 'child2', parent: root };
+      const grandchild = { id: 'grandchild', parent: child1, root: root };
+
+      root.children = [child1, child2];
+      child1.sibling = child2;
+      child2.sibling = child1;
+      child1.children = [grandchild];
+
+      console.log('Complex circular structure:', root);
+    }
+
+    function testDeepAndWide() {
+      const obj = {};
+      for (let i = 0; i < 100; i++) {
+        obj[`key${i}`] = createDeepObject(5);
+      }
+      console.log('Deep & wide object:', obj);
+    }
+
+    function testAllTypesAtOnce() {
+      const everything = {
+        // Primitives
+        string: 'hello',
+        number: 42,
+        boolean: true,
+        nil: null,
+        undef: undefined,
+        symbol: Symbol('test'),
+        bigint: 123n,
+
+        // Functions
+        fn: function namedFn() {},
+        arrow: () => {},
+
+        // Objects
+        obj: { nested: { deep: 'value' } },
+        arr: [1, 2, [3, 4, [5, 6]]],
+
+        // Special types
+        date: new Date(),
+        regex: /pattern/gi,
+        error: new Error('test'),
+        map: new Map([['k1', 'v1'], ['k2', 'v2']]),
+        set: new Set([1, 2, 3]),
+        weakmap: new WeakMap(),
+        weakset: new WeakSet(),
+
+        // Binary data
+        buffer: new ArrayBuffer(32),
+        int32arr: new Int32Array([1, 2, 3]),
+        dataview: new DataView(new ArrayBuffer(16)),
+
+        // Async
+        promise: Promise.resolve('value'),
+
+        // DOM
+        dom: document.createElement('div')
+      };
+
+      // Add circular reference
+      everything.self = everything;
+
+      console.log('ALL TYPES AT ONCE:', everything);
+    }
+
+    // ============================================================
+    // AUTO-LOAD MESSAGE
+    // ============================================================
+    console.log('🌉 Console Bridge Advanced Test Page Loaded');
+    console.log('📝 Click buttons above to test serialization features');
+  </script>
+</body>
+</html>
