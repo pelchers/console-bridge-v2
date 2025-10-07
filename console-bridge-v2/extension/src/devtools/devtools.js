@@ -8,11 +8,16 @@
 // Log to DevTools console first (for debugging)
 console.log('[Console Bridge DevTools] Script loaded');
 
-// Wait a tiny bit for DevTools to be ready, then inject
+// Inject immediately AND log to inspected window
+chrome.devtools.inspectedWindow.eval(
+  `console.log('%c[Console Bridge] Extension loading...', 'color: blue; font-weight: bold');`
+);
+
+// Wait a bit for page to be ready, then inject
 setTimeout(() => {
   console.log('[Console Bridge DevTools] Starting injection...');
   injectConsoleCapture();
-}, 100);
+}, 500);
 
 // Create Console Bridge panel
 chrome.devtools.panels.create(
