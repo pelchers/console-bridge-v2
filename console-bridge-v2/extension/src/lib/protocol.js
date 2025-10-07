@@ -5,20 +5,26 @@
  * All messages follow the standard envelope structure with version, type, timestamp, and payload.
  *
  * Protocol Specification: docs/v2.0.0-spec/websocket-protocol-v1.0.0.md
- */
-
-const PROTOCOL_VERSION = '1.0.0';
-
-/**
- * Build a console_event message per protocol v1.0.0
  *
- * @param {string} method - Console method name (log, info, warn, error, etc.)
- * @param {Array} args - Serialized console arguments
- * @param {Object|null} location - Source location { url, line, column }
- * @param {Object} sourceInfo - Tab/page information { tabId, url, title }
- * @returns {Object} Protocol v1.0.0 console_event message
+ * Note: Using window.ConsoleBridgeProtocol namespace to avoid global pollution
+ * while maintaining compatibility with Chrome extension context.
  */
-export function buildConsoleEvent(method, args, location, sourceInfo) {
+
+(function() {
+  'use strict';
+
+  const PROTOCOL_VERSION = '1.0.0';
+
+  /**
+   * Build a console_event message per protocol v1.0.0
+   *
+   * @param {string} method - Console method name (log, info, warn, error, etc.)
+   * @param {Array} args - Serialized console arguments
+   * @param {Object|null} location - Source location { url, line, column }
+   * @param {Object} sourceInfo - Tab/page information { tabId, url, title }
+   * @returns {Object} Protocol v1.0.0 console_event message
+   */
+  function buildConsoleEvent(method, args, location, sourceInfo) {
   const message = {
     version: PROTOCOL_VERSION,
     type: 'console_event',
@@ -38,16 +44,16 @@ export function buildConsoleEvent(method, args, location, sourceInfo) {
   return message;
 }
 
-/**
- * Build a connection_status message
- *
- * @param {string} status - Connection status: 'connected', 'disconnected', 'reconnecting'
- * @param {string} reason - Human-readable reason for status change
- * @param {Object} clientInfo - Client information { extensionVersion, browser, browserVersion }
- * @param {Object|null} sourceInfo - Optional source info for extension->CLI messages
- * @returns {Object} Protocol v1.0.0 connection_status message
- */
-export function buildConnectionStatus(status, reason, clientInfo, sourceInfo = null) {
+  /**
+   * Build a connection_status message
+   *
+   * @param {string} status - Connection status: 'connected', 'disconnected', 'reconnecting'
+   * @param {string} reason - Human-readable reason for status change
+   * @param {Object} clientInfo - Client information { extensionVersion, browser, browserVersion }
+   * @param {Object|null} sourceInfo - Optional source info for extension->CLI messages
+   * @returns {Object} Protocol v1.0.0 connection_status message
+   */
+  function buildConnectionStatus(status, reason, clientInfo, sourceInfo = null) {
   const message = {
     version: PROTOCOL_VERSION,
     type: 'connection_status',
@@ -67,15 +73,15 @@ export function buildConnectionStatus(status, reason, clientInfo, sourceInfo = n
   return message;
 }
 
-/**
- * Build an error message
- *
- * @param {string} code - Error code (INVALID_MESSAGE, UNSUPPORTED_VERSION, etc.)
- * @param {string} message - Human-readable error message
- * @param {Object} details - Additional error context
- * @returns {Object} Protocol v1.0.0 error message
- */
-export function buildError(code, message, details = {}) {
+  /**
+   * Build an error message
+   *
+   * @param {string} code - Error code (INVALID_MESSAGE, UNSUPPORTED_VERSION, etc.)
+   * @param {string} message - Human-readable error message
+   * @param {Object} details - Additional error context
+   * @returns {Object} Protocol v1.0.0 error message
+   */
+  function buildError(code, message, details = {}) {
   return {
     version: PROTOCOL_VERSION,
     type: 'error',
@@ -88,13 +94,13 @@ export function buildError(code, message, details = {}) {
   };
 }
 
-/**
- * Build a ping message
- *
- * @param {string} id - Unique ping identifier
- * @returns {Object} Protocol v1.0.0 ping message
- */
-export function buildPing(id) {
+  /**
+   * Build a ping message
+   *
+   * @param {string} id - Unique ping identifier
+   * @returns {Object} Protocol v1.0.0 ping message
+   */
+  function buildPing(id) {
   return {
     version: PROTOCOL_VERSION,
     type: 'ping',
@@ -105,13 +111,13 @@ export function buildPing(id) {
   };
 }
 
-/**
- * Build a pong message (response to ping)
- *
- * @param {string} id - Ping identifier to respond to
- * @returns {Object} Protocol v1.0.0 pong message
- */
-export function buildPong(id) {
+  /**
+   * Build a pong message (response to ping)
+   *
+   * @param {string} id - Ping identifier to respond to
+   * @returns {Object} Protocol v1.0.0 pong message
+   */
+  function buildPong(id) {
   return {
     version: PROTOCOL_VERSION,
     type: 'pong',
@@ -122,15 +128,15 @@ export function buildPong(id) {
   };
 }
 
-/**
- * Get source info for the current inspected window
- *
- * Note: This function must be called from a DevTools context where
- * chrome.devtools.inspectedWindow is available.
- *
- * @returns {Object} Source info { tabId, url, title }
- */
-export function getSourceInfo() {
+  /**
+   * Get source info for the current inspected window
+   *
+   * Note: This function must be called from a DevTools context where
+   * chrome.devtools.inspectedWindow is available.
+   *
+   * @returns {Object} Source info { tabId, url, title }
+   */
+  function getSourceInfo() {
   return {
     tabId: chrome.devtools.inspectedWindow.tabId,
     // Note: url and title will need to be obtained from the inspected window
@@ -140,12 +146,12 @@ export function getSourceInfo() {
   };
 }
 
-/**
- * Get extension client info
- *
- * @returns {Object} Client info { extensionVersion, browser, browserVersion }
- */
-export function getClientInfo() {
+  /**
+   * Get extension client info
+   *
+   * @returns {Object} Client info { extensionVersion, browser, browserVersion }
+   */
+  function getClientInfo() {
   const manifest = chrome.runtime.getManifest();
 
   return {
@@ -155,13 +161,13 @@ export function getClientInfo() {
   };
 }
 
-/**
- * Validate a message structure against protocol v1.0.0
- *
- * @param {Object} message - Message to validate
- * @returns {boolean} True if valid, false otherwise
- */
-export function validateMessage(message) {
+  /**
+   * Validate a message structure against protocol v1.0.0
+   *
+   * @param {Object} message - Message to validate
+   * @returns {boolean} True if valid, false otherwise
+   */
+  function validateMessage(message) {
   // Must have version
   if (!message.version) return false;
 
@@ -202,4 +208,19 @@ export function validateMessage(message) {
   }
 
   return true;
-}
+  }
+
+  // Export all functions to window.ConsoleBridgeProtocol namespace
+  window.ConsoleBridgeProtocol = {
+    PROTOCOL_VERSION,
+    buildConsoleEvent,
+    buildConnectionStatus,
+    buildError,
+    buildPing,
+    buildPong,
+    getSourceInfo,
+    getClientInfo,
+    validateMessage
+  };
+
+})();
