@@ -109,12 +109,12 @@ console-bridge start localhost:3000 --no-headless --merge-output
 
 **Extension Mode (v2.0.0 - NEW):**
 ```bash
-# NEW: Monitor your personal browser!
+# NEW: Monitor your personal Chrome browser!
 console-bridge start --extension-mode
 ```
-- ✅ Use YOUR Chrome/Firefox/Safari browser
-- ✅ Works with browser extensions (React DevTools, Vue DevTools)
-- ✅ Cross-browser testing support
+- ✅ Use YOUR Chrome browser (or Edge, Brave, Opera, Vivaldi)
+- ✅ Works with browser extensions (React DevTools, Vue DevTools, etc.)
+- ✅ Works on all Chromium-based browsers
 - ✅ Console logs from YOUR browser appear in terminal
 
 **See [docs/v2.0.0-spec/clarifications.md](docs/v2.0.0-spec/clarifications.md) for complete dual-mode documentation.**

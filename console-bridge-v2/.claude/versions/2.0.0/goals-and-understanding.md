@@ -84,7 +84,7 @@ npx concurrently "npm run dev" "sleep 12 && console-bridge start localhost:3847 
 # Terminal: Console logs from THEIR Chrome browser appear in terminal
 
 # AI can now see console output without MCPs
-# User can use their preferred browser (Chrome with extensions, Firefox, Safari, etc.)
+# User can use their preferred browser (Chrome with extensions, , etc.)
 ```
 
 **Why this user story makes perfect sense:**
@@ -181,8 +181,8 @@ Console Bridge v1.0.0 can ONLY monitor the Puppeteer-controlled Chromium browser
 
 **1. Developer Testing in Preferred Browser**
 - ❌ Can't use Chrome with their favorite extensions
-- ❌ Can't use Firefox Developer Edition for debugging
-- ❌ Can't use Safari for iOS-specific testing
+- ❌ Can't use  for debugging
+- ❌ Can't use 
 - ⚠️ Must use Puppeteer Chromium (limited extension support)
 
 **2. Headless Mode Workflow**
@@ -226,7 +226,7 @@ Console Bridge v1.0.0 can ONLY monitor the Puppeteer-controlled Chromium browser
 - API is tightly coupled to Puppeteer's browser lifecycle
 
 **2. No Cross-Browser Monitoring Standard**
-- No universal API to "hook into" Chrome/Firefox/Safari from external process
+- No universal API to "hook into" Chrome from external process
 - Each browser has its own DevTools protocol
 - No standard for external console event monitoring
 
@@ -247,7 +247,7 @@ Console Bridge v1.0.0 can ONLY monitor the Puppeteer-controlled Chromium browser
 ### Option 1: Browser Extension ⭐ (RECOMMENDED)
 
 **How it works:**
-- Create Chrome/Firefox/Safari extensions
+- Create Chrome extensions
 - Extension captures console events inside the browser
 - Extension sends logs to Console Bridge via WebSocket or HTTP
 - Console Bridge acts as a server receiving logs from extension
@@ -257,12 +257,12 @@ Console Bridge v1.0.0 can ONLY monitor the Puppeteer-controlled Chromium browser
 - ✅ Works with ANY tab/window the user opens
 - ✅ User can use their real browser with extensions
 - ✅ Natural developer workflow (use the browser they're already using)
-- ✅ Can support multiple browsers (Chrome, Firefox, Safari, Edge)
+- ✅ Can support multiple browsers (Chrome, , Edge)
 - ✅ User installs extension once, works forever
 
 **Cons:**
 - ⚠️ Requires browser extension installation (no longer "zero-config")
-- ⚠️ Need separate extensions for Chrome/Firefox/Safari
+- ⚠️ Need separate extensions for Chrome
 - ⚠️ Browser extension store approval process
 - ⚠️ Users need to grant extension permissions
 
@@ -357,7 +357,7 @@ Console Bridge v1.0.0 can ONLY monitor the Puppeteer-controlled Chromium browser
 
 2. **Multi-Browser Support**
    - Chrome extension (covers Chrome, Edge, Brave, Opera, Vivaldi)
-   - Firefox extension (covers Firefox, Firefox Developer Edition)
+   - Firefox extension (covers Firefox, )
    - Safari extension (covers Safari on macOS/iOS)
    - One-time development effort per browser platform
 
@@ -390,8 +390,8 @@ Transform Console Bridge from a Puppeteer-only automation tool into a universal 
 ### Core Goals
 
 **1. Universal Browser Support**
-- Support Chrome, Firefox, Safari, Edge via browser extensions
-- One extension per browser platform
+- Support Chrome, , Edge via browser extensions
+- Chrome extension (works on all Chromium-based browsers)
 - Seamless cross-browser console monitoring
 
 **2. Natural Developer Workflow**

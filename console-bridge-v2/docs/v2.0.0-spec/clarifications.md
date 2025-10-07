@@ -57,7 +57,7 @@ console-bridge start --extension-mode
 **When to use:**
 - ✅ Human development workflows
 - ✅ When browser extensions are required (React DevTools, Vue DevTools)
-- ✅ Cross-browser testing (Chrome, Firefox, Safari)
+- ✅ Cross-browser testing (Chrome)
 - ✅ Testing with personal browser configuration
 
 ---
@@ -137,7 +137,7 @@ console-bridge start --extension-mode  # Must explicitly enable
 
 ```
 ┌──────────────────────────────────────────────┐
-│   User's Browser (Chrome/Firefox/Safari)    │
+│   User's Browser (Chrome)    │
 │   ┌─────────────────────────────────────┐   │
 │   │  Console Bridge Extension           │   │
 │   │  - DevTools API Integration         │   │
@@ -179,11 +179,9 @@ console-bridge start --extension-mode
 # Chrome
 # Install from Chrome Web Store or load unpacked from extensions/chrome/
 
-# Firefox
-# Install from Firefox Add-ons or load temporary add-on from extensions/firefox/
 
-# Safari
-# Install from extensions/safari/
+
+
 ```
 
 **What the extension does:**
@@ -230,7 +228,7 @@ console-bridge start --extension-mode
 **Decision:** WebSocket
 
 **Rationale:**
-- Cross-browser support (Chrome, Firefox, Safari)
+- Cross-browser support (Chrome)
 - Simple, real-time bidirectional communication
 - No special browser launch flags required
 - Works with user's actual browser (not Puppeteer-controlled)
@@ -287,8 +285,8 @@ console-bridge start --extension-mode
 ### Q: Can I use both modes simultaneously?
 **A:** No. Choose one mode per CLI instance. Run two CLI instances if needed.
 
-### Q: Will Extension mode work with Puppeteer headful mode?
-**A:** No. Extension monitors personal browser, not Puppeteer browser.
+### Q: Does the Chrome extension work with Edge, Brave, etc.?
+**A:** Yes! All Chromium-based browsers (Edge, Brave, Opera, Vivaldi) can use the Chrome extension.
 
 ### Q: What happens if I upgrade from v1.0.0 to v2.0.0?
 **A:** All your existing commands continue working. Extension mode is opt-in.
