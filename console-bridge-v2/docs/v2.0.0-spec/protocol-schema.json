@@ -1,0 +1,311 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://console-bridge.io/schemas/protocol-v1.0.0.json",
+  "title": "Console Bridge WebSocket Protocol v1.0.0",
+  "description": "Message schema for Console Bridge WebSocket protocol",
+  "definitions": {
+    "message_envelope": {
+      "type": "object",
+      "required": ["version", "type", "timestamp", "payload"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Protocol version (semver)"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["console_event", "connection_status", "error", "ping", "pong"],
+          "description": "Message type"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp"
+        },
+        "source": {
+          "$ref": "#/definitions/source_info"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Message-specific payload"
+        }
+      }
+    },
+    "source_info": {
+      "type": "object",
+      "required": ["tabId", "url", "title"],
+      "properties": {
+        "tabId": {
+          "type": "integer",
+          "description": "Browser tab ID"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Page URL"
+        },
+        "title": {
+          "type": "string",
+          "description": "Page title"
+        }
+      }
+    },
+    "console_event_payload": {
+      "type": "object",
+      "required": ["method", "args"],
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "log",
+            "info",
+            "warn",
+            "error",
+            "debug",
+            "trace",
+            "table",
+            "group",
+            "groupCollapsed",
+            "groupEnd",
+            "clear",
+            "count",
+            "countReset",
+            "time",
+            "timeEnd",
+            "timeLog",
+            "assert",
+            "dir",
+            "dirxml"
+          ],
+          "description": "Console method name"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/serialized_argument"
+          },
+          "description": "Console method arguments"
+        },
+        "location": {
+          "$ref": "#/definitions/source_location"
+        }
+      }
+    },
+    "serialized_argument": {
+      "type": "object",
+      "required": ["type", "value"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "string",
+            "number",
+            "boolean",
+            "null",
+            "undefined",
+            "object",
+            "array",
+            "function",
+            "dom",
+            "circular",
+            "error"
+          ]
+        },
+        "value": {
+          "description": "Serialized value"
+        },
+        "name": {
+          "type": "string",
+          "description": "Function name (for functions)"
+        },
+        "tagName": {
+          "type": "string",
+          "description": "DOM element tag name (for DOM elements)"
+        },
+        "className": {
+          "type": "string",
+          "description": "Class name (for objects with constructors)"
+        },
+        "stack": {
+          "type": "string",
+          "description": "Stack trace (for errors)"
+        }
+      }
+    },
+    "source_location": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "connection_status_payload": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["connected", "disconnected", "reconnecting"]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "clientInfo": {
+          "type": "object",
+          "properties": {
+            "extensionVersion": {
+              "type": "string"
+            },
+            "cliVersion": {
+              "type": "string"
+            },
+            "browser": {
+              "type": "string"
+            },
+            "browserVersion": {
+              "type": "string"
+            },
+            "platform": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "error_payload": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "INVALID_MESSAGE",
+            "UNSUPPORTED_VERSION",
+            "INTERNAL_ERROR",
+            "RATE_LIMIT",
+            "AUTH_REQUIRED"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "object"
+        }
+      }
+    },
+    "ping_pong_payload": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique ping/pong identifier"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "description": "Console Event Message",
+      "allOf": [
+        {
+          "$ref": "#/definitions/message_envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "console_event"
+            },
+            "payload": {
+              "$ref": "#/definitions/console_event_payload"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Connection Status Message",
+      "allOf": [
+        {
+          "$ref": "#/definitions/message_envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "connection_status"
+            },
+            "payload": {
+              "$ref": "#/definitions/connection_status_payload"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Error Message",
+      "allOf": [
+        {
+          "$ref": "#/definitions/message_envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "error"
+            },
+            "payload": {
+              "$ref": "#/definitions/error_payload"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Ping Message",
+      "allOf": [
+        {
+          "$ref": "#/definitions/message_envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "ping"
+            },
+            "payload": {
+              "$ref": "#/definitions/ping_pong_payload"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "Pong Message",
+      "allOf": [
+        {
+          "$ref": "#/definitions/message_envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "pong"
+            },
+            "payload": {
+              "$ref": "#/definitions/ping_pong_payload"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+# Commit Log
+
+## Commit 1
+**Branch:** phase-1/subtask-1.1  
+**Message:** docs(subtask-1.1): create pre-implementation ADR for project initialization  
+**Files Changed:**
+- .claude/adr/phase-1/subtask-1.1-project-initialization.md (created)
+
+---
+
+## Commit 2
+**Branch:** phase-1/subtask-1.1  
+**Message:** feat(subtask-1.1): complete project initialization with all config files  
+**Files Changed:**
+- README.md, CHANGELOG.md, LICENSE, .gitignore, .npmignore, .eslintrc.json, .prettierrc, jest.config.js (all created)
+
+---
+
+## Commit 3
+**Branch:** phase-1/subtask-1.1  
+**Message:** docs(subtask-1.1): update ADR with implementation results  
+**Files Changed:**
+- .claude/adr/phase-1/subtask-1.1-project-initialization.md (updated, status: Completed)
+
+---
+
+## Commit 4
+**Branch:** phase-1/subtask-1.2  
+**Message:** docs(subtask-1.2): create pre-implementation ADR for Puppeteer integration  
+**Files Changed:**
+- .claude/adr/phase-1/subtask-1.2-basic-puppeteer-integration.md (created)
+
+---
+
+## Commit 5
+**Branch:** phase-1/subtask-1.2  
+**Message:** feat(subtask-1.2): implement BrowserPool and LogCapturer classes  
+**Files Changed:**
+- src/core/BrowserPool.js (created)
+- src/core/LogCapturer.js (created)
+
+**Description:**
+- Implemented BrowserPool with instance management, max limits, and cleanup
+- Implemented LogCapturer with console, pageerror, and requestfailed event handling
+- Added robust argument serialization with multiple fallback strategies
+- Includes proper error handling and resource cleanup
+
+---
+
+## Commit 6
+**Branch:** phase-1/subtask-1.2  
+**Message:** test(subtask-1.2): add comprehensive unit tests for BrowserPool  
+**Files Changed:**
+- test/unit/BrowserPool.test.js (created)
+
+**Description:**
+- Created 15+ test cases covering all BrowserPool methods
+- Tests create, get, has, destroy, destroyAll, count, getUrls
+- Tests max instances limit enforcement
+- Tests error handling scenarios
+- All tests use 30s timeout for Puppeteer operations
+
+---
