@@ -5,19 +5,10 @@
  * It also handles injection of the console capture code into the inspected window.
  */
 
-// Log to DevTools console first (for debugging)
-console.log('[Console Bridge DevTools] Script loaded');
-
-// Inject immediately AND log to inspected window
-chrome.devtools.inspectedWindow.eval(
-  `console.log('%c[Console Bridge] Extension loading...', 'color: blue; font-weight: bold');`
-);
-
-// Wait a bit for page to be ready, then inject
+// Inject console capture immediately when DevTools opens
 setTimeout(() => {
-  console.log('[Console Bridge DevTools] Starting injection...');
   injectConsoleCapture();
-}, 500);
+}, 100);
 
 // Create Console Bridge panel
 chrome.devtools.panels.create(
@@ -48,52 +39,35 @@ function logToInspectedConsole(level, message) {
  * Inject console capture code into the inspected window
  */
 function injectConsoleCapture() {
-  console.log('[Console Bridge DevTools] injectConsoleCapture() called');
-
-  try {
-    logToInspectedConsole('log', '[Console Bridge] DevTools extension loaded, injecting console capture...');
-  } catch (e) {
-    console.error('[Console Bridge DevTools] Failed to log to inspected console:', e);
-  }
-
-  const scriptURL = chrome.runtime.getURL('content/console-capture.js');
-  console.log('[Console Bridge DevTools] Script URL:', scriptURL);
+  logToInspectedConsole('log', '[Console Bridge] Injecting console capture...');
 
   // Fetch the console capture script
+  const scriptURL = chrome.runtime.getURL('content/console-capture.js');
+
   fetch(scriptURL)
     .then(response => {
-      console.log('[Console Bridge DevTools] Fetch response:', response.status, response.ok);
       if (!response.ok) {
         throw new Error(`Failed to load console-capture.js: HTTP ${response.status}`);
       }
       return response.text();
     })
     .then(code => {
-      console.log('[Console Bridge DevTools] Code fetched, length:', code.length);
-      console.log('[Console Bridge DevTools] First 100 chars:', code.substring(0, 100));
-
       // Inject the code into the inspected window
-      // The code is an IIFE so we execute it immediately
       chrome.devtools.inspectedWindow.eval(
         code,
         { useContentScriptContext: false },
         (result, error) => {
-          console.log('[Console Bridge DevTools] Eval callback - result:', result, 'error:', error);
           if (error) {
-            console.error('[Console Bridge DevTools] Eval error:', error);
             logToInspectedConsole('error', '[Console Bridge] ❌ Injection failed: ' + JSON.stringify(error));
           } else {
-            console.log('[Console Bridge DevTools] Injection successful!');
-            logToInspectedConsole('log', '[Console Bridge] ✅ Console capture injected successfully');
-            // Set up listener for captured console events
+            logToInspectedConsole('log', '[Console Bridge] ✅ Console capture active');
             setupEventListener();
           }
         }
       );
     })
     .catch(error => {
-      console.error('[Console Bridge DevTools] Fetch error:', error);
-      logToInspectedConsole('error', '[Console Bridge] ❌ Failed to fetch console-capture.js: ' + error.message);
+      logToInspectedConsole('error', '[Console Bridge] ❌ Failed to load extension: ' + error.message);
     });
 }
 
@@ -103,13 +77,17 @@ function injectConsoleCapture() {
 function setupEventListener() {
   // Inject a message listener into the inspected window
   // This will listen for postMessage events from console-capture.js
-  // and log them to the console so we can see them during testing
+  // In the future (Subtask 2.3), this will forward events to WebSocket client
   chrome.devtools.inspectedWindow.eval(`
+    let capturedEventCount = 0;
     window.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'console-bridge-event') {
-        console.log('%c[Console Bridge Event]', 'color: #0066cc; font-weight: bold;', event.data);
+        capturedEventCount++;
+        // TODO: In Subtask 2.3, forward event.data to WebSocket client
+        // For now, we just count them silently to avoid infinite loops
       }
     });
-    console.log('[Console Bridge] ✅ Event listener active - will display captured events');
+    console.log('[Console Bridge] ✅ Event listener active - capturing console events');
+    console.log('[Console Bridge] Events will be sent to CLI via WebSocket (coming in Subtask 2.3)');
   `);
 }
