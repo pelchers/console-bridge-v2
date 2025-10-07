@@ -1,6 +1,6 @@
 # Console Bridge v2.0.0 - Implementation Plan
 
-**Version:** 2.0.0 "Browser Extension"
+**Version:** 2.0.0 "Chrome Extension"
 **Created:** October 6, 2025
 **Status:** Planning
 **Target Release:** Q1 2026
@@ -9,10 +9,10 @@
 
 ## Executive Summary
 
-Console Bridge v2.0.0 transforms the tool from a Puppeteer-only automation utility into a universal development companion by introducing browser extension support. This allows developers to use their preferred browsers (Chrome, Firefox, Safari) while monitoring console output in their terminal.
+Console Bridge v2.0.0 transforms the tool from a Puppeteer-only automation utility into a universal development companion by introducing Chrome browser extension support. This allows developers to use their personal Chrome browser (with extensions like React DevTools) while monitoring console output in their terminal.
 
 **Key Changes:**
-- Browser extension for Chrome (primary), Firefox (secondary), Safari (optional)
+- Chrome browser extension (supports Chrome, Edge, Brave, Opera, Vivaldi - all Chromium-based browsers)
 - WebSocket-based communication between extension and CLI tool
 - Dual-mode operation: Extension Mode (new) + Puppeteer Mode (existing)
 - Zero breaking changes - fully backward compatible with v1.0.0
@@ -39,7 +39,7 @@ Console Bridge v2.0.0 transforms the tool from a Puppeteer-only automation utili
 
 Console Bridge v1.0.0 can ONLY monitor Puppeteer-controlled Chromium browsers. It CANNOT monitor:
 - User's personal Chrome browser
-- Firefox, Safari, Edge
+
 - Any browser instance not launched by Puppeteer
 
 ### Impact
@@ -69,7 +69,7 @@ Enable Console Bridge to monitor ANY browser the developer uses, not just Puppet
 ### Browser Extension Approach
 
 **How it works:**
-1. Developer installs Console Bridge extension in their browser (Chrome/Firefox/Safari)
+1. Developer installs Console Bridge extension in Chrome
 2. Extension captures console events using browser DevTools API
 3. Extension sends logs to Console Bridge CLI via WebSocket
 4. Console Bridge formats and displays logs in terminal
@@ -79,7 +79,7 @@ Enable Console Bridge to monitor ANY browser the developer uses, not just Puppet
 - ✅ Works with developer's preferred browser
 - ✅ Browser extensions already installed (React DevTools, etc.)
 - ✅ Natural workflow (no Puppeteer window)
-- ✅ Cross-browser support (Chrome, Firefox, Safari)
+- ✅ Chromium browser support (Chrome, Edge, Brave, Opera, Vivaldi)
 - ✅ Multi-tab support (monitor multiple tabs simultaneously)
 
 ---
@@ -91,7 +91,7 @@ Enable Console Bridge to monitor ANY browser the developer uses, not just Puppet
 ```
 ┌──────────────────────────────────────────────────────────┐
 │                    Developer's Browser                   │
-│                    (Chrome/Firefox/Safari)               │
+│                    (Chrome)               │
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐ │
 │  │        Console Bridge Extension                    │ │
@@ -143,7 +143,7 @@ Enable Console Bridge to monitor ANY browser the developer uses, not just Puppet
 │  │  - Format logs for terminal                       │ │
 │  │  - Color coding by log type                       │ │
 │  │  - Timestamp formatting                            │ │
-│  │  - Source labeling ([Chrome Tab 1], [Firefox])    │ │
+│  │  - Source labeling ([Chrome Tab 1], [Chrome Tab 2])    │ │
 │  └────────────────────────────────────────────────────┘ │
 │                                                          │
 │  ┌────────────────────────────────────────────────────┐ │
@@ -238,27 +238,11 @@ Enable Console Bridge to monitor ANY browser the developer uses, not just Puppet
 
 ---
 
-### Phase 4: Firefox Extension (Sprint 5)
+### Phase 4: Testing & Documentation (Sprint 5)
 **Duration:** 1 sprint (2 weeks)
 
 **Goals:**
-- Port Chrome extension to Firefox
-- Handle Firefox-specific API differences
-- Submit to Firefox Add-ons store
-
-**Deliverables:**
-1. Firefox extension using WebExtensions API
-2. Compatibility layer for browser APIs
-3. Firefox Add-ons store submission
-4. Cross-browser testing
-
----
-
-### Phase 5: Testing & Documentation (Sprint 6)
-**Duration:** 1 sprint (2 weeks)
-
-**Goals:**
-- Comprehensive testing across browsers
+- Comprehensive testing in Chrome
 - Write user documentation
 - Create video tutorials
 - Beta testing with real users
@@ -272,27 +256,12 @@ Enable Console Bridge to monitor ANY browser the developer uses, not just Puppet
 
 ---
 
-### Phase 6: Safari Extension (Sprint 7) - Optional
-**Duration:** 1 sprint (2 weeks)
-
-**Goals:**
-- Create Safari extension (if user demand exists)
-- Submit to Safari Extension Gallery
-
-**Deliverables:**
-1. Safari extension
-2. Safari Extension Gallery submission
-3. macOS/iOS testing
-
----
-
 ## Sprint Breakdown
 
 ### Sprint 1: Architecture & Planning
 
 **Week 1:**
 - Research Chrome DevTools API (`chrome.devtools.network`, `chrome.devtools.inspectedWindow`)
-- Research Firefox WebExtensions API
 - Design WebSocket message protocol
 - Define extension manifest structure
 
@@ -411,29 +380,10 @@ src/
 
 ---
 
-### Sprint 5: Firefox Extension
+### Sprint 5: Testing & Documentation
 
 **Week 1:**
-- Port Chrome extension to Firefox
-- Handle API differences (browser.* vs chrome.*)
-- Test with Firefox Developer Edition
-
-**Week 2:**
-- Firefox Add-ons store submission
-- Cross-browser compatibility testing
-- Documentation updates
-
-**Acceptance Criteria:**
-- [ ] Firefox extension works identically to Chrome
-- [ ] Firefox Add-ons submission complete
-- [ ] Cross-browser tests passing
-
----
-
-### Sprint 6: Testing & Documentation
-
-**Week 1:**
-- Comprehensive testing (Chrome + Firefox)
+- Comprehensive testing (Chrome)
 - Write user installation guide
 - Create comparison doc (Extension vs Puppeteer)
 
@@ -443,27 +393,12 @@ src/
 - Bug fixes from beta testing
 
 **Acceptance Criteria:**
-- [ ] All tests passing (Chrome + Firefox)
+- [ ] All tests passing (Chrome)
 - [ ] User guide published
 - [ ] Video tutorial on YouTube
 - [ ] 10+ beta testers validated functionality
 
 ---
-
-### Sprint 7: Safari Extension (Optional)
-
-**Week 1:**
-- Research Safari Extension APIs
-- Port extension to Safari
-- Test on macOS
-
-**Week 2:**
-- Safari Extension Gallery submission
-- iOS testing (if applicable)
-
-**Acceptance Criteria:**
-- [ ] Safari extension works on macOS
-- [ ] Safari Extension Gallery submission complete
 
 ---
 
@@ -706,20 +641,13 @@ function serializeConsoleArgs(args) {
 
 ### Browser Compatibility Tests
 
-**Chrome:**
-- Latest stable
-- Chrome Beta
-- Chrome Dev
+**Chrome & Chromium-based:**
+- Chrome (latest stable, Beta, Dev, Canary)
+- Microsoft Edge
+- Brave Browser
+- Opera
+- Vivaldi
 - Chromium
-
-**Firefox:**
-- Latest stable
-- Firefox Developer Edition
-- Firefox ESR
-
-**Safari (if implemented):**
-- Safari 16+
-- Safari Technology Preview
 
 ---
 
@@ -764,19 +692,9 @@ function serializeConsoleArgs(args) {
 
 ---
 
-### Risk 4: Cross-Browser API Differences
-
-**Impact:** Medium
-**Probability:** Low
-
-**Mitigation:**
-- Use WebExtensions polyfill
-- Abstract browser-specific code
-- Comprehensive cross-browser testing
-
 ---
 
-### Risk 5: User Adoption
+### Risk 4: User Adoption
 
 **Impact:** Medium
 **Probability:** Low
@@ -803,17 +721,15 @@ function serializeConsoleArgs(args) {
 
 ### Should Have (v2.1.0)
 
-1. Firefox extension published
-2. Graceful reconnection on disconnect
-3. Connection status UI in extension
-4. Performance optimizations
+1. Graceful reconnection on disconnect
+2. Connection status UI in extension
+3. Performance optimizations
 
 ### Nice to Have (v2.2.0)
 
-1. Safari extension
-2. Extension settings panel
-3. Log filtering in extension
-4. Visual console replay
+1. Extension settings panel
+2. Log filtering in extension
+3. Visual console replay
 
 ---
 
@@ -825,9 +741,7 @@ function serializeConsoleArgs(args) {
 
 **Development Tools:**
 - Chrome DevTools
-- Firefox Developer Edition
 - Chrome Web Store Developer account
-- Firefox Add-ons Developer account
 
 **Documentation Tools:**
 - Screen recording software for tutorials
@@ -842,11 +756,9 @@ function serializeConsoleArgs(args) {
 **Sprint 2 (Chrome Extension Core):** Week 3-4
 **Sprint 3 (Chrome Extension Complete):** Week 5-6
 **Sprint 4 (CLI WebSocket Server):** Week 7-8
-**Sprint 5 (Firefox Extension):** Week 9-10
-**Sprint 6 (Testing & Docs):** Week 11-12
-**Sprint 7 (Safari Extension - Optional):** Week 13-14
+**Sprint 5 (Testing & Docs):** Week 9-10
 
-**Total Duration:** 12-14 weeks (3-3.5 months)
+**Total Duration:** 10 weeks (2.5 months)
 
 **Target Release:** Q1 2026
 
@@ -860,12 +772,10 @@ function serializeConsoleArgs(args) {
 - Documentation clarifications
 
 ### v2.1.0 (Minor)
-- Firefox extension improvements
 - Additional CLI flags
 - Enhanced error messages
 
 ### v2.2.0 (Minor)
-- Safari extension
 - Extension settings panel
 - Advanced filtering
 
@@ -890,8 +800,6 @@ console-bridge-c-s-4.5/
 │       ├── icon16.png
 │       ├── icon48.png
 │       └── icon128.png
-├── firefox-extension/
-│   └── (similar structure to chrome-extension)
 ├── src/
 │   ├── core/
 │   │   ├── BridgeManager.js (updated)
@@ -915,7 +823,7 @@ console-bridge-c-s-4.5/
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** October 6, 2025
+**Document Version:** 2.0
+**Last Updated:** October 7, 2025
 **Status:** ✅ Ready for Implementation
 **Next Review:** Sprint 1 Kickoff
