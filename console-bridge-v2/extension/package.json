@@ -1,0 +1,47 @@
+{
+  "name": "console-bridge-extension",
+  "version": "2.0.0-alpha",
+  "description": "Chrome extension for Console Bridge - Bridge browser console logs to terminal",
+  "author": "Console Bridge Team",
+  "license": "MIT",
+  "scripts": {
+    "dev": "web-ext run --source-dir=src --target=chromium --start-url about:blank --browser-console",
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "format": "prettier --write \"src/**/*.{js,html,css,json}\"",
+    "format:check": "prettier --check \"src/**/*.{js,html,css,json}\"",
+    "validate": "npm run lint && npm run format:check && npm run test"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.253",
+    "chokidar": "^3.5.3",
+    "eslint": "^8.55.0",
+    "eslint-plugin-jest": "^27.6.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier": "^3.1.1",
+    "sinon-chrome": "^3.0.1",
+    "web-ext": "^7.9.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "coverageDirectory": "coverage",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/**/*.test.js"
+    ],
+    "setupFilesAfterEnv": [
+      "./test/setup.js"
+    ],
+    "transform": {}
+  },
+  "type": "module"
+}

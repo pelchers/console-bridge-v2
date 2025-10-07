@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Console Bridge Panel</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🌉 Console Bridge</h1>
+        <p class="subtitle">Development Environment Active</p>
+      </header>
+
+      <section class="status-section">
+        <h2>Connection Status</h2>
+        <div class="status-indicator">
+          <div class="status-light" id="statusLight"></div>
+          <span id="statusText">Initializing...</span>
+        </div>
+        <div class="connection-details">
+          <p><strong>WebSocket URL:</strong> <code id="wsUrl">ws://localhost:9223</code></p>
+          <p><strong>Mode:</strong> <span id="mode">Development</span></p>
+        </div>
+      </section>
+
+      <section class="stats-section">
+        <h2>Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="eventsCount">0</div>
+            <div class="stat-label">Events Captured</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="messagesCount">0</div>
+            <div class="stat-label">Messages Sent</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="errorsCount">0</div>
+            <div class="stat-label">Errors</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="info-section">
+        <h2>Development Info</h2>
+        <p>
+          This is the Console Bridge v2.0.0 development environment. The extension is now set up
+          with hot-reload, testing, and linting capabilities.
+        </p>
+        <p><strong>Next Steps:</strong></p>
+        <ul>
+          <li>Complete Sprint 1 (Architecture & Planning)</li>
+          <li>Proceed to Sprint 2 (Full Chrome Extension Implementation)</li>
+          <li>Build WebSocket client and console capture logic</li>
+        </ul>
+      </section>
+    </div>
+
+    <script src="panel.js"></script>
+  </body>
+</html>

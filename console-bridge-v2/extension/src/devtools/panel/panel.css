@@ -1,0 +1,143 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #1e1e1e;
+  color: #e0e0e0;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #333;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
+  color: #61dafb;
+}
+
+.subtitle {
+  color: #888;
+  font-size: 14px;
+}
+
+section {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #333;
+}
+
+h2 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #61dafb;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.status-light {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #666;
+  animation: pulse 2s infinite;
+}
+
+.status-light.connected {
+  background: #4caf50;
+}
+
+.status-light.disconnected {
+  background: #f44336;
+}
+
+.status-light.connecting {
+  background: #ff9800;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.connection-details p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+code {
+  background: #1e1e1e;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  color: #61dafb;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.stat-card {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid #333;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #61dafb;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-section p {
+  margin-bottom: 12px;
+  color: #ccc;
+}
+
+.info-section ul {
+  margin-left: 20px;
+  color: #ccc;
+}
+
+.info-section li {
+  margin: 6px 0;
+}
