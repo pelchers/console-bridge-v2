@@ -159,7 +159,7 @@ Console Bridge v1.0.0 ONLY monitors the Puppeteer-controlled Chromium browser:
 
 **See [REQUIREMENTS.md](../docs/REQUIREMENTS.md) for complete limitation documentation.**
 
-**v2.0.0 (planned Q1 2026)** will add browser extension support to monitor personal Chrome/Firefox/Safari browsers.
+**v2.0.0 (October 8, 2025 - Phase 2 Complete)** adds browser extension support to monitor personal Chrome/Chromium browsers. See "v2.0.0 Extension Mode" section below.
 
 4. **Remote Debugging**: Support for non-localhost URLs (with security)
 5. **Browser Extension**: Alternative capture method
@@ -200,6 +200,95 @@ Console Bridge v1.0.0 ONLY monitors the Puppeteer-controlled Chromium browser:
 
 ---
 
+## v2.0.0 Extension Mode (October 8, 2025)
+
+### Problem Statement (v1 Limitation)
+v1.0.0 only monitors Puppeteer-controlled browsers. Developers want to use THEIR personal Chrome browser with THEIR extensions (React DevTools, Vue DevTools, etc.) while streaming console logs to terminal.
+
+### Solution: Chrome Extension as Bridge
+A Chrome extension that acts as the "bridge" between user's personal Chrome browser and the CLI tool.
+
+### Core Features (v2.0.0)
+
+#### 1. Extension Mode - Monitor Personal Chrome
+- **Description**: Use YOUR Chrome browser instead of Puppeteer-controlled browser
+- **User Story**: As a developer, I want to use my personal Chrome with all my extensions while streaming console logs to terminal
+- **Acceptance Criteria**:
+  - ✅ Extension installed via Chrome Web Store or developer mode
+  - ✅ Works with user's daily Chrome browser
+  - ✅ Compatible with all Chrome extensions (React DevTools, Redux DevTools, etc.)
+  - ✅ Supports all Chromium-based browsers (Chrome, Edge, Brave, Opera, Vivaldi)
+
+#### 2. WebSocket Protocol v1.0.0
+- **Description**: Extension communicates with CLI via WebSocket
+- **User Story**: As a developer, I want reliable streaming from extension to CLI
+- **Acceptance Criteria**:
+  - ✅ WebSocket server on CLI (port 9223, localhost only)
+  - ✅ JSON message protocol with envelope structure
+  - ✅ Message types: console_event, connection_status, ping, pong, welcome
+  - ✅ Protocol documentation in v1-to-v2 comparison doc
+
+#### 3. Advanced Features (Beyond v1)
+- **Message Queuing**: Queue up to 1000 messages during disconnections
+- **Ping/Pong Keep-Alive**: 30s ping interval, 5s pong timeout
+- **Auto-Reconnect**: Exponential backoff (1s → 2s → 4s → 8s → 16s, max 5 attempts)
+- **Advanced Serialization**: Maps, Sets, Promises, Symbols, BigInt, circular refs, DOM elements
+- **DevTools Panel UI**: Connection status, statistics, error display
+
+#### 4. Dual-Mode Operation (100% Backward Compatible)
+- **Puppeteer Mode**: Same as v1.0.0, no changes
+- **Extension Mode**: NEW, use `--extension-mode` flag
+- **User Experience**:
+  ```bash
+  # v1 Puppeteer mode (unchanged)
+  console-bridge start localhost:3000
+
+  # v2 Extension mode (NEW)
+  console-bridge start --extension-mode
+  ```
+
+### Extension Mode Supported Flags
+- ✅ `--output` - File export (works identically to v1)
+- ✅ `--no-timestamp` - Hide timestamps
+- ✅ `--no-source` - Hide source URLs
+- ✅ `--location` - Show file locations
+- ✅ `--timestamp-format` - Time vs ISO format
+- ⚠️ `--levels` - Log filtering (coming in Phase 3.2)
+- ❌ `--no-headless`, `--max-instances` - N/A (you control your own browser)
+
+### Testing Strategy (v2 ADDS tools, not replaces)
+**v1 Testing Tools (2 - Preserved):**
+1. Jest - Unit tests (186 tests in v1, 211 in v2)
+2. Puppeteer - Integration tests (v1 Puppeteer mode)
+
+**v2 ADDS Testing Tools (+2 NEW):**
+3. Playwright MCP - Extension E2E tests (cross-browser, extension loading, CDP access)
+4. BrowserMCP - Chrome-specific automation (DevTools panel, visual testing)
+
+**Rationale:** v2 does NOT remove any v1 tests. We KEEP all v1 tests and ADD new extension tests using Playwright MCP + BrowserMCP.
+
+### MVP Scope (v2.0.0 - Phase 2 Complete)
+1. ✅ Chrome extension with console capture via chrome.devtools APIs
+2. ✅ WebSocket client in extension (connects to CLI)
+3. ✅ WebSocket server in CLI (receives extension messages)
+4. ✅ Advanced object serialization (Maps, Sets, Promises, circular refs, DOM)
+5. ✅ Message queuing (1000 messages)
+6. ✅ Ping/pong keep-alive
+7. ✅ Auto-reconnect with exponential backoff
+8. ✅ DevTools panel UI
+9. ✅ 100% v1 backward compatibility (Puppeteer mode still works)
+10. ✅ 211/211 core tests passing (100%)
+
+### Phase 3 - In Progress (Chrome Web Store Publication)
+- 🚧 Subtask 3.1: Chrome Web Store preparation (manifest, privacy policy, listing content) - Documentation complete
+- ⏳ Subtask 3.2: User documentation (installation guide, usage tutorial, troubleshooting)
+- ⏳ Subtask 3.3: Video tutorials
+- ⏳ Subtask 3.4: Performance testing with Playwright/BrowserMCP
+- ⏳ Subtask 3.5: Beta testing program
+- ⏳ Subtask 3.6: Migration guide v1 → v2
+
+---
+
 ## Version History
 
 **v1.0.0 (October 5, 2025) - "Unified Terminal"**
@@ -209,9 +298,27 @@ Console Bridge v1.0.0 ONLY monitors the Puppeteer-controlled Chromium browser:
 - Cross-platform support (Windows, macOS, Linux)
 - 96.68% test coverage
 - Comprehensive documentation
+- **Limitation:** Puppeteer-controlled browser only
+
+**v2.0.0-beta (October 8, 2025) - "Extension Mode"**
+- 🎉 Chrome Extension support (monitor personal Chrome browser)
+- 🎉 WebSocket Protocol v1.0.0 (extension ↔ CLI)
+- 🎉 Advanced serialization (Maps, Sets, Promises, DOM elements)
+- 🎉 Message queuing, ping/pong, auto-reconnect
+- 🎉 DevTools panel UI
+- ✅ 100% v1 backward compatibility (Puppeteer mode preserved)
+- ✅ 211/211 core tests passing (100%)
+- 🚧 Phase 3: Chrome Web Store publication in progress
+
+**v2.0.0 (Planned - After Chrome Web Store Approval)**
+- Chrome Web Store publication
+- User documentation complete
+- Video tutorials
+- Beta testing complete
+- Performance testing complete
 
 ---
 
-**Document Status:** Production (v1.0.0)
-**Last Updated:** October 5, 2025
+**Document Status:** Living Document (Updated for v2.0.0)
+**Last Updated:** October 8, 2025
 **Location:** `.claude/PRD.md`

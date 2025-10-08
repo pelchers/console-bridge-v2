@@ -508,22 +508,28 @@ npm test                    # 211/211 tests (100%)
 npm run test:integration    # v1 compatibility
 
 # Extension tests (planned Phase 3.4)
-npm run test:extension      # Playwright + BrowserMCP
+npm run test:extension      # Playwright MCP + BrowserMCP
 ```
 
-**Tools:**
-1. **Jest** - Unit tests (core modules, utilities)
-2. **Puppeteer** - v1 Puppeteer mode integration tests
-3. **Playwright MCP** - Extension E2E tests, cross-browser testing
-4. **BrowserMCP** - Chrome DevTools panel interaction, visual testing
+**Tools (v1 uses 2, v2 ADDS 2 more = 4 total):**
 
-**Why 3 testing tools?**
+**v1 Testing Tools (2):**
+1. **Jest** - Unit tests (core modules, utilities) - 186 tests in v1
+2. **Puppeteer** - Integration tests (Puppeteer mode only)
 
-- **Puppeteer**: Already in use for v1 mode, lightweight for basic tests
-- **Playwright MCP**: Cross-browser support (Chrome, Edge, Brave), extension loading, CDP access
-- **BrowserMCP**: Chrome-specific automation, DevTools panel interaction
+**v2 ADDS Testing Tools (+2):**
+3. **Playwright MCP** (NEW in v2) - Extension E2E tests, cross-browser testing
+4. **BrowserMCP** (NEW in v2) - Chrome DevTools panel interaction, visual testing
 
-**Note:** Desktop Automation MCP available but not needed (no keyboard/mouse simulation required for console streaming tests).
+**Rationale for adding Playwright MCP + BrowserMCP:**
+
+- **Puppeteer** (v1): Already in use, lightweight, perfect for v1 Puppeteer mode
+- **Playwright MCP** (v2 NEW): Cross-browser support (Chrome, Edge, Brave), extension loading in automated tests, CDP access for DevTools interaction
+- **BrowserMCP** (v2 NEW): Chrome-specific automation, lighter than Playwright for Chrome-only tests, DevTools panel UI interaction
+
+**Note:** v2 does NOT remove any v1 tests. We KEEP all v1 tests (Jest + Puppeteer for v1 mode) and ADD new tests (Playwright/BrowserMCP for extension mode).
+
+**Desktop Automation MCP:** Available but not needed for console streaming tests (no keyboard/mouse simulation required).
 
 ---
 

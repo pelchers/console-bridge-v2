@@ -173,11 +173,12 @@ v2.0.0 solves all these limitations with Extension Mode - see above!
 
 ### Testing Strategy
 
-Console Bridge v2 uses a multi-tool testing approach:
+Console Bridge v2 uses a multi-tool testing approach **(v1 uses 2 tools, v2 ADDS 2 more = 4 total)**:
 
+**v1 Testing Tools (Preserved in v2):**
 1. **Jest** - Unit tests (core modules, utilities)
    ```bash
-   npm test  # 211/211 tests passing
+   npm test  # 211/211 tests passing (186 in v1, +25 in v2)
    ```
 
 2. **Puppeteer** - Integration tests for v1 Puppeteer mode
@@ -185,6 +186,7 @@ Console Bridge v2 uses a multi-tool testing approach:
    npm run test:integration
    ```
 
+**v2 ADDS Testing Tools (NEW):**
 3. **Playwright MCP** - Extension E2E tests (planned Phase 3.4)
    - Cross-browser testing (Chrome, Edge, Brave)
    - Extension loading and automation
@@ -195,7 +197,7 @@ Console Bridge v2 uses a multi-tool testing approach:
    - Visual testing (screenshots)
    - Real Chrome browser control
 
-**Note:** Desktop Automation MCP available but not needed for console streaming tests.
+**Note:** v2 does NOT remove any v1 tests. We KEEP all v1 tests and ADD new extension tests. Desktop Automation MCP available but not needed for console streaming tests.
 
 ## Documentation
 
