@@ -1,10 +1,10 @@
 # ADR: Phase 3, Subtask 3.1 - Chrome Web Store Preparation
 
 **Date:** 2025-10-08
-**Status:** In Progress
+**Status:** Documentation Complete ✅ | Assets Pending ⏳
 **Branch:** `phase-3`
 **Depends on:** Phase 2 Subtask 2.4 (WebSocket Server) ✅
-**Implementation Time:** 1 day (documentation), TBD (design work)
+**Implementation Time:** 1.5 days (documentation + living docs), TBD (design work)
 
 ---
 
@@ -166,7 +166,120 @@ Chrome Web Store submission requires:
 
 ---
 
-### 5. Icon Design Guide
+### 5. Living Documents Update (Post-Completion Work)
+
+**Purpose:** Update all living documentation to reflect v2.0.0 Extension Mode as primary feature
+
+After completing initial Chrome Web Store preparation, a comprehensive living documents update was performed to ensure all project documentation accurately reflects v2.0.0 as the current release version.
+
+**Commit 1: Living Documents Policy (`e6b8679`)**
+
+Added living documents policy to guide ongoing documentation maintenance:
+
+**Files Updated:**
+1. **`.claude/PRD.md`** (+113 lines)
+   - Added comprehensive v2.0.0 Extension Mode section
+   - Problem statement (v1 Puppeteer-only limitation)
+   - Solution (Chrome extension as bridge to user's browser)
+   - Core features (Extension Mode, WebSocket Protocol, Advanced Features, Dual-Mode)
+   - Extension mode CLI flags (--extension-mode)
+   - Testing strategy clarification (v2 ADDS tools: Playwright MCP + BrowserMCP)
+   - Version history (v1.0.0, v2.0.0-beta, v2.0.0 planned)
+
+2. **`.claude/claude.md`** (+47 lines)
+   - Added "Living Documents Policy" section
+   - Defined living vs static documents
+   - Documented where living docs are located
+   - When to update them (feature changes, architecture changes, version releases)
+   - Best practices (update dates, add version sections, keep history)
+
+3. **`.claude/versions/comparison/v1-to-v2.md`** (~28 lines modified)
+   - Clarified testing tools: v2 ADDS 2 tools (Playwright MCP + BrowserMCP)
+   - Emphasized: v2 does NOT remove v1 tests, we ADD new extension tests
+   - v1: Jest + Puppeteer (186 tests) | v2: +Playwright MCP +BrowserMCP (211 tests)
+
+4. **`README.md`** (~8 lines modified)
+   - Updated Testing Strategy section to clarify v2 ADDS tools
+
+**Commit 2: Core Living Documents (`86cdeea`)**
+
+Updated core technical and project management documents:
+
+**Files Updated:**
+1. **`.claude/TRD.md`** (+498 lines)
+   - Added "v2.0.0 Extension Mode Architecture" section
+   - Dual-mode architecture diagram
+   - Extension components (background.js, devtools/panel.js, serializer.js)
+   - WebSocket Protocol v1.0.0 specification with message types
+   - CLI WebSocketServer implementation
+   - Advanced features (message queuing, ping/pong keep-alive, auto-reconnect, advanced serialization)
+   - Testing strategy: v2 ADDS 2 tools (Playwright MCP + BrowserMCP)
+   - Browser support matrix (Chrome, Edge, Brave, Opera, Vivaldi)
+   - v2.0.0 package structure
+
+2. **`.claude/IMPLEMENTATION_PLAN.md`** (+160 lines)
+   - Added Phase 2 completion status with all 4 subtasks
+   - Added Phase 3 breakdown (6 subtasks)
+   - Testing clarification: 25 new tests, 211/211 total passing (100%)
+   - Current status: Phase 3 Subtask 3.1 in progress
+
+3. **`.claude/PROJECT_SUMMARY.md`** (+258 lines)
+   - Added complete v2.0.0 Extension Mode section
+   - Dual-mode operation explanation (Puppeteer + Extension)
+   - New features (Chrome Extension, WebSocket Protocol, Advanced Serialization, DevTools Panel)
+   - Technical architecture (extension components + CLI components)
+   - Usage examples (extension mode workflows + dual-mode workflows)
+   - Testing tools: v2 ADDS 2 tools
+   - Current status (Phase 3 Subtask 3.1 in progress)
+
+4. **`docs/REQUIREMENTS.md`** (+423 lines)
+   - Expanded minimal v2.0.0 header to comprehensive requirements
+   - 10 new features with user stories and acceptance criteria
+   - System requirements (Node.js 18+, OS support, dependencies including ws v8.x)
+   - Browser requirements (Puppeteer mode + Extension mode)
+   - Non-functional requirements (performance, security, compatibility)
+   - Testing requirements with tools clarification
+
+**Commit 3: User Documentation (`889bb5c`)**
+
+Updated user-facing documentation for extension mode:
+
+**Files Updated:**
+1. **`docs/USAGE.md`** (+142 lines)
+   - Added "Extension Mode (v2 NEW)" Quick Start section
+   - Installation steps (Chrome Web Store future, developer mode current)
+   - Basic usage workflow
+   - Benefits of extension mode (use YOUR browser, works with DevTools extensions)
+   - Extension mode use cases (4 scenarios)
+   - Extension mode FAQs (6 Q&A pairs)
+
+2. **`docs/API.md`** (+294 lines)
+   - Added WebSocketServer API documentation
+   - Constructor options, methods (start, stop, getClients, broadcast)
+   - Usage examples (extension mode + combined mode)
+   - WebSocket Protocol v1.0.0 message format documentation
+   - Event handling examples
+
+3. **`docs/architecture/system-overview.md`** (+235 lines)
+   - Added v2.0.0 Dual-Mode Architecture section at document top
+   - Dual-mode overview (Puppeteer vs Extension comparison)
+   - Extension Mode architecture diagram (ASCII art)
+   - Components documentation (Extension, Protocol, CLI Server)
+   - Data flow (11-step process from console.log to terminal)
+   - Advanced features (queuing, ping/pong, reconnect, serialization)
+   - "When to Use Which Mode" decision guide
+
+**Total Living Documents Work:**
+- **3 commits** (e6b8679, 86cdeea, 889bb5c)
+- **11 files updated**
+- **+2,054 lines of documentation**
+- **Topics covered:** Product requirements, technical architecture, implementation status, user guides, API docs, system overview, testing strategy, version comparison
+
+**Status:** ✅ Complete
+
+---
+
+### 6. Icon Design Guide
 
 **Created:** `chrome-extension-poc/icons/ICONS_NEEDED.md`
 
@@ -194,7 +307,7 @@ Chrome Web Store submission requires:
 
 ---
 
-### 6. Main Project README Updates
+### 7. Main Project README Updates
 
 **Changes:**
 - Updated status to "Phase 3 In Progress 🚧"
@@ -316,6 +429,8 @@ jq . chrome-extension-poc/manifest.json
 
 ## Files Created/Modified
 
+### Initial Chrome Web Store Preparation
+
 **New Files:**
 1. `chrome-extension-poc/PRIVACY_POLICY.md` - Comprehensive privacy policy
 2. `chrome-extension-poc/CHROME_WEB_STORE_LISTING.md` - Complete store listing content
@@ -327,16 +442,35 @@ jq . chrome-extension-poc/manifest.json
 2. `chrome-extension-poc/README.md` - Replaced POC README with user-focused production documentation
 3. `README.md` - Updated status and added extension README link
 
+### Living Documents Update
+
+**Modified Files (11 total):**
+1. `.claude/PRD.md` - Added v2.0.0 Extension Mode requirements
+2. `.claude/TRD.md` - Added v2.0.0 technical architecture
+3. `.claude/IMPLEMENTATION_PLAN.md` - Updated phase progress
+4. `.claude/PROJECT_SUMMARY.md` - Added v2.0.0 current state
+5. `.claude/claude.md` - Added living documents policy
+6. `.claude/versions/comparison/v1-to-v2.md` - Clarified testing tools
+7. `README.md` - Updated testing strategy
+8. `docs/REQUIREMENTS.md` - Added v2.0.0 requirements
+9. `docs/USAGE.md` - Added extension mode usage guide
+10. `docs/API.md` - Added WebSocketServer API
+11. `docs/architecture/system-overview.md` - Added dual-mode architecture
+
 **Commits:**
 ```bash
-# Phase 3 branch commits for Subtask 3.1
-git log --oneline phase-3 --since="2025-10-08"
-
-c9e8762 feat(extension): Update manifest.json for Chrome Web Store
-2e36b66 docs(phase-3): Add Chrome Web Store preparation documentation
-0919b1d docs(phase-3): Add privacy policy for Chrome Web Store
-95e3208 docs(phase-3): Update extension README for production release
+# Phase 3 branch commits for Subtask 3.1 (8 total)
+889bb5c docs: Update user docs with v2.0.0 extension mode usage and API
+86cdeea docs: Update core living documents with v2.0.0 details
+e6b8679 docs: Update all living documents for v2.0.0 and add living documents policy
+4517773 docs(phase-3): Add v1-to-v2 comparison and clarify testing strategy
+11ed968 docs(phase-3): Complete Subtask 3.1 ADR for Chrome Web Store prep
 e7f908d docs(phase-3): Update README with Phase 3 status and extension links
+95e3208 docs(phase-3): Update extension README for production release
+0919b1d docs(phase-3): Add privacy policy for Chrome Web Store
+2e36b66 docs(phase-3): Add Chrome Web Store preparation documentation
+b8367b6 feat(extension): Update manifest.json for Chrome Web Store
+952f3cf docs(phase-3): Add preliminary ADR for Phase 3 - Documentation & Chrome Web Store
 ```
 
 ---
@@ -455,22 +589,37 @@ e7f908d docs(phase-3): Update README with Phase 3 status and extension links
 
 ### Documentation Created
 
+**Initial Chrome Web Store Preparation:**
 - **Lines of documentation:** ~900 lines (privacy policy, store listing, README, icons guide, ADR)
 - **Files created:** 4 new files
 - **Files modified:** 3 files
 - **Commits:** 5 commits
 
+**Living Documents Update:**
+- **Lines of documentation:** ~2,054 lines (across 11 living documents)
+- **Files modified:** 11 files (.claude/ and docs/ directories)
+- **Commits:** 3 commits (e6b8679, 86cdeea, 889bb5c)
+
+**Total Subtask 3.1:**
+- **Lines of documentation:** ~2,954 lines
+- **Files created:** 4 new files
+- **Files modified:** 14 unique files (3 initial + 11 living docs)
+- **Commits:** 8 commits
+
 ### Time Investment
 
 - **Planning:** 0.5 hours
-- **Implementation:** 3 hours
+- **Implementation:** 3 hours (initial docs)
   - manifest.json: 0.5 hours
   - Privacy policy: 1 hour
   - Store listing content: 1 hour
   - Extension README: 0.5 hours
   - Icon guide: 0.5 hours
-- **ADR writing:** 1 hour
-- **Total:** 4.5 hours
+- **Living documents update:** 4 hours
+  - PRD, TRD, IMPLEMENTATION_PLAN, PROJECT_SUMMARY: 2 hours
+  - REQUIREMENTS, USAGE, API, system-overview: 2 hours
+- **ADR writing:** 1.5 hours (initial + update)
+- **Total:** 9 hours
 
 ### Remaining Work Estimate
 
@@ -490,12 +639,16 @@ e7f908d docs(phase-3): Update README with Phase 3 status and extension links
 2. **Privacy policy emphasis:** Localhost-only and zero data collection are major differentiators
 3. **User-focused README:** Replacing POC README with production docs improves user experience
 4. **Detailed guidelines:** Icon design guide ensures consistency even if outsourced
+5. **Living documents policy:** Establishing clear policy for maintaining documentation prevents drift
+6. **Comprehensive living docs update:** Updating all 11 living documents at once ensures consistency across project
+7. **Testing tools clarification:** Explicitly stating "v2 ADDS tools" prevents confusion about v1 test removal
 
 ### What Could Be Improved
 
 1. **Icon creation:** Could have used icon generator immediately instead of deferring
 2. **Screenshot planning:** Could have taken screenshots during Phase 2 testing
 3. **Asset pipeline:** Could have created assets in parallel with documentation
+4. **Living docs timing:** Could have updated living documents earlier (during Phase 2 completion)
 
 ### Recommendations for Future Phases
 
@@ -503,6 +656,7 @@ e7f908d docs(phase-3): Update README with Phase 3 status and extension links
 2. **Phase 3.3 (Video tutorials):** Script videos before recording
 3. **Phase 3.4 (Performance testing):** Set up monitoring tools early
 4. **Phase 3.5 (Beta testing):** Recruit beta testers before Subtask 3.1 completion
+5. **All phases:** Update living documents immediately after major feature completion
 
 ---
 
@@ -564,7 +718,8 @@ chrome-extension-poc/
 
 ---
 
-**Document Version:** 1.0 (Complete Documentation, Pending Assets)
+**Document Version:** 1.1 (Complete Documentation + Living Docs Update, Pending Assets)
 **Created:** October 8, 2025
+**Updated:** October 8, 2025 (Added living documents update section)
 **Next Review:** When icons/screenshots are created
-**Status:** ✅ Documentation Complete | ⏳ Assets Pending
+**Status:** ✅ Documentation Complete (including 11 living docs) | ⏳ Assets Pending (icons, screenshots)
