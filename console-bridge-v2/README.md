@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/console-bridge.svg)](https://nodejs.org)
 
-**Status:** Phase 3 Complete - Pre-Release (Preparing for npm publish)
+**Status:** Phase 2 Complete - v2.0.0 Extension Mode Implemented
 
 ## Overview
 
@@ -36,9 +36,9 @@ console-bridge start localhost:3000 localhost:8080 localhost:5000
 - ✅ Graceful Exit - Clean shutdown with Ctrl+C
 - ✅ CLI Interface - Full-featured command-line tool
 
-**Coming in v1.0.0:**
-- 🔜 Programmatic API - Use as a library in Node.js apps
-- 🔜 Comprehensive documentation
+**In Development:**
+- 🔜 Chrome Web Store publication
+- 🔜 Comprehensive documentation website
 
 ## Installation
 
@@ -117,7 +117,14 @@ console-bridge start --extension-mode
 - ✅ Works on all Chromium-based browsers
 - ✅ Console logs from YOUR browser appear in terminal
 
-**See [docs/v2.0.0-spec/clarifications.md](docs/v2.0.0-spec/clarifications.md) for complete dual-mode documentation.**
+**Extension Installation (Development Mode):**
+1. Clone this repository
+2. Open Chrome → `chrome://extensions`
+3. Enable "Developer mode"
+4. Click "Load unpacked" → Select `console-bridge-v2/chrome-extension-poc/`
+5. Open DevTools on any localhost page → "Console Bridge" panel
+6. Start CLI: `console-bridge start --extension-mode`
+7. Console logs from browser appear in terminal!
 
 ## Previous v1.0.0 Limitations (SOLVED in v2.0.0)
 
@@ -134,12 +141,20 @@ v2.0.0 solves all these limitations with Extension Mode - see above!
 
 ## Development Status
 
+### v1.0.0 (Puppeteer Mode)
 - ✅ **Phase 1 Complete** - Core components (BrowserPool, LogCapturer, utilities)
 - ✅ **Phase 2 Complete** - BridgeManager and LogFormatter
 - ✅ **Phase 3 Complete** - CLI implementation
-- ✅ **Phase 4 Complete** - Documentation, file export, npm publish (v1.0.0 released)
+- ✅ **Phase 4 Complete** - Documentation, file export, npm publish
 
-**Test Coverage:** 186/186 tests passing (100%)
+### v2.0.0 (Extension Mode)
+- ✅ **Subtask 2.1** - Console capture system in extension
+- ✅ **Subtask 2.2** - Advanced object serialization
+- ✅ **Subtask 2.3** - WebSocket client (extension → CLI)
+- ✅ **Subtask 2.4** - WebSocket server (CLI receives messages)
+- 🔜 **Phase 3** - Chrome Web Store publication & documentation
+
+**Test Coverage:** 211/211 core tests passing (100%)
 
 ## Documentation
 
@@ -151,6 +166,22 @@ v2.0.0 solves all these limitations with Extension Mode - see above!
 
 MIT © 2025
 
+## Architecture
+
+### Puppeteer Mode (v1.0.0)
+```
+CLI → Puppeteer → Chromium → Console Logs → Terminal
+```
+
+### Extension Mode (v2.0.0)
+```
+Your Chrome Browser → Console Logs → Extension → WebSocket (ws://localhost:9223) → CLI → Terminal
+```
+
+**Protocol:** WebSocket Protocol v1.0.0 (JSON messages)
+**Port:** 9223 (WebSocket server on CLI)
+**Security:** Localhost only, no external connections
+
 ## Contributing
 
-This project is under active development. Contributions welcome once v1.0.0 is released.
+This project is under active development. Contributions welcome!
