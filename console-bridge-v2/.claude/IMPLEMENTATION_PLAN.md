@@ -101,10 +101,164 @@ Multi-phase development plan for Console Bridge features and improvements.
 
 ---
 
+---
+
+## v2.0.0 Phases (Extension Mode)
+
+### Phase 2: Extension Mode Core Implementation ✅
+**Status:** COMPLETE (October 8, 2025)
+
+**Scope:**
+- Chrome extension with console capture
+- Advanced object serialization (Maps, Sets, Promises, circular refs, DOM)
+- WebSocket Protocol v1.0.0 (extension ↔ CLI)
+- Message queuing, ping/pong, auto-reconnect
+- DevTools panel UI
+- 100% v1 backward compatibility
+
+**Subtasks:**
+
+#### Subtask 2.1: Console Capture System ✅
+**Deliverables:**
+- ✅ `chrome-extension-poc/manifest.json` - Extension manifest V3
+- ✅ `chrome-extension-poc/background.js` - WebSocket client service worker
+- ✅ `chrome-extension-poc/devtools/devtools.js` - DevTools panel entry
+- ✅ `chrome-extension-poc/devtools/panel.html` - Panel UI
+- ✅ `chrome-extension-poc/devtools/panel.js` - Console capture logic
+- ✅ Basic console interception (log, info, warn, error, debug)
+- ✅ Message envelope protocol (type, timestamp, data)
+
+#### Subtask 2.2: Advanced Serialization ✅
+**Deliverables:**
+- ✅ `chrome-extension-poc/serializer.js` - Advanced object serialization
+- ✅ Support for Maps, Sets, Promises, Symbols, BigInt
+- ✅ Circular reference detection
+- ✅ DOM element serialization
+- ✅ Test page: `test-advanced-serialization.html`
+- ✅ 100% test coverage for all edge cases
+
+#### Subtask 2.3: WebSocket Client (Extension) ✅
+**Deliverables:**
+- ✅ WebSocket client in `background.js`
+- ✅ Message queuing (1000 messages max)
+- ✅ Ping/pong keep-alive (30s interval, 5s timeout)
+- ✅ Auto-reconnect with exponential backoff (1s → 16s, max 5 attempts)
+- ✅ Connection status tracking
+- ✅ DevTools panel connection UI
+
+#### Subtask 2.4: WebSocket Server (CLI) ✅
+**Deliverables:**
+- ✅ `src/core/WebSocketServer.js` - WebSocket server class
+- ✅ Localhost-only binding (security)
+- ✅ Welcome message protocol
+- ✅ Ping/pong server-side
+- ✅ `--extension-mode` CLI flag
+- ✅ Integration with LogFormatter (reuse v1 formatting)
+- ✅ 25 new unit tests (211 total, 100% passing)
+
+**Testing:**
+- ✅ 25 new WebSocketServer unit tests
+- ✅ All 186 v1 tests still passing (100% v1 compatibility)
+- ✅ Manual E2E testing (extension + CLI)
+- ✅ Test coverage: 211/211 tests passing (100%)
+
+**Bug Fixes:**
+- ✅ Fixed WebSocket server port conflict handling
+- ✅ Fixed message queuing overflow
+- ✅ Fixed serialization of nested Maps/Sets
+
+---
+
+### Phase 3: Chrome Web Store Publication & Documentation 🚧
+**Status:** IN PROGRESS
+
+**Scope:**
+- Chrome Web Store preparation
+- User documentation
+- Video tutorials
+- Performance testing with Playwright/BrowserMCP
+- Beta testing program
+- Migration guide v1 → v2
+
+**Subtasks:**
+
+#### Subtask 3.1: Chrome Web Store Preparation 🚧
+**Status:** Documentation Complete, Submission Pending
+**Deliverables:**
+- ✅ manifest.json updated for Web Store requirements
+- ✅ Privacy policy documentation
+- ✅ Store listing content (title, description, screenshots)
+- ⏳ Official icons (pending design)
+- ⏳ Promotional images (1280x800, 640x400)
+- ⏳ Web Store submission
+
+#### Subtask 3.2: User Documentation ⏳
+**Status:** PLANNED
+**Deliverables:**
+- ⏳ Installation guide (extension + CLI)
+- ⏳ Usage tutorial (basic + advanced)
+- ⏳ Troubleshooting guide
+- ⏳ FAQ section
+- ⏳ Update README.md with extension mode
+- ⏳ Update docs/USAGE.md
+
+#### Subtask 3.3: Video Tutorials ⏳
+**Status:** PLANNED
+**Deliverables:**
+- ⏳ Quick start video (2-3 minutes)
+- ⏳ Advanced features video (5-7 minutes)
+- ⏳ Comparison: Puppeteer mode vs Extension mode
+
+#### Subtask 3.4: Performance Testing ⏳
+**Status:** PLANNED
+**Deliverables:**
+- ⏳ Playwright MCP E2E tests for extension
+- ⏳ BrowserMCP Chrome-specific automation tests
+- ⏳ Load testing (high-volume logging)
+- ⏳ Memory leak detection
+- ⏳ Latency benchmarks
+
+**Testing Tools (v2 ADDS 2 new tools):**
+- **v1 Tools (Preserved):**
+  - Jest (211 tests)
+  - Puppeteer (v1 Puppeteer mode integration tests)
+- **v2 ADDS:**
+  - Playwright MCP (extension E2E, cross-browser)
+  - BrowserMCP (Chrome DevTools panel, visual testing)
+
+#### Subtask 3.5: Beta Testing Program ⏳
+**Status:** PLANNED
+**Deliverables:**
+- ⏳ Beta tester recruitment
+- ⏳ Feedback collection form
+- ⏳ Issue tracking
+- ⏳ Beta release notes
+
+#### Subtask 3.6: Migration Guide v1 → v2 ⏳
+**Status:** PLANNED
+**Deliverables:**
+- ⏳ Breaking changes documentation (none expected)
+- ⏳ Feature comparison table
+- ⏳ Migration examples
+- ⏳ When to use Puppeteer vs Extension mode
+
+---
+
 ## Future Phases
 
+### Phase 4: Firefox & Safari Extension Support 🚧
+**Status:** PLANNED
+
+**Scope:**
+- Firefox WebExtensions API port
+- Safari extension port
+- Cross-browser extension testing
+- Unified extension codebase
+
+---
+
 ### Phase 5: Unified Terminal Output 🚧
-**Status:** PLANNED (NOT STARTED)
+**Status:** BACKLOG (v1 Feature - May Revisit)
 
 **Problem Statement:**
 Currently, Console Bridge requires a separate terminal from the dev server, forcing users to switch between terminals. This adds friction to the development workflow.
@@ -336,16 +490,27 @@ Complex console types (table, dir, dirxml) currently show as `JSHandle@array` or
 
 ## Version Roadmap
 
+### v1.0.0 (October 5, 2025) - "Unified Terminal"
 | Version | Phase | Target Date | Status |
 |---------|-------|-------------|--------|
 | 0.1.0 | Phase 1 - Core | - | ✅ Complete |
 | 0.2.0 | Phase 2 - Console Types | - | ✅ Complete |
 | 0.3.0 | Phase 3 - React Fix | - | ✅ Complete |
-| 1.0.0 | Phase 4 - Testing & Docs | - | ✅ Complete |
-| 1.1.0 | Phase 5 - Unified Output | TBD | 🚧 Planned |
-| 1.2.0 | Phase 6 - Serialization | TBD | 🚧 Planned |
-| 1.3.0 | Phase 7 - Performance | TBD | 🚧 Planned |
-| 2.0.0 | Phase 8 - Distribution | TBD | 🚧 Planned |
+| 1.0.0 | Phase 4 - Testing & Docs | Oct 5, 2025 | ✅ Complete |
+
+### v2.0.0 (October 8, 2025) - "Extension Mode"
+| Version | Phase | Target Date | Status |
+|---------|-------|-------------|--------|
+| 2.0.0-alpha | Phase 2.1-2.2 - Console Capture & Serialization | Oct 6, 2025 | ✅ Complete |
+| 2.0.0-beta | Phase 2.3-2.4 - WebSocket Protocol | Oct 7, 2025 | ✅ Complete |
+| 2.0.0 | Phase 3 - Chrome Web Store & Documentation | TBD | 🚧 In Progress |
+
+### Future Versions
+| Version | Phase | Target Date | Status |
+|---------|-------|-------------|--------|
+| 2.1.0 | Phase 4 - Firefox/Safari Extensions | Q1 2026 | 🚧 Planned |
+| 2.2.0 | Performance & Optimization | TBD | 🚧 Planned |
+| 3.0.0 | Advanced Features (Remote Debugging, etc.) | TBD | 🚧 Planned |
 
 ---
 
