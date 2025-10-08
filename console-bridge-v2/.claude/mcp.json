@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "desktop-automation": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "mcp-desktop-automation"]
+    },
+    "playwright": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@playwright/mcp@latest"]
+    }
+  }
+}

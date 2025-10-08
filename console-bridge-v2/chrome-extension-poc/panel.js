@@ -17,16 +17,27 @@ class ConsoleBridgePOC {
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
 
+    // Message queuing
+    this.messageQueue = [];
+    this.maxQueueSize = 1000;
+
+    // Ping/Pong keep-alive
+    this.pingInterval = null;
+    this.pongTimeout = null;
+    this.pingIntervalMs = 30000;  // 30 seconds
+    this.pongTimeoutMs = 5000;    // 5 seconds
+
     // Statistics
     this.stats = {
       eventsCaptured: 0,
       messagesSent: 0,
-      errors: 0
+      errors: 0,
+      queueSize: 0
     };
 
     // Tab info
-    this.tabId = `chrome-tab-${Date.now()}`;
-    this.tabUrl = chrome.devtools.inspectedWindow.tabId;
+    this.tabId = chrome.devtools.inspectedWindow.tabId;
+    this.tabUrl = null;
 
     // UI elements
     this.ui = {
@@ -36,6 +47,7 @@ class ConsoleBridgePOC {
       tabUrl: document.getElementById('tabUrl'),
       eventCount: document.getElementById('eventCount'),
       messageCount: document.getElementById('messageCount'),
+      queueSize: document.getElementById('queueSize'),
       errorCount: document.getElementById('errorCount'),
       errorMessage: document.getElementById('errorMessage')
     };
@@ -95,21 +107,28 @@ class ConsoleBridgePOC {
         this.reconnectAttempts = 0;
         this.updateConnectionStatus(true);
 
-        // Send connection handshake
-        this.sendMessage({
-          type: 'connect',
-          browser: 'chrome',
-          browserVersion: navigator.userAgent,
-          extensionVersion: '2.0.0-poc',
-          tabId: this.tabId,
-          tabUrl: this.ui.tabUrl.textContent,
-          timestamp: Date.now()
+        // Send connection_status message (protocol v1.0.0)
+        const connectionEnvelope = this.createEnvelope('connection_status', {
+          status: 'connected',
+          clientInfo: {
+            extensionVersion: '2.0.0',
+            browser: 'Chrome',
+            browserVersion: navigator.userAgent
+          }
         });
+        this.sendMessage(connectionEnvelope);
+
+        // Flush queued messages
+        this.flushQueue();
+
+        // Start ping/pong keep-alive
+        this.startPingPong();
       };
 
       this.ws.onclose = () => {
         console.log('[Console Bridge POC] WebSocket disconnected');
         this.updateConnectionStatus(false);
+        this.stopPingPong();
         this.scheduleReconnect();
       };
 
@@ -125,6 +144,12 @@ class ConsoleBridgePOC {
           const message = JSON.parse(event.data);
           console.log('[Console Bridge POC] Received:', message);
 
+          // Handle pong messages
+          if (message.type === 'pong') {
+            this.handlePong();
+          }
+
+          // Handle welcome messages (for backwards compatibility)
           if (message.type === 'welcome') {
             console.log('[Console Bridge POC] Server welcome:', message.message);
           }
@@ -356,37 +381,208 @@ class ConsoleBridgePOC {
     this.stats.eventsCaptured++;
     this.updateStats();
 
-    // Send to WebSocket server
-    this.sendMessage({
-      version: '2.0',
-      type: 'console',
-      method: event.method,
-      args: event.args,
-      timestamp: event.timestamp,
-      location: event.location || { url: this.ui.tabUrl.textContent },
-      tabId: this.tabId,
-      browser: 'chrome',
-      extensionVersion: '2.0.0-poc'
+    // Convert args to protocol v1.0.0 format (type + value)
+    const formattedArgs = (event.args || []).map(arg => {
+      if (arg === null) {
+        return { type: 'null', value: null };
+      }
+      if (arg === undefined) {
+        return { type: 'undefined', value: undefined };
+      }
+
+      const argType = typeof arg;
+
+      if (argType === 'string') {
+        return { type: 'string', value: arg };
+      }
+      if (argType === 'number') {
+        return { type: 'number', value: arg };
+      }
+      if (argType === 'boolean') {
+        return { type: 'boolean', value: arg };
+      }
+
+      // Handle special object types
+      if (arg && arg.__type === 'DOMElement') {
+        return { type: 'dom', value: arg };
+      }
+      if (arg && arg.__type === 'Function') {
+        return { type: 'function', value: arg };
+      }
+      if (arg && arg.__type === 'Object') {
+        return { type: 'object', value: arg };
+      }
+
+      // Default: object
+      return { type: 'object', value: arg };
     });
+
+    // Create console_event envelope (protocol v1.0.0)
+    const consoleEnvelope = this.createEnvelope('console_event', {
+      method: event.method,
+      args: formattedArgs,
+      location: {
+        url: event.location?.url || this.tabUrl || 'unknown',
+        line: event.location?.line,
+        column: event.location?.column
+      }
+    });
+
+    this.sendMessage(consoleEnvelope);
   }
 
   /**
-   * Send message via WebSocket
+   * Send message via WebSocket (with queuing support)
    */
-  sendMessage(message) {
+  sendMessage(envelope) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.warn('[Console Bridge POC] WebSocket not connected, message not sent');
+      console.warn('[Console Bridge POC] WebSocket not connected, queuing message');
+      this.queueMessage(envelope);
       return;
     }
 
     try {
-      this.ws.send(JSON.stringify(message));
+      this.ws.send(JSON.stringify(envelope));
       this.stats.messagesSent++;
       this.updateStats();
     } catch (error) {
       console.error('[Console Bridge POC] Failed to send message:', error);
       this.stats.errors++;
       this.updateStats();
+    }
+  }
+
+  /**
+   * Create protocol v1.0.0 message envelope
+   */
+  createEnvelope(type, payload) {
+    return {
+      version: '1.0.0',
+      type: type,
+      timestamp: this.formatISOTimestamp(new Date()),
+      source: {
+        tabId: this.tabId,
+        url: this.tabUrl || 'unknown',
+        title: document.title || 'Console Bridge DevTools'
+      },
+      payload: payload
+    };
+  }
+
+  /**
+   * Format timestamp as ISO 8601 string
+   */
+  formatISOTimestamp(date) {
+    return date.toISOString();
+  }
+
+  /**
+   * Queue message during disconnection
+   */
+  queueMessage(envelope) {
+    // Drop oldest message if queue is full
+    if (this.messageQueue.length >= this.maxQueueSize) {
+      this.messageQueue.shift();
+      console.warn('[Console Bridge POC] Queue full, dropping oldest message');
+    }
+
+    this.messageQueue.push(envelope);
+    this.stats.queueSize = this.messageQueue.length;
+    this.updateStats();
+  }
+
+  /**
+   * Flush queued messages on reconnection
+   */
+  flushQueue() {
+    if (this.messageQueue.length === 0) {
+      return;
+    }
+
+    console.log(`[Console Bridge POC] Flushing ${this.messageQueue.length} queued messages...`);
+
+    while (this.messageQueue.length > 0) {
+      const envelope = this.messageQueue.shift();
+
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        try {
+          this.ws.send(JSON.stringify(envelope));
+          this.stats.messagesSent++;
+        } catch (error) {
+          console.error('[Console Bridge POC] Failed to flush message:', error);
+          // Put it back if send failed
+          this.messageQueue.unshift(envelope);
+          break;
+        }
+      } else {
+        // Connection lost during flush, put it back
+        this.messageQueue.unshift(envelope);
+        break;
+      }
+    }
+
+    this.stats.queueSize = this.messageQueue.length;
+    this.updateStats();
+  }
+
+  /**
+   * Start ping/pong keep-alive
+   */
+  startPingPong() {
+    this.stopPingPong(); // Clear any existing timers
+
+    this.pingInterval = setInterval(() => {
+      this.sendPing();
+    }, this.pingIntervalMs);
+  }
+
+  /**
+   * Stop ping/pong keep-alive
+   */
+  stopPingPong() {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
+
+    if (this.pongTimeout) {
+      clearTimeout(this.pongTimeout);
+      this.pongTimeout = null;
+    }
+  }
+
+  /**
+   * Send ping message
+   */
+  sendPing() {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    const pingEnvelope = this.createEnvelope('ping', {});
+
+    try {
+      this.ws.send(JSON.stringify(pingEnvelope));
+
+      // Set pong timeout
+      this.pongTimeout = setTimeout(() => {
+        console.warn('[Console Bridge POC] Pong timeout, reconnecting...');
+        this.ws.close();
+        this.scheduleReconnect();
+      }, this.pongTimeoutMs);
+
+    } catch (error) {
+      console.error('[Console Bridge POC] Failed to send ping:', error);
+    }
+  }
+
+  /**
+   * Handle pong message
+   */
+  handlePong() {
+    if (this.pongTimeout) {
+      clearTimeout(this.pongTimeout);
+      this.pongTimeout = null;
     }
   }
 
@@ -412,6 +608,7 @@ class ConsoleBridgePOC {
   updateStats() {
     this.ui.eventCount.textContent = this.stats.eventsCaptured;
     this.ui.messageCount.textContent = this.stats.messagesSent;
+    this.ui.queueSize.textContent = this.stats.queueSize;
     this.ui.errorCount.textContent = this.stats.errors;
   }
 
