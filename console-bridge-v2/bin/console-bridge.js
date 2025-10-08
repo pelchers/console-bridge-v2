@@ -9,13 +9,15 @@ const { Command } = require('commander');
 const fs = require('fs');
 const stripAnsi = require('strip-ansi');
 const BridgeManager = require('../src/core/BridgeManager');
+const WebSocketServer = require('../src/core/WebSocketServer');
 const { validateUrl } = require('../src/utils/url');
 const packageJson = require('../package.json');
 
 const program = new Command();
 
-// Track active bridge manager and file stream
+// Track active bridge manager, WebSocket server, and file stream
 let activeBridge = null;
+let activeWebSocketServer = null;
 let logFileStream = null;
 let isShuttingDown = false;
 
@@ -37,6 +39,15 @@ function setupSignalHandlers() {
         console.log('✓ Console Bridge stopped.\n');
       } catch (error) {
         console.error('Error during shutdown:', error.message);
+      }
+    }
+
+    if (activeWebSocketServer) {
+      try {
+        await activeWebSocketServer.stop();
+        console.log('✓ WebSocket server stopped.\n');
+      } catch (error) {
+        console.error('Error stopping WebSocket server:', error.message);
       }
     }
 
@@ -65,14 +76,89 @@ function parseLevels(value) {
 }
 
 /**
- * Start monitoring URLs
+ * Start extension mode (WebSocket server)
+ */
+async function startExtensionMode(options) {
+  try {
+    // Setup file output if specified
+    if (options.output) {
+      try {
+        logFileStream = fs.createWriteStream(options.output, { flags: 'a' });
+
+        // Handle stream errors
+        logFileStream.on('error', (error) => {
+          console.error(`❌ Failed to create log file: ${error.message}\n`);
+          process.exit(1);
+        });
+
+        console.log(`📝 Logging to file: ${options.output}\n`);
+      } catch (error) {
+        console.error(`❌ Failed to create log file: ${error.message}\n`);
+        process.exit(1);
+      }
+    }
+
+    // Create custom output function that handles both console and file
+    const customOutput = (formattedLog) => {
+      // Always output to console
+      console.log(formattedLog);
+
+      // Also write to file if stream is open
+      if (logFileStream) {
+        try {
+          // Strip ANSI codes for file output
+          const plainText = stripAnsi(formattedLog);
+          logFileStream.write(plainText + '\n');
+        } catch (error) {
+          console.error(`⚠️  Warning: Failed to write to log file: ${error.message}`);
+        }
+      }
+    };
+
+    // Create WebSocket server
+    activeWebSocketServer = new WebSocketServer({
+      port: 9223,
+      output: customOutput,
+      formatterOptions: {
+        showTimestamp: options.showTimestamp,
+        showSource: options.showSource,
+        showLocation: options.showLocation,
+        timestampFormat: options.timestampFormat,
+      },
+    });
+
+    // Setup shutdown handlers
+    setupSignalHandlers();
+
+    // Start server
+    console.log('📡 Starting WebSocket server...');
+    await activeWebSocketServer.start();
+
+    console.log(`✓ Listening for extension on ws://localhost:${activeWebSocketServer.getPort()}`);
+    console.log('\nWaiting for Chrome extension to connect...');
+    console.log('Press Ctrl+C to stop.\n');
+
+  } catch (error) {
+    console.error(`❌ Error: ${error.message}\n`);
+    process.exit(1);
+  }
+}
+
+/**
+ * Start monitoring URLs or WebSocket server
  */
 async function startCommand(urls, options) {
   try {
     // Show header
-    console.log(`🌉 Console Bridge v${packageJson.version}\n`);
+    const modeText = options.extensionMode ? '(Extension Mode)' : '';
+    console.log(`🌉 Console Bridge v${packageJson.version} ${modeText}\n`);
 
-    // Validate URLs
+    // Extension mode: Start WebSocket server
+    if (options.extensionMode) {
+      return await startExtensionMode(options);
+    }
+
+    // Puppeteer mode: Validate URLs and start monitoring
     if (!urls || urls.length === 0) {
       console.error('❌ Error: No URLs provided.');
       console.log('Usage: console-bridge start <url> [url...]');
@@ -180,8 +266,12 @@ program
 
 // Start command
 program
-  .command('start <urls...>')
-  .description('Start monitoring one or more localhost URLs')
+  .command('start [urls...]')
+  .description('Start monitoring one or more localhost URLs (or use --extension-mode)')
+  .option(
+    '-e, --extension-mode',
+    'Start WebSocket server for Chrome extension (port 9223)'
+  )
   .option(
     '-l, --levels <levels>',
     'Comma-separated log levels to capture',

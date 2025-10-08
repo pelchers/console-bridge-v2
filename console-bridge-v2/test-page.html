@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Console Bridge Test Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #0052a3;
+    }
+    .info {
+      background: #e3f2fd;
+      padding: 10px;
+      border-left: 4px solid #2196f3;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Console Bridge - Manual Test Page</h1>
+
+  <div class="info">
+    <strong>Instructions:</strong>
+    <ol>
+      <li>Load the Console Bridge extension in Chrome (chrome://extensions → Load unpacked → extension/src/)</li>
+      <li>Open DevTools (F12)</li>
+      <li>Click the "Console Bridge" tab</li>
+      <li>Click the buttons below to test console capture</li>
+      <li>Check DevTools console for [Console Bridge Event] messages</li>
+    </ol>
+  </div>
+
+  <div class="test-section">
+    <h2>Basic Console Methods</h2>
+    <button onclick="testLog()">Test console.log()</button>
+    <button onclick="testInfo()">Test console.info()</button>
+    <button onclick="testWarn()">Test console.warn()</button>
+    <button onclick="testError()">Test console.error()</button>
+    <button onclick="testDebug()">Test console.debug()</button>
+  </div>
+
+  <div class="test-section">
+    <h2>Special Console Methods</h2>
+    <button onclick="testTrace()">Test console.trace()</button>
+    <button onclick="testTable()">Test console.table()</button>
+    <button onclick="testGroup()">Test console.group()</button>
+    <button onclick="testCount()">Test console.count()</button>
+    <button onclick="testTime()">Test console.time()</button>
+    <button onclick="testAssert()">Test console.assert()</button>
+    <button onclick="testDir()">Test console.dir()</button>
+  </div>
+
+  <div class="test-section">
+    <h2>Data Types</h2>
+    <button onclick="testPrimitives()">Test Primitives</button>
+    <button onclick="testObject()">Test Object</button>
+    <button onclick="testArray()">Test Array</button>
+    <button onclick="testFunction()">Test Function</button>
+    <button onclick="testError()">Test Error</button>
+    <button onclick="testDOM()">Test DOM Element</button>
+  </div>
+
+  <div class="test-section">
+    <h2>Edge Cases</h2>
+    <button onclick="testMultipleArgs()">Test Multiple Arguments</button>
+    <button onclick="testNested()">Test Nested Object</button>
+    <button onclick="testLargeArray()">Test Large Array</button>
+    <button onclick="testAllTypes()">Test All Types Together</button>
+  </div>
+
+  <script>
+    // Basic console methods
+    function testLog() {
+      console.log('This is a log message');
+    }
+
+    function testInfo() {
+      console.info('This is an info message');
+    }
+
+    function testWarn() {
+      console.warn('This is a warning message');
+    }
+
+    function testError() {
+      console.error('This is an error message');
+    }
+
+    function testDebug() {
+      console.debug('This is a debug message');
+    }
+
+    // Special console methods
+    function testTrace() {
+      console.trace('Stack trace test');
+    }
+
+    function testTable() {
+      console.table([
+        { name: 'Alice', age: 30 },
+        { name: 'Bob', age: 25 }
+      ]);
+    }
+
+    function testGroup() {
+      console.group('Test Group');
+      console.log('Inside group 1');
+      console.log('Inside group 2');
+      console.groupEnd();
+    }
+
+    function testCount() {
+      console.count('test-counter');
+      console.count('test-counter');
+      console.count('test-counter');
+      console.countReset('test-counter');
+    }
+
+    function testTime() {
+      console.time('test-timer');
+      setTimeout(() => {
+        console.timeLog('test-timer', 'Checkpoint');
+        setTimeout(() => {
+          console.timeEnd('test-timer');
+        }, 100);
+      }, 100);
+    }
+
+    function testAssert() {
+      console.assert(2 + 2 === 4, 'Math is broken!');
+      console.assert(2 + 2 === 5, 'This assertion should fail');
+    }
+
+    function testDir() {
+      console.dir({ foo: 'bar', nested: { a: 1, b: 2 } });
+    }
+
+    // Data types
+    function testPrimitives() {
+      console.log('String:', 'Hello World');
+      console.log('Number:', 42);
+      console.log('Boolean:', true);
+      console.log('Null:', null);
+      console.log('Undefined:', undefined);
+    }
+
+    function testObject() {
+      console.log('Object:', {
+        name: 'Test User',
+        age: 30,
+        active: true,
+        meta: { created: new Date() }
+      });
+    }
+
+    function testArray() {
+      console.log('Array:', [1, 2, 3, 'four', { five: 5 }]);
+    }
+
+    function testFunction() {
+      function namedFunction() {}
+      const anonymous = function() {};
+      const arrow = () => {};
+
+      console.log('Named function:', namedFunction);
+      console.log('Anonymous function:', anonymous);
+      console.log('Arrow function:', arrow);
+    }
+
+    function testErrorObj() {
+      try {
+        throw new Error('Test error message');
+      } catch (error) {
+        console.error('Caught error:', error);
+      }
+    }
+
+    function testDOM() {
+      console.log('DOM Element:', document.body);
+      console.log('DOM Node:', document.querySelector('h1'));
+    }
+
+    // Edge cases
+    function testMultipleArgs() {
+      console.log('Multiple args:', 'string', 42, true, { obj: 'value' }, [1, 2, 3]);
+    }
+
+    function testNested() {
+      const nested = {
+        level1: {
+          level2: {
+            level3: {
+              level4: {
+                deep: 'value'
+              }
+            }
+          }
+        }
+      };
+      console.log('Nested object:', nested);
+    }
+
+    function testLargeArray() {
+      const largeArray = Array.from({ length: 100 }, (_, i) => i);
+      console.log('Large array (100 items):', largeArray);
+    }
+
+    function testAllTypes() {
+      console.log('All types together:',
+        'string',
+        42,
+        true,
+        null,
+        undefined,
+        { object: 'value' },
+        [1, 2, 3],
+        function testFunc() {},
+        new Error('test error'),
+        document.body
+      );
+    }
+
+    // Auto-run on page load
+    console.log('[Test Page] Page loaded - Console Bridge should be capturing this message');
+  </script>
+</body>
+</html>
