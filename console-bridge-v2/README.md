@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/node/v/console-bridge.svg)](https://nodejs.org)
 
-**Status:** Phase 2 Complete - v2.0.0 Extension Mode Implemented
+**Status:** Phase 2 Complete ✅ | Phase 3 In Progress 🚧 (Chrome Web Store Prep)
 
 ## Overview
 
@@ -126,6 +126,8 @@ console-bridge start --extension-mode
 6. Start CLI: `console-bridge start --extension-mode`
 7. Console logs from browser appear in terminal!
 
+**See [chrome-extension-poc/README.md](chrome-extension-poc/README.md) for complete extension documentation.**
+
 ## Previous v1.0.0 Limitations (SOLVED in v2.0.0)
 
 **⚠️ CRITICAL: Puppeteer Chromium Only**
@@ -152,7 +154,8 @@ v2.0.0 solves all these limitations with Extension Mode - see above!
 - ✅ **Subtask 2.2** - Advanced object serialization
 - ✅ **Subtask 2.3** - WebSocket client (extension → CLI)
 - ✅ **Subtask 2.4** - WebSocket server (CLI receives messages)
-- 🔜 **Phase 3** - Chrome Web Store publication & documentation
+- 🚧 **Phase 3** - Chrome Web Store publication & documentation (IN PROGRESS)
+  - 🚧 **Subtask 3.1** - Chrome Web Store preparation (manifest, privacy policy, listing content)
 
 **Test Coverage:** 211/211 core tests passing (100%)
 
