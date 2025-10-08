@@ -111,11 +111,23 @@ console-bridge start localhost:3000 --no-headless --merge-output
 ```bash
 # NEW: Monitor your personal Chrome browser!
 console-bridge start --extension-mode
+
+# Extension mode supports most v1 formatting flags:
+console-bridge start --extension-mode --output logs.txt --no-timestamp --location
 ```
 - ✅ Use YOUR Chrome browser (or Edge, Brave, Opera, Vivaldi)
 - ✅ Works with browser extensions (React DevTools, Vue DevTools, etc.)
 - ✅ Works on all Chromium-based browsers
 - ✅ Console logs from YOUR browser appear in terminal
+
+**Extension Mode Supported Flags:**
+- ✅ `--output` - File export (works identically to v1)
+- ✅ `--no-timestamp` - Hide timestamps
+- ✅ `--no-source` - Hide source URLs
+- ✅ `--location` - Show file locations
+- ✅ `--timestamp-format` - Time vs ISO format
+- ⚠️ `--levels` - Log filtering (coming in Phase 3.2)
+- ❌ `--no-headless`, `--max-instances` - N/A (you control your own browser)
 
 **Extension Installation (Development Mode):**
 1. Clone this repository
@@ -159,11 +171,37 @@ v2.0.0 solves all these limitations with Extension Mode - see above!
 
 **Test Coverage:** 211/211 core tests passing (100%)
 
+### Testing Strategy
+
+Console Bridge v2 uses a multi-tool testing approach:
+
+1. **Jest** - Unit tests (core modules, utilities)
+   ```bash
+   npm test  # 211/211 tests passing
+   ```
+
+2. **Puppeteer** - Integration tests for v1 Puppeteer mode
+   ```bash
+   npm run test:integration
+   ```
+
+3. **Playwright MCP** - Extension E2E tests (planned Phase 3.4)
+   - Cross-browser testing (Chrome, Edge, Brave)
+   - Extension loading and automation
+   - CDP access for DevTools interaction
+
+4. **BrowserMCP** - Chrome-specific automation (planned Phase 3.4)
+   - DevTools panel interaction
+   - Visual testing (screenshots)
+   - Real Chrome browser control
+
+**Note:** Desktop Automation MCP available but not needed for console streaming tests.
+
 ## Documentation
 
-- [Implementation Plan](IMPLEMENTATION_PLAN.md)
-- [Technical Requirements](TRD.md)
-- [Product Requirements](PRD.md)
+- **[v1 to v2 Comparison](.claude/versions/comparison/v1-to-v2.md)** - Comprehensive comparison of v1 (Puppeteer-only) vs v2 (Dual-mode)
+- [Chrome Extension README](chrome-extension-poc/README.md) - Extension documentation
+- [Phase 3 ADRs](.claude/adr/phase-3/) - Architecture decision records
 
 ## License
 

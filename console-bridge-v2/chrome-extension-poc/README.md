@@ -244,6 +244,7 @@ The extension is ready for Chrome Web Store submission as-is:
 ## 📖 Documentation
 
 - **Main Project:** [console-bridge-v2 README](../README.md)
+- **v1 to v2 Comparison:** [../.claude/versions/comparison/v1-to-v2.md](../.claude/versions/comparison/v1-to-v2.md) - Comprehensive v1 vs v2 comparison
 - **Installation Guide:** [docs/extension-mode/installation.md](../docs/extension-mode/installation.md) (Coming in Phase 3.2)
 - **Usage Tutorial:** [docs/extension-mode/usage.md](../docs/extension-mode/usage.md) (Coming in Phase 3.2)
 - **Troubleshooting:** [docs/extension-mode/troubleshooting.md](../docs/extension-mode/troubleshooting.md) (Coming in Phase 3.2)

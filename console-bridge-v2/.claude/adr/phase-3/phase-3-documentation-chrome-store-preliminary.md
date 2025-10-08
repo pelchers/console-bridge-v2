@@ -166,6 +166,32 @@ for (let i = 0; i < 10000; i++) {
 // Start CLI → Connect extension → Stop CLI → Start CLI → Verify reconnect
 ```
 
+**Testing Tools:**
+
+Console Bridge v2 uses a multi-tool testing approach:
+
+1. **Jest** - Unit tests (core modules, utilities)
+   - Already implemented: 211/211 tests passing
+
+2. **Puppeteer** - Integration tests for v1 Puppeteer mode
+   - Already in dependencies
+   - Tests v1 mode backward compatibility
+
+3. **Playwright MCP** (`mcp__playwright__*`) - Extension E2E tests
+   - Cross-browser testing (Chrome, Edge, Brave)
+   - Extension loading in automated tests
+   - CDP access for DevTools interaction
+   - Visual testing (screenshots)
+   - **Use for:** Extension installation tests, multi-tab tests, reconnection tests
+
+4. **BrowserMCP** (`mcp__browsermcp__*`) - Chrome-specific automation
+   - Chrome DevTools panel interaction
+   - Real Chrome browser control
+   - Lighter-weight than Playwright for Chrome-only tests
+   - **Use for:** DevTools panel UI tests, connection status verification
+
+**Note:** Desktop Automation MCP available but not needed for console streaming tests. Only use if keyboard shortcuts (Ctrl+Shift+I) or mouse simulation required.
+
 **Acceptance Criteria:**
 - [ ] Extension handles 1000+ logs/sec without freezing
 - [ ] No memory leaks after 24 hours
@@ -173,6 +199,7 @@ for (let i = 0; i < 10000; i++) {
 - [ ] Message queue works after 1-minute disconnect
 - [ ] Reconnection successful after multiple disconnects
 - [ ] Performance optimizations documented
+- [ ] Automated E2E tests with Playwright/BrowserMCP implemented
 
 **Estimated Time:** 3-4 days
 
