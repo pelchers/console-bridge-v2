@@ -852,3 +852,292 @@ Note: Type definitions are not yet included but may be added in a future release
 ---
 
 **Questions or Issues?** Open an issue on the [GitHub repository](https://github.com/yourusername/console-bridge).
+
+---
+
+## v2.0.0 Extension Mode API (NEW)
+
+### WebSocketServer
+
+The WebSocket server for Extension Mode communication.
+
+#### Constructor
+
+```javascript
+new WebSocketServer(options)
+```
+
+**Parameters:**
+
+- `options` (Object, optional)
+  - `port` (number) - WebSocket server port (default: 9223)
+  - `host` (string) - Host to bind to (default: 'localhost' - SECURITY: never change this)
+  - `formatter` (LogFormatter) - Formatter instance for log output
+  - `output` (Function) - Output handler (default: `console.log`)
+
+**Example:**
+
+```javascript
+const { WebSocketServer, LogFormatter } = require('console-bridge');
+
+const formatter = new LogFormatter({
+  showTimestamp: true,
+  timestampFormat: 'iso',
+});
+
+const server = new WebSocketServer({
+  port: 9223,
+  formatter,
+  output: (log) => console.log(log),
+});
+```
+
+#### Methods
+
+##### `start()`
+
+Start the WebSocket server and listen for connections.
+
+```javascript
+server.start()
+```
+
+**Returns:** `void`
+
+**Example:**
+
+```javascript
+const server = new WebSocketServer();
+server.start();
+
+console.log('WebSocket server listening on ws://localhost:9223');
+console.log('Waiting for extension connection...');
+```
+
+##### `stop()`
+
+Stop the WebSocket server and close all client connections.
+
+```javascript
+server.stop()
+```
+
+**Returns:** `void`
+
+**Example:**
+
+```javascript
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('\nShutting down WebSocket server...');
+  server.stop();
+  process.exit(0);
+});
+```
+
+##### `getClients()`
+
+Get list of connected WebSocket clients.
+
+```javascript
+server.getClients()
+```
+
+**Returns:** `Set<WebSocket>` - Set of connected client WebSocket objects
+
+**Example:**
+
+```javascript
+const clients = server.getClients();
+console.log(`Connected clients: ${clients.size}`);
+```
+
+##### `broadcast(message)`
+
+Send a message to all connected clients.
+
+```javascript
+server.broadcast(message)
+```
+
+**Parameters:**
+- `message` (Object) - Message object to broadcast (will be JSON.stringify'd)
+
+**Returns:** `void`
+
+**Example:**
+
+```javascript
+// Send ping to all clients
+server.broadcast({
+  type: 'ping',
+  timestamp: Date.now(),
+  data: {}
+});
+```
+
+---
+
+### Extension Mode Usage Example
+
+```javascript
+const { WebSocketServer, LogFormatter } = require('console-bridge');
+const fs = require('fs');
+
+// Create formatter
+const formatter = new LogFormatter({
+  showTimestamp: true,
+  showLocation: true,
+  timestampFormat: 'iso',
+});
+
+// Create file stream for logging
+const logStream = fs.createWriteStream('extension-logs.txt', { flags: 'a' });
+
+// Create WebSocket server
+const server = new WebSocketServer({
+  port: 9223,
+  formatter,
+  output: (formattedLog) => {
+    // Output to console
+    console.log(formattedLog);
+
+    // Also save to file (strip ANSI codes)
+    const strippedLog = formattedLog.replace(/\x1b\[[0-9;]*m/g, '');
+    logStream.write(strippedLog + '\n');
+  },
+});
+
+// Start server
+server.start();
+
+console.log('WebSocket server listening on ws://localhost:9223');
+console.log('Install Chrome extension and open DevTools to connect.');
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('\nShutting down...');
+  server.stop();
+  logStream.end();
+  process.exit(0);
+});
+
+// Monitor connection count
+setInterval(() => {
+  const clients = server.getClients();
+  console.log(`[Status] Connected clients: ${clients.size}`);
+}, 30000); // Every 30 seconds
+```
+
+---
+
+### Extension Mode + Puppeteer Mode Combined
+
+You can run both modes simultaneously for different use cases:
+
+```javascript
+const { BridgeManager, WebSocketServer, LogFormatter } = require('console-bridge');
+
+const formatter = new LogFormatter();
+
+// 1. Start Puppeteer mode for automated testing
+const puppeteerBridge = new BridgeManager({
+  headless: true,
+  levels: ['error'],
+  formatterOptions: formatter,
+});
+
+await puppeteerBridge.start(['localhost:3000']);
+
+// 2. Start Extension mode for interactive development
+const extensionServer = new WebSocketServer({
+  port: 9223,
+  formatter,
+});
+
+extensionServer.start();
+
+console.log('Running dual-mode:');
+console.log('- Puppeteer Mode: localhost:3000 (error logs only)');
+console.log('- Extension Mode: ws://localhost:9223 (all logs)');
+
+// Cleanup
+process.on('SIGINT', async () => {
+  await puppeteerBridge.stop();
+  extensionServer.stop();
+  process.exit(0);
+});
+```
+
+---
+
+### WebSocket Protocol v1.0.0
+
+The extension communicates with the CLI using JSON messages over WebSocket.
+
+**Message Envelope:**
+
+```javascript
+{
+  "type": "console_event | connection_status | ping | pong | welcome",
+  "timestamp": 1696345678901,
+  "data": { ... }
+}
+```
+
+**Example console_event from Extension:**
+
+```javascript
+{
+  "type": "console_event",
+  "timestamp": 1696345678901,
+  "data": {
+    "method": "log",
+    "args": ["Hello from browser", { "user": "Alice" }],
+    "location": {
+      "url": "http://localhost:3000/app.js",
+      "lineNumber": 42,
+      "columnNumber": 10
+    },
+    "source": "http://localhost:3000"
+  }
+}
+```
+
+**Handling Messages Manually:**
+
+```javascript
+const WebSocket = require('ws');
+
+const wss = new WebSocket.Server({ host: 'localhost', port: 9223 });
+
+wss.on('connection', (ws) => {
+  console.log('Extension connected');
+
+  // Send welcome
+  ws.send(JSON.stringify({
+    type: 'welcome',
+    timestamp: Date.now(),
+    data: { server: 'custom-server', protocolVersion: '1.0.0' }
+  }));
+
+  // Handle messages
+  ws.on('message', (data) => {
+    const message = JSON.parse(data);
+
+    if (message.type === 'console_event') {
+      console.log(`[${message.data.method}]`, ...message.data.args);
+    } else if (message.type === 'ping') {
+      ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
+    }
+  });
+});
+```
+
+See [WebSocket Protocol Specification](./v2.0.0-spec/websocket-protocol-v1.0.0.md) for complete protocol documentation.
+
+---
+
+**Document Status:** Living Document (Updated for v2.0.0)
+**Last Updated:** October 8, 2025
+**Version:** 2.0.0-beta
