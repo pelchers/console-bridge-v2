@@ -100,7 +100,7 @@ describe('CLI', () => {
       const result = await runCLI(['start']);
       expect(result.code).toBe(1);
       const output = result.stdout + result.stderr;
-      expect(output).toContain('missing required argument');
+      expect(output).toContain('No URLs provided');
     }, TIMEOUT);
 
     test('rejects invalid URL', async () => {
