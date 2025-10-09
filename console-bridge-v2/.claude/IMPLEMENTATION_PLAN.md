@@ -287,6 +287,43 @@ Multi-phase development plan for Console Bridge features and improvements.
 
 ---
 
+### Phase 5: Unified Terminal Output (`--merge-output` Flag) ✅
+**Status:** COMPLETE (Implementation Discovered October 9, 2025)
+**Branch:** `phase-5-merge-output`
+
+**Scope:**
+- CLI flag for unified terminal output workflow
+- Process discovery to find dev server on port
+- Terminal attachment for merging output streams
+- Cross-platform support (Windows, macOS, Linux)
+- Graceful fallback when attachment fails
+
+**Deliverables:**
+- ✅ CLI flag `--merge-output` (bin/console-bridge.js)
+- ✅ TerminalAttacher class (src/core/TerminalAttacher.js - 160 lines)
+- ✅ Process utilities (src/utils/processUtils.js - 201 lines)
+  - Windows: netstat-based process discovery
+  - Unix/Mac: lsof-based process discovery
+- ✅ BridgeManager integration (attemptTerminalAttachment method)
+- ✅ Graceful fallback behavior with user messaging
+- ❌ Unit tests (not yet written)
+- ❌ User documentation updates (not yet written)
+
+**Discovery:** Phase 5 was found to be fully implemented in the codebase during Phase 3 completion. The feature was coded in early development but never activated, tested, or documented. ADR created documenting existing implementation.
+
+**Usage:**
+```bash
+# Unified terminal with concurrently
+npx concurrently "npm run dev" "console-bridge start localhost:3000 --merge-output"
+
+# Works with both headless and no-headless
+console-bridge start localhost:3000 --merge-output --no-headless
+```
+
+**ADR:** `.claude/adr/phase-5/phase-5-merge-output.md`
+
+---
+
 ## Future Phases
 
 ### Phase 4: Firefox & Safari Extension Support 🚧
@@ -310,16 +347,26 @@ Multi-phase development plan for Console Bridge features and improvements.
 
 ---
 
-### Phase 5: Unified Terminal Output (`--merge-output` Flag) ❌
-**Status:** NOT DONE YET - Planned for v2.0.x or v2.1.0
-**❌ Status**: Not implemented yet, but on roadmap for future release
+### Phase 5: Unified Terminal Output (`--merge-output` Flag) ✅
+**Status:** COMPLETE (Implementation Already Existed - Discovered October 9, 2025)
+**✅ Status**: Fully implemented but undocumented/untested
 
-**Note:** This is about the `--merge-output` flag for merging Console Bridge output INTO the dev server's terminal (single terminal workflow). **Output format parity (1-1 formatting) WAS implemented** - Extension Mode uses same LogFormatter as Puppeteer mode, supporting all format flags (--no-timestamp, --no-source, --location, --timestamp-format).
+**Discovery**: Phase 5 was found to be ALREADY FULLY IMPLEMENTED in the codebase during preparation for v2.0.0 launch. The feature was coded in early development but never activated, tested, or documented.
 
-**What's NOT implemented**: The `--merge-output` flag that would merge logs into dev server terminal (requires process discovery + stream redirection)
-**What IS implemented**: Identical output formatting between Puppeteer and Extension modes
+**Implementation Components**:
+- ✅ CLI flag `--merge-output` (bin/console-bridge.js line 306-308)
+- ✅ TerminalAttacher class (src/core/TerminalAttacher.js - 160 lines)
+- ✅ Process discovery utilities (src/utils/processUtils.js - 201 lines)
+- ✅ BridgeManager integration (attemptTerminalAttachment method)
+- ✅ Cross-platform support (Windows: netstat, Unix/Mac: lsof)
+- ✅ Graceful fallback behavior
 
-**Implementation Timeline**: 11-16 days (planned for post-v2.0.0 release)
+**Remaining Work**:
+- ❌ Unit tests for TerminalAttacher and processUtils
+- ❌ User documentation (USAGE.md, MIGRATION.md, README.md)
+- ❌ Manual E2E testing
+
+**Note:** Output format parity (1-1 formatting) ALSO implemented - Extension Mode uses same LogFormatter as Puppeteer mode.
 
 **Problem Statement:**
 Console Bridge requires a separate terminal from the dev server, forcing users to switch between terminals. The `--merge-output` flag would merge Console Bridge output into the dev server's terminal.
@@ -592,10 +639,11 @@ class TerminalAttacher {
 ### Future Versions
 | Version | Feature | Target Date | Status |
 |---------|---------|-------------|--------|
-| 2.0.x | Phase 5 - `--merge-output` Flag | Q4 2025 / Q1 2026 | ❌ Planned (11-16 days work) |
 | 2.1.0 | Phase 4 - Firefox/Safari Extensions | Q1 2026 | 🚧 Deferred |
 | 2.2.0 | Phase 7 - Performance Optimization | TBD | ⛔ Not Needed (unless user demand) |
 | 3.0.0 | Advanced Features (Remote Debugging, etc.) | TBD | 🚧 Future Consideration |
+
+**Note**: Phase 5 (`--merge-output`) was discovered to be already implemented in v2.0.0 codebase.
 
 ---
 
