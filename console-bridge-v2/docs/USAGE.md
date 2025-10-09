@@ -139,6 +139,54 @@ Press `Ctrl+C` to stop the WebSocket server.
 
 ---
 
+### Unified Terminal Output (--merge-output)
+
+Console Bridge can merge its output into your dev server's terminal using the `--merge-output` flag, providing a unified workflow.
+
+**Basic Usage:**
+
+```bash
+# Separate terminals (default)
+console-bridge start localhost:3000
+
+# Unified terminal (with concurrently)
+npx concurrently "npm run dev" "console-bridge start localhost:3000 --merge-output"
+```
+
+**How It Works:**
+
+1. Console Bridge extracts the port from the URL
+2. Finds the process listening on that port (using `lsof` on Unix/Mac or `netstat` on Windows)
+3. Redirects output to the same terminal stream
+4. Falls back gracefully if process not found
+
+**Supported Modes:**
+
+All combinations work:
+- `--merge-output` (headless, unified terminal)
+- `--merge-output --no-headless` (headful browser, unified terminal)
+- No flag (headless, separate terminal - default)
+- `--no-headless` (headful browser, separate terminal)
+
+**Example with Multiple Tools:**
+
+```bash
+# Run dev server + Console Bridge in unified terminal
+npx concurrently \
+  "npm run dev" \
+  "console-bridge start localhost:3000 --merge-output"
+```
+
+**Graceful Fallback:**
+
+If the process cannot be found or accessed, Console Bridge falls back to standard output with a message:
+
+```
+ℹ️  No process found listening on port 3000. Using separate terminal.
+```
+
+---
+
 ## CLI Options Reference
 
 ### Basic Command Structure

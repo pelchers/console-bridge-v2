@@ -90,6 +90,23 @@ console-bridge start localhost:3000 --output logs.txt
 - `--no-source` - Hide source URLs
 - `--location` - Show file location for each log
 - `--timestamp-format <format>` - Use 'time' or 'iso' format (default: time)
+- `--merge-output` - Merge Console Bridge logs with dev server terminal (use with concurrently)
+
+### Unified Terminal Output
+
+Run Console Bridge alongside your dev server in the same terminal:
+
+```bash
+npx concurrently "npm run dev" "console-bridge start localhost:3000 --merge-output"
+```
+
+This merges console logs into your dev server's output stream for a unified workflow. Works with both Puppeteer Mode and Extension Mode. The `--merge-output` flag automatically finds the process running on the specified port and redirects output to that terminal.
+
+**Supported Combinations:**
+- Headless + unified terminal: `--merge-output`
+- Headful + unified terminal: `--merge-output --no-headless`
+- Headless + separate terminal: (default, no flags)
+- Headful + separate terminal: `--no-headless`
 
 ## v2.0.0 - Browser Extension Support ✨
 

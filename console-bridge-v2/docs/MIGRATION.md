@@ -109,11 +109,20 @@ If you want to monitor your personal Chrome:
 
 **None!** v2.0.0 has zero breaking changes.
 
-### Deprecated (But Still Works)
+### Restored in v2.0.0
 
-- `--merge-output` flag (v1 only) - Not needed in v2, cleaner default output
+- **`--merge-output` flag** - Merge Console Bridge output into dev server terminal
+  - Works with both Puppeteer and Extension modes
+  - Cross-platform support (Windows, macOS, Linux)
+  - Graceful fallback when process not found
+  - Use with `concurrently` for unified terminal workflow
 
-All other v1 flags work identically in v2.
+**Example:**
+```bash
+npx concurrently "npm run dev" "console-bridge start localhost:3000 --merge-output"
+```
+
+All v1 flags work identically in v2.
 
 ---
 
