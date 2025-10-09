@@ -3,10 +3,58 @@
 Multi-phase development plan for Console Bridge features and improvements.
 
 ## Table of Contents
+- [🚀 ROADMAP TO v2.0.0 RELEASE](#-roadmap-to-v200-release)
 - [Branch Management Notes](#branch-management-notes)
 - [Emoji Legend](#emoji-legend)
 - [Completed Phases](#completed-phases)
 - [Future Phases](#future-phases)
+
+---
+
+## 🚀 ROADMAP TO v2.0.0 RELEASE
+
+**Current Status:** Phase 5 Subtask 5.1 COMPLETE - User docs ready, awaiting manual testing
+**Current Branch:** `phase-5-subtask-5.1-user-docs-and-testing`
+**Last Updated:** October 9, 2025
+
+### ✅ COMPLETED (All code/docs ready)
+- ✅ Phase 1-3: Core + Extension Mode + Chrome Web Store Prep
+- ✅ Phase 5: `--merge-output` implementation (discovered - was already coded)
+- ✅ Phase 5 Subtask 5.1: User documentation for `--merge-output` (496782d)
+
+### ⏳ IN PROGRESS (User executing now)
+- **Phase 5 Subtask 5.2: Manual Testing** - 12 tests
+  - PART 1: Phase 5 tests (6 tests - `--merge-output` validation)
+  - PART 2: Backward compatibility tests (6 tests - v1 commands in v2)
+
+### ❌ REMAINING BEFORE LAUNCH (After testing passes)
+
+**Phase A: Fix Bugs from Testing** (if any found)
+- Fix any issues discovered during manual testing
+- Update IMPLEMENTATION_PLAN.md to mark Phase 5 complete
+
+**Phase B: Chrome Web Store Submission** (1-2 hours + 5-10 day wait)
+- Create 7 screenshots (per SCREENSHOT_GUIDE.md)
+- Package extension (.zip)
+- Create Chrome Web Store developer account ($5)
+- Submit for review
+- **Wait 5-10 business days for Google approval**
+
+**Phase C: npm & GitHub Publishing** (30 minutes)
+- Merge all branches to main
+- Run `npm version 2.0.0 && npm publish`
+- Create v2.0.0 tag
+- Publish GitHub release with release notes
+
+**Phase D: Marketing & Announcement** (Optional, 1-2 hours)
+- GitHub Discussions post
+- Social media (Twitter, Reddit, Dev.to)
+- Submit to aggregators
+
+### Timeline to Launch
+- **Active Work Remaining:** 1-2 hours (screenshots + publishing)
+- **Waiting Period:** 5-10 business days (Chrome Web Store approval)
+- **Total Calendar Time:** ~2 weeks from now
 
 ---
 
@@ -27,7 +75,8 @@ Multi-phase development plan for Console Bridge features and improvements.
 - Phase 1: (branch unknown - legacy work)
 - Phase 2: `phase-2-subtask-2.2` ✅ (Subtask 2.1-2.4 complete)
 - Phase 3: `phase-2-subtask-2.2` → `phase-3-completion` ✅ (Subtask 3.1-3.6 complete)
-- Phase 4+: Not started
+- Phase 4: 🚧 Deferred to v2.1.0+
+- Phase 5: `phase-5-merge-output` → `phase-5-subtask-5.1-user-docs-and-testing` ⏳ (Subtask 5.1 complete, 5.2 in progress)
 
 ---
 
@@ -287,9 +336,11 @@ Multi-phase development plan for Console Bridge features and improvements.
 
 ---
 
-### Phase 5: Unified Terminal Output (`--merge-output` Flag) ✅
-**Status:** COMPLETE (Implementation Discovered October 9, 2025)
-**Branch:** `phase-5-merge-output`
+### Phase 5: Unified Terminal Output (`--merge-output` Flag) ⏳
+**Status:** PARTIALLY COMPLETE - Implementation exists, docs complete, manual testing in progress
+**Branch:** `phase-5-merge-output` → `phase-5-subtask-5.1-user-docs-and-testing`
+
+**Discovery:** Phase 5 was found to be ALREADY FULLY IMPLEMENTED in the codebase on October 9, 2025. The feature (~550 lines of code) was coded in early development but never activated, tested, or documented. This saved 11-16 days of development time.
 
 **Scope:**
 - CLI flag for unified terminal output workflow
@@ -298,18 +349,43 @@ Multi-phase development plan for Console Bridge features and improvements.
 - Cross-platform support (Windows, macOS, Linux)
 - Graceful fallback when attachment fails
 
-**Deliverables:**
-- ✅ CLI flag `--merge-output` (bin/console-bridge.js)
+**Implementation Components (ALREADY CODED):**
+- ✅ CLI flag `--merge-output` (bin/console-bridge.js line 306-308)
 - ✅ TerminalAttacher class (src/core/TerminalAttacher.js - 160 lines)
 - ✅ Process utilities (src/utils/processUtils.js - 201 lines)
   - Windows: netstat-based process discovery
   - Unix/Mac: lsof-based process discovery
 - ✅ BridgeManager integration (attemptTerminalAttachment method)
 - ✅ Graceful fallback behavior with user messaging
-- ❌ Unit tests (not yet written)
-- ❌ User documentation updates (not yet written)
+- ✅ Output format parity (Extension Mode uses same LogFormatter as Puppeteer)
 
-**Discovery:** Phase 5 was found to be fully implemented in the codebase during Phase 3 completion. The feature was coded in early development but never activated, tested, or documented. ADR created documenting existing implementation.
+**Subtasks:**
+
+#### Subtask 5.1: User Documentation ✅
+**Status:** COMPLETE (Commit: 496782d, October 9, 2025)
+**Deliverables:**
+- ✅ docs/USAGE.md updated with "Unified Terminal Output" section
+- ✅ docs/MIGRATION.md updated (changed "Deprecated" to "Restored in v2.0.0")
+- ✅ README.md updated with unified terminal output example
+- ✅ .claude/adr/phase-5/phase-5-merge-output.md updated with roadmap
+
+#### Subtask 5.2: Manual Testing ⏳
+**Status:** IN PROGRESS (User executing now)
+**Test Plan:** 12 tests documented in Phase 5 ADR
+- **PART 1: Phase 5 tests (6 tests)**
+  1. Puppeteer Mode + unified terminal (headless)
+  2. Puppeteer Mode + unified terminal (headful)
+  3. Extension Mode + unified terminal
+  4. Graceful fallback (invalid port)
+  5. Multi-URL unified terminal
+  6. Cross-platform verification (Windows ✅, macOS/Linux if available)
+- **PART 2: Backward compatibility (6 tests)**
+  7. Basic Puppeteer mode (`console-bridge start localhost:3000`)
+  8. Multi-instance monitoring
+  9. Log filtering (`--levels error,warn`)
+  10. File export (`--output logs.txt`)
+  11. Headful mode (`--no-headless`)
+  12. Combined flags test
 
 **Usage:**
 ```bash
@@ -319,6 +395,11 @@ npx concurrently "npm run dev" "console-bridge start localhost:3000 --merge-outp
 # Works with both headless and no-headless
 console-bridge start localhost:3000 --merge-output --no-headless
 ```
+
+**Remaining Work:**
+- ⏳ Manual E2E testing (Subtask 5.2 - IN PROGRESS)
+- ❌ Bug fixes if any found during testing
+- ❌ Unit tests for TerminalAttacher and processUtils (optional - can defer to v2.0.1)
 
 **ADR:** `.claude/adr/phase-5/phase-5-merge-output.md`
 
@@ -344,195 +425,6 @@ console-bridge start localhost:3000 --merge-output --no-headless
 - Chrome Web Store provides fastest path to users
 
 **Why NOT DONE**: Strategic decision to ship v2.0.0 faster with Chrome-only support, add other browsers based on user demand
-
----
-
-### Phase 5: Unified Terminal Output (`--merge-output` Flag) ✅
-**Status:** COMPLETE (Implementation Already Existed - Discovered October 9, 2025)
-**✅ Status**: Fully implemented but undocumented/untested
-
-**Discovery**: Phase 5 was found to be ALREADY FULLY IMPLEMENTED in the codebase during preparation for v2.0.0 launch. The feature was coded in early development but never activated, tested, or documented.
-
-**Implementation Components**:
-- ✅ CLI flag `--merge-output` (bin/console-bridge.js line 306-308)
-- ✅ TerminalAttacher class (src/core/TerminalAttacher.js - 160 lines)
-- ✅ Process discovery utilities (src/utils/processUtils.js - 201 lines)
-- ✅ BridgeManager integration (attemptTerminalAttachment method)
-- ✅ Cross-platform support (Windows: netstat, Unix/Mac: lsof)
-- ✅ Graceful fallback behavior
-
-**Remaining Work**:
-- ❌ Unit tests for TerminalAttacher and processUtils
-- ❌ User documentation (USAGE.md, MIGRATION.md, README.md)
-- ❌ Manual E2E testing
-
-**Note:** Output format parity (1-1 formatting) ALSO implemented - Extension Mode uses same LogFormatter as Puppeteer mode.
-
-**Problem Statement:**
-Console Bridge requires a separate terminal from the dev server, forcing users to switch between terminals. The `--merge-output` flag would merge Console Bridge output into the dev server's terminal.
-
-**Goals:**
-1. Allow Console Bridge logs to stream to the **same terminal** as the dev server
-2. Support both headless and headful modes with unified output
-3. Provide seamless integration without breaking existing separate terminal workflow
-
-**Proposed Solution:**
-
-#### New CLI Flags
-```bash
-# Option 3: Headless + Unified Terminal
-console-bridge start localhost:3847 --merge-output
-
-# Option 4: Headful + Unified Terminal
-console-bridge start localhost:3847 --no-headless --merge-output
-```
-
-#### Implementation Requirements
-
-**1. Process Discovery**
-- Detect running dev server process
-- Find associated terminal/TTY
-- Handle multiple dev servers gracefully
-
-**2. Output Stream Redirection**
-- Redirect Console Bridge output to dev server's stdout
-- Maintain color/formatting
-- Preserve existing terminal output behavior as default
-
-**3. Graceful Degradation**
-- Fallback to separate terminal if process discovery fails
-- Warn user if `--merge-output` cannot attach
-- Continue functioning normally
-
-**4. Lifecycle Management**
-- Detach gracefully when dev server stops
-- Handle dev server restart
-- Clean up streams on Console Bridge exit
-
-#### Technical Approach
-
-**Option A: Process Attachment (Recommended)**
-```javascript
-// Pseudo-code
-class TerminalAttacher {
-  findDevServerProcess(port) {
-    // Use `lsof -i :3847` (Unix) or `netstat` (Windows)
-    // to find process listening on port
-  }
-
-  attachToProcess(pid) {
-    // Get process stdout
-    // Redirect Console Bridge output to same stream
-  }
-}
-```
-
-**Option B: IPC/Socket Communication**
-```javascript
-// Create Unix socket or named pipe
-// Dev server writes to socket
-// Console Bridge reads from socket and merges output
-```
-
-**Option C: NPM Package Integration**
-```javascript
-// Provide `console-bridge` as npm package
-// Dev server imports and uses programmatically
-// Output naturally unified since same process
-```
-
-#### Files to Create/Modify
-
-**New Files:**
-- `src/core/TerminalAttacher.js` - Process discovery and attachment
-- `src/utils/processUtils.js` - Process utilities (lsof, netstat wrappers)
-- `tests/unit/TerminalAttacher.test.js` - Unit tests
-- `tests/integration/unified-output.test.js` - Integration tests
-
-**Modified Files:**
-- `bin/console-bridge.js` - Add `--merge-output` flag
-- `src/core/BridgeManager.js` - Accept output redirection config
-- `docs/guides/advanced-usage.md` - Document new options
-- `docs/architecture/system-overview.md` - Update architecture diagrams
-
-#### Testing Strategy
-
-**Unit Tests:**
-- Process discovery on various platforms (Unix, Windows)
-- Stream redirection logic
-- Graceful fallback behavior
-- Cleanup on exit
-
-**Integration Tests:**
-- Start dev server + Console Bridge with `--merge-output`
-- Verify logs appear in unified terminal
-- Test dev server restart
-- Test Console Bridge restart
-- Test graceful degradation
-
-**Manual Tests:**
-- React dev server (port 3000)
-- Next.js dev server (port 3000)
-- Vite dev server (port 5173)
-- Custom Express server
-- Multiple concurrent dev servers
-
-#### Edge Cases to Handle
-
-1. **Multiple dev servers on same port** (different interfaces)
-   - Solution: Prompt user to specify which process
-
-2. **Dev server running in Docker**
-   - Solution: Document limitation or implement Docker-aware discovery
-
-3. **Permission issues** (accessing other process streams)
-   - Solution: Graceful fallback with warning
-
-4. **Windows vs Unix differences** (process management)
-   - Solution: Platform-specific implementations
-
-5. **Terminal emulator compatibility**
-   - Solution: Test with common emulators (iTerm, Hyper, Windows Terminal, etc.)
-
-#### Success Criteria
-
-- ✅ Logs appear in dev server terminal when `--merge-output` used
-- ✅ Works in both headless and headful modes
-- ✅ Graceful fallback when attachment fails
-- ✅ No breaking changes to existing CLI
-- ✅ Cross-platform support (Windows, macOS, Linux)
-- ✅ Documented in user guides
-- ✅ 90%+ test coverage for new code
-
-#### Risks & Mitigations
-
-| Risk | Impact | Mitigation |
-|------|--------|-----------|
-| Process discovery fails on certain platforms | High | Graceful fallback + clear error messages |
-| Permission denied accessing process streams | Medium | Document sudo requirements or alternative approaches |
-| Stream redirection breaks terminal formatting | Medium | Extensive testing across terminals |
-| Dev server framework incompatibility | Low | Framework-agnostic process discovery |
-
-#### Timeline Estimate
-
-- **Research & Design:** 2-3 days
-- **Implementation:** 5-7 days
-- **Testing:** 3-4 days
-- **Documentation:** 1-2 days
-- **Total:** 11-16 days
-
-#### Dependencies
-
-- `lsof` (Unix) or `netstat` (Windows) for port-to-process mapping
-- Node.js `process` module for stream manipulation
-- Platform detection (`os` module)
-
-#### Future Enhancements (Post-Phase 5)
-
-- Auto-detect dev server and attach without `--merge-output` flag
-- GUI dashboard option (Electron app showing logs)
-- Browser extension for in-browser log viewing
-- Remote monitoring (monitor localhost from different machine)
 
 ---
 
