@@ -24,4 +24,8 @@ module.exports = {
     '/node_modules/',
     '/test/fixtures/',
   ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/extension/test/', // Extension tests require ESM configuration
+  ],
 };

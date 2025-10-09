@@ -34,11 +34,10 @@ describe('LogCapturer', () => {
         'http://localhost:5555/'
       );
       expect(defaultCapturer.levels).toEqual([
-        'log',
-        'info',
-        'warning',
-        'error',
-        'debug',
+        'log', 'info', 'warning', 'error', 'debug',
+        'dir', 'dirxml', 'table', 'trace', 'clear',
+        'startGroup', 'startGroupCollapsed', 'endGroup',
+        'assert', 'profile', 'profileEnd', 'count', 'timeEnd'
       ]);
     });
 
@@ -258,189 +257,165 @@ describe('LogCapturer', () => {
     });
   });
 
-  describe('extractArgs', () => {
+  describe('extractPuppeteerArgs', () => {
     test('extracts simple string argument', async () => {
-      const mockMsg = {
-        args: () => [
-          {
-            jsonValue: async () => 'hello',
-          },
-        ],
-      };
+      const mockJSHandles = [
+        {
+          jsonValue: async () => 'hello',
+        },
+      ];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args).toEqual(['hello']);
     });
 
     test('extracts multiple arguments', async () => {
-      const mockMsg = {
-        args: () => [
-          { jsonValue: async () => 'hello' },
-          { jsonValue: async () => 123 },
-          { jsonValue: async () => true },
-        ],
-      };
+      const mockJSHandles = [
+        { jsonValue: async () => 'hello' },
+        { jsonValue: async () => 123 },
+        { jsonValue: async () => true },
+      ];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args).toEqual(['hello', 123, true]);
     });
 
     test('extracts object argument', async () => {
-      const mockMsg = {
-        args: () => [
-          {
-            jsonValue: async () => ({ key: 'value' }),
-          },
-        ],
-      };
+      const mockJSHandles = [
+        {
+          jsonValue: async () => ({ key: 'value' }),
+        },
+      ];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args).toEqual([{ key: 'value' }]);
     });
 
     test('extracts null', async () => {
-      const mockMsg = {
-        args: () => [
-          {
-            jsonValue: async () => null,
-          },
-        ],
-      };
+      const mockJSHandles = [
+        {
+          jsonValue: async () => null,
+        },
+      ];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args).toEqual([null]);
     });
 
     test('extracts undefined', async () => {
-      const mockMsg = {
-        args: () => [
-          {
-            jsonValue: async () => undefined,
-          },
-        ],
-      };
+      const mockJSHandles = [
+        {
+          jsonValue: async () => undefined,
+        },
+      ];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args).toEqual([undefined]);
     });
 
     test('falls back to string representation for non-serializable values', async () => {
-      const mockMsg = {
-        args: () => [
-          {
-            jsonValue: async () => {
-              throw new Error('Cannot serialize');
-            },
-            evaluate: jest.fn().mockResolvedValue('function() {}'),
+      const mockJSHandles = [
+        {
+          jsonValue: async () => {
+            throw new Error('Cannot serialize');
           },
-        ],
-      };
+          evaluate: jest.fn().mockResolvedValue('function() {}'),
+        },
+      ];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args).toEqual(['function() {}']);
     });
 
     test('handles null in evaluate fallback', async () => {
-      const mockMsg = {
-        args: () => [
-          {
-            jsonValue: async () => {
-              throw new Error('Cannot serialize');
-            },
-            evaluate: jest.fn().mockImplementation((fn) => {
-              return Promise.resolve(fn(null));
-            }),
+      const mockJSHandles = [
+        {
+          jsonValue: async () => {
+            throw new Error('Cannot serialize');
           },
-        ],
-      };
+          evaluate: jest.fn().mockImplementation((fn) => {
+            return Promise.resolve(fn(null));
+          }),
+        },
+      ];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args).toEqual(['null']);
     });
 
     test('handles undefined in evaluate fallback', async () => {
-      const mockMsg = {
-        args: () => [
-          {
-            jsonValue: async () => {
-              throw new Error('Cannot serialize');
-            },
-            evaluate: jest.fn().mockImplementation((fn) => {
-              return Promise.resolve(fn(undefined));
-            }),
+      const mockJSHandles = [
+        {
+          jsonValue: async () => {
+            throw new Error('Cannot serialize');
           },
-        ],
-      };
+          evaluate: jest.fn().mockImplementation((fn) => {
+            return Promise.resolve(fn(undefined));
+          }),
+        },
+      ];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args).toEqual(['undefined']);
     });
 
     test('handles function in evaluate fallback', async () => {
-      const mockMsg = {
-        args: () => [
-          {
-            jsonValue: async () => {
-              throw new Error('Cannot serialize');
-            },
-            evaluate: jest.fn().mockImplementation((fn) => {
-              return Promise.resolve(
-                fn(function testFunc() {
-                  return 'test';
-                })
-              );
-            }),
+      const mockJSHandles = [
+        {
+          jsonValue: async () => {
+            throw new Error('Cannot serialize');
           },
-        ],
-      };
+          evaluate: jest.fn().mockImplementation((fn) => {
+            return Promise.resolve(
+              fn(function testFunc() {
+                return 'test';
+              })
+            );
+          }),
+        },
+      ];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args[0]).toContain('function testFunc()');
     });
 
     test('handles symbol in evaluate fallback', async () => {
-      const mockMsg = {
-        args: () => [
-          {
-            jsonValue: async () => {
-              throw new Error('Cannot serialize');
-            },
-            evaluate: jest.fn().mockImplementation((fn) => {
-              return Promise.resolve(fn(Symbol('test')));
-            }),
+      const mockJSHandles = [
+        {
+          jsonValue: async () => {
+            throw new Error('Cannot serialize');
           },
-        ],
-      };
+          evaluate: jest.fn().mockImplementation((fn) => {
+            return Promise.resolve(fn(Symbol('test')));
+          }),
+        },
+      ];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args[0]).toContain('Symbol(test)');
     });
 
     test('uses toString as last resort', async () => {
-      const mockMsg = {
-        args: () => [
-          {
-            jsonValue: async () => {
-              throw new Error('Cannot serialize');
-            },
-            evaluate: async () => {
-              throw new Error('Evaluate failed');
-            },
-            toString: () => 'JSHandle@object',
+      const mockJSHandles = [
+        {
+          jsonValue: async () => {
+            throw new Error('Cannot serialize');
           },
-        ],
-      };
+          evaluate: async () => {
+            throw new Error('Evaluate failed');
+          },
+          toString: () => 'JSHandle@object',
+        },
+      ];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args).toEqual(['JSHandle@object']);
     });
 
     test('handles empty args', async () => {
-      const mockMsg = {
-        args: () => [],
-      };
+      const mockJSHandles = [];
 
-      const args = await capturer.extractArgs(mockMsg);
+      const args = await capturer.extractPuppeteerArgs(mockJSHandles);
       expect(args).toEqual([]);
     });
   });
