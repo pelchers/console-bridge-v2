@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Interactions Test</title>
+</head>
+<body>
+  <h1>User Interactions Test</h1>
+  <p>Test button clicks and form interactions.</p>
+
+  <div>
+    <button id="click-btn">Click Counter</button>
+    <span id="click-count">0</span>
+  </div>
+
+  <div>
+    <input type="text" id="text-input" placeholder="Type something..." />
+    <button id="submit-btn">Submit</button>
+  </div>
+
+  <div>
+    <button id="multi-log-btn">Multiple Logs</button>
+  </div>
+
+  <script>
+    console.log('[Interactions] Page ready for user interactions');
+
+    let clickCount = 0;
+
+    // Click counter
+    document.getElementById('click-btn').addEventListener('click', () => {
+      clickCount++;
+      document.getElementById('click-count').textContent = clickCount;
+      console.log(`[Interactions] Button clicked ${clickCount} times`);
+    });
+
+    // Text input and submit
+    document.getElementById('submit-btn').addEventListener('click', () => {
+      const text = document.getElementById('text-input').value;
+      console.log(`[Interactions] Submitted text: "${text}"`);
+    });
+
+    // Multiple logs at once
+    document.getElementById('multi-log-btn').addEventListener('click', () => {
+      console.log('[Interactions] First log');
+      console.warn('[Interactions] Second log (warning)');
+      console.error('[Interactions] Third log (error)');
+      console.log('[Interactions] All 3 logs fired');
+    });
+  </script>
+</body>
+</html>

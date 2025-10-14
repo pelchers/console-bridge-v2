@@ -376,6 +376,262 @@ See `IMPLEMENTATION_PLAN.md` for development roadmap.
 
 ---
 
-**Document Status:** Production (v1.0.0)
-**Last Updated:** October 5, 2025
+## v2.0.0 "Extension Mode" (October 8, 2025)
+
+### Product Overview
+
+**Console Bridge v2.0.0** extends v1 by adding **Chrome Extension Mode** - monitor YOUR Chrome browser (with React DevTools, Vue DevTools, etc.) while streaming console logs to terminal.
+
+**Version:** 2.0.0-beta
+**Status:** Phase 2 Complete ✅ | Phase 3 In Progress 🚧
+**Release Date:** TBD (after Chrome Web Store approval)
+
+### Dual-Mode Operation
+
+**Mode 1: Puppeteer (v1.0.0 - Unchanged)**
+```bash
+console-bridge start localhost:3000 --no-headless
+```
+- ✅ Same as v1.0.0, zero changes
+- ✅ Perfect for CI/CD, automated testing
+- ✅ All v1 flags still work
+
+**Mode 2: Extension (v2.0.0 - NEW)**
+```bash
+console-bridge start --extension-mode
+```
+- ✅ Monitor YOUR Chrome browser
+- ✅ Works with browser extensions
+- ✅ Console logs from YOUR browser → terminal
+- ✅ Chromium-based browsers (Chrome, Edge, Brave, Opera, Vivaldi)
+
+### New Features (v2.0.0)
+
+#### 1. Chrome Extension as Bridge
+- **Description:** Extension captures console events from YOUR Chrome
+- **Technology:** Manifest V3, chrome.devtools API, WebSocket
+- **Benefits:**
+  - Use React DevTools, Vue DevTools, Redux DevTools
+  - Test in YOUR Chrome (not Puppeteer Chromium)
+  - Cross-browser support (Chromium-based)
+
+#### 2. WebSocket Protocol v1.0.0
+- **Communication:** Extension ↔ CLI via WebSocket (ws://localhost:9223)
+- **Message Types:** console_event, connection_status, ping, pong, welcome
+- **Features:**
+  - JSON message envelope
+  - Ping/pong keep-alive (30s interval, 5s timeout)
+  - Auto-reconnect (exponential backoff: 1s → 16s)
+  - Message queuing (1000 messages max)
+
+#### 3. Advanced Serialization
+- **Supported Types Beyond v1:**
+  - Maps, Sets
+  - Promises (state tracking)
+  - Symbols (with description)
+  - BigInt
+  - Circular references (detected and marked)
+  - DOM elements (tagName, id, className)
+
+#### 4. DevTools Panel UI
+- **Interface:** "Console Bridge" panel in Chrome DevTools
+- **Features:**
+  - Connection status indicator
+  - Message statistics
+  - Error display
+  - Reconnection UI
+
+### Technical Architecture (v2.0.0)
+
+**Extension Components:**
+- `background.js` - WebSocket client service worker
+- `devtools/panel.js` - Console capture logic
+- `serializer.js` - Advanced object serialization
+
+**CLI Components:**
+- `src/core/WebSocketServer.js` - WebSocket server (NEW)
+- `src/core/BridgeManager.js` - Dual-mode orchestration (UPDATED)
+- All v1 components - unchanged (100% compatibility)
+
+**Data Flow (Extension Mode):**
+```
+Your Chrome Browser
+  → console.log()
+    → Extension captures
+      → Advanced serialization
+        → WebSocket (localhost:9223)
+          → CLI WebSocketServer
+            → LogFormatter (reused from v1)
+              → Terminal output
+```
+
+### Key Achievements (v2.0.0 Phase 2)
+
+**Core Implementation:**
+- ✅ Chrome extension with console capture
+- ✅ WebSocket Protocol v1.0.0 complete
+- ✅ Advanced serialization (Maps, Sets, Promises, circular refs)
+- ✅ Message queuing, ping/pong, auto-reconnect
+- ✅ DevTools panel UI
+- ✅ `--extension-mode` CLI flag
+- ✅ 100% v1 backward compatibility
+
+**Quality & Testing:**
+- ✅ 211/211 core tests passing (100%)
+- ✅ 25 new WebSocketServer tests
+- ✅ All 186 v1 tests still passing
+- ✅ Manual E2E testing complete
+- ✅ Test coverage maintained
+
+**Documentation:**
+- ✅ WebSocket Protocol spec
+- ✅ Extension architecture docs
+- ✅ v1-to-v2 comparison guide
+- ✅ Privacy policy (Chrome Web Store ready)
+- ✅ Store listing content drafted
+
+### Usage Examples (v2.0.0)
+
+#### Extension Mode Basic Usage
+```bash
+# 1. Install extension in Chrome (developer mode or Web Store)
+# 2. Open DevTools on any localhost page → "Console Bridge" panel
+# 3. Start CLI in extension mode:
+console-bridge start --extension-mode
+
+# 4. Console logs from YOUR Chrome appear in terminal!
+```
+
+#### Extension Mode with Flags
+```bash
+# Save to file
+console-bridge start --extension-mode --output logs.txt
+
+# Show file locations
+console-bridge start --extension-mode --location
+
+# ISO timestamps
+console-bridge start --extension-mode --timestamp-format iso
+
+# Hide timestamps
+console-bridge start --extension-mode --no-timestamp
+```
+
+#### Dual-Mode Workflow
+```bash
+# Terminal 1: Puppeteer mode (automated testing)
+console-bridge start localhost:3000 --levels error
+
+# Terminal 2: Extension mode (interactive development)
+console-bridge start --extension-mode --no-timestamp
+```
+
+### Testing & Quality (v2.0.0)
+
+**Test Coverage:**
+- **Total Tests:** 211/211 passing (100%)
+- **v1 Tests:** 186 (preserved, 100% passing)
+- **v2 Tests:** 25 new (WebSocketServer)
+
+**Testing Tools (v2 ADDS 2 new tools):**
+
+**v1 Tools (Preserved):**
+1. **Jest** - 211 unit tests (186 in v1, +25 in v2)
+2. **Puppeteer** - Integration tests (v1 Puppeteer mode)
+
+**v2 ADDS:**
+3. **Playwright MCP** - Extension E2E tests (planned Phase 3.4)
+4. **BrowserMCP** - Chrome DevTools panel automation (planned Phase 3.4)
+
+**Note:** v2 does NOT remove any v1 tests. We KEEP all v1 tests and ADD new extension tests.
+
+### Current Status (Phase 3 - In Progress)
+
+**Completed (Phase 2):**
+- ✅ Subtask 2.1: Console Capture System
+- ✅ Subtask 2.2: Advanced Serialization
+- ✅ Subtask 2.3: WebSocket Client (Extension)
+- ✅ Subtask 2.4: WebSocket Server (CLI)
+
+**In Progress (Phase 3):**
+- 🚧 Subtask 3.1: Chrome Web Store Preparation (documentation complete)
+- ⏳ Subtask 3.2: User Documentation
+- ⏳ Subtask 3.3: Video Tutorials
+- ⏳ Subtask 3.4: Performance Testing (Playwright/BrowserMCP)
+- ⏳ Subtask 3.5: Beta Testing Program
+- ⏳ Subtask 3.6: Migration Guide v1 → v2
+
+### Browser Support (v2.0.0)
+
+| Browser | Puppeteer Mode | Extension Mode |
+|---------|----------------|----------------|
+| Puppeteer Chromium | ✓ | - |
+| Chrome/Chromium | - | ✓ |
+| Microsoft Edge | - | ✓ |
+| Brave | - | ✓ |
+| Opera | - | ✓ |
+| Vivaldi | - | ✓ |
+| Firefox | - | ⏳ Planned (Phase 4) |
+| Safari | - | ⏳ Planned (Phase 4) |
+
+### Future Enhancements (v2.x)
+
+**Planned for v2.1.0:**
+- Firefox WebExtensions port
+- Safari extension port
+- Cross-browser testing suite
+- Unified extension codebase
+
+**Planned for v2.2.0:**
+- Performance optimizations
+- Enhanced serialization
+- Log filtering in extension mode (--levels flag)
+
+**Planned for v3.0.0:**
+- Remote debugging support (with security)
+- Log persistence (database storage)
+- Performance monitoring
+- Network request monitoring
+
+### Design Decisions (v2.0.0)
+
+**Why Chrome Extension?**
+- Solves v1's Puppeteer-only limitation
+- Enables developer's personal browser
+- Works with browser extensions (React DevTools, etc.)
+- Natural developer workflow
+
+**Why WebSocket Protocol?**
+- Real-time streaming
+- Localhost-only (secure)
+- Simple JSON messages (no code execution)
+- Reliable connection with reconnection
+
+**Why Dual-Mode?**
+- 100% backward compatibility (no breaking changes)
+- Choose best mode for use case:
+  - Puppeteer: CI/CD, automation
+  - Extension: Interactive development
+- Same CLI, same flags (where applicable)
+
+### Migration from v1 to v2
+
+**No Migration Required!**
+- v1 Puppeteer mode works identically
+- All v1 flags work in v1 mode
+- All v1 tests pass
+- No breaking changes
+
+**Optional: Adopt Extension Mode**
+```bash
+# Install extension from Chrome Web Store (Phase 3)
+# Use --extension-mode flag
+
+console-bridge start --extension-mode
+```
+
+---
+
+**Document Status:** Living Document (Updated for v2.0.0-beta)
+**Last Updated:** October 8, 2025
 **Location:** `.claude/PROJECT_SUMMARY.md`

@@ -18,6 +18,15 @@ class BrowserPool {
         '--disable-dev-shm-usage',
         '--disable-gpu',
         '--disable-web-security', // Allow localhost cross-origin
+        // Additional args to prevent crashes (Phase 6 - Subtask 6.2)
+        '--disable-software-rasterizer', // Prevent software rendering crashes
+        '--disable-extensions', // Disable extensions in headless mode
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-features=IsolateOrigins,site-per-process', // Reduce process isolation overhead
+        '--disable-blink-features=AutomationControlled', // Prevent detection
+        '--single-process', // Run in single process mode (Windows Git Bash fix)
       ],
       defaultViewport: {
         width: 1920,

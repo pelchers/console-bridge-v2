@@ -1,11 +1,13 @@
 # Console Bridge - User Guide
 
-**Version:** 1.0.0-rc
+**Version:** 2.0.0-beta (Dual-Mode Support)
 
 ## Table of Contents
 
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+  - [Puppeteer Mode (v1 Compatible)](#puppeteer-mode-v1-compatible)
+  - [Extension Mode (v2 NEW)](#extension-mode-v2-new)
 - [CLI Options Reference](#cli-options-reference)
 - [Common Use Cases](#common-use-cases)
 - [File Export](#file-export)
@@ -58,7 +60,11 @@ Or add it to your package.json scripts:
 
 ## Quick Start
 
-### Monitor a Single Application
+Console Bridge v2.0.0 supports **two modes**: Puppeteer Mode (v1 compatible) and Extension Mode (NEW).
+
+### Puppeteer Mode (v1 Compatible)
+
+**Monitor a Single Application**
 
 ```bash
 console-bridge start localhost:3000
@@ -70,7 +76,7 @@ This will:
 3. Stream all console logs to your terminal in real-time
 4. Display logs with timestamps, colors, and source labels
 
-### Monitor Multiple Applications
+**Monitor Multiple Applications**
 
 ```bash
 console-bridge start localhost:3000 localhost:8080 localhost:5000
@@ -78,9 +84,106 @@ console-bridge start localhost:3000 localhost:8080 localhost:5000
 
 Each URL gets its own browser instance and color-coded output.
 
-### Stop Monitoring
+**Stop Monitoring**
 
 Press `Ctrl+C` to gracefully shut down all browser instances.
+
+---
+
+### Extension Mode (v2 NEW)
+
+**What is Extension Mode?**
+
+Extension mode lets you monitor console logs from **YOUR Chrome browser** (with React DevTools, Vue DevTools, etc.) while streaming them to your terminal.
+
+**Installation**
+
+1. Install the Chrome extension:
+   - **Option A:** Chrome Web Store (coming soon - Phase 3)
+   - **Option B:** Developer mode (available now)
+     ```bash
+     # Open chrome://extensions in Chrome
+     # Enable "Developer mode"
+     # Click "Load unpacked" → Select C:/Claude/console-bridge-v2/chrome-extension-poc/
+     ```
+
+2. Start the CLI in extension mode:
+   ```bash
+   console-bridge start --extension-mode
+   ```
+
+**Basic Usage**
+
+```bash
+# 1. Start CLI in extension mode
+console-bridge start --extension-mode
+
+# Output:
+# WebSocket server listening on ws://localhost:9223
+# Waiting for extension connection...
+
+# 2. Open Chrome DevTools on any localhost page
+# 3. Click "Console Bridge" panel in DevTools
+# 4. Console logs from YOUR Chrome → terminal!
+```
+
+**Benefits of Extension Mode:**
+- ✅ Use YOUR Chrome browser (not Puppeteer Chromium)
+- ✅ Works with browser extensions (React DevTools, Vue DevTools, Redux DevTools)
+- ✅ Monitor YOUR interactions (clicks, form submissions, etc.)
+- ✅ Chromium-based browsers (Chrome, Edge, Brave, Opera, Vivaldi)
+
+**Stop Monitoring**
+
+Press `Ctrl+C` to stop the WebSocket server.
+
+---
+
+### Unified Terminal Output (--merge-output)
+
+Console Bridge can merge its output into your dev server's terminal using the `--merge-output` flag, providing a unified workflow.
+
+**Basic Usage:**
+
+```bash
+# Separate terminals (default)
+console-bridge start localhost:3000
+
+# Unified terminal (with concurrently)
+npx concurrently "npm run dev" "console-bridge start localhost:3000 --merge-output"
+```
+
+**How It Works:**
+
+1. Console Bridge extracts the port from the URL
+2. Finds the process listening on that port (using `lsof` on Unix/Mac or `netstat` on Windows)
+3. Redirects output to the same terminal stream
+4. Falls back gracefully if process not found
+
+**Supported Modes:**
+
+All combinations work:
+- `--merge-output` (headless, unified terminal)
+- `--merge-output --no-headless` (headful browser, unified terminal)
+- No flag (headless, separate terminal - default)
+- `--no-headless` (headful browser, separate terminal)
+
+**Example with Multiple Tools:**
+
+```bash
+# Run dev server + Console Bridge in unified terminal
+npx concurrently \
+  "npm run dev" \
+  "console-bridge start localhost:3000 --merge-output"
+```
+
+**Graceful Fallback:**
+
+If the process cannot be found or accessed, Console Bridge falls back to standard output with a message:
+
+```
+ℹ️  No process found listening on port 3000. Using separate terminal.
+```
 
 ---
 
@@ -97,6 +200,25 @@ console-bridge start <urls...> [options]
 - `<urls...>` - One or more localhost URLs to monitor
   - Examples: `localhost:3000`, `http://localhost:8080`, `127.0.0.1:5000`
   - Only localhost/127.0.0.1 URLs are accepted for security
+
+### Mode Selection
+
+**`--extension-mode`**
+Use Extension Mode instead of Puppeteer Mode (v2.0.0 NEW).
+
+```bash
+# Start WebSocket server for extension connection
+console-bridge start --extension-mode
+```
+
+**Note:** In extension mode, you do NOT provide URLs. The extension captures logs from whatever page you have open in Chrome DevTools.
+
+**Mutually Exclusive with:**
+- Cannot use URLs with `--extension-mode`
+- Cannot use `--no-headless` with `--extension-mode` (you control your own browser)
+- Cannot use `--max-instances` with `--extension-mode` (single browser)
+
+---
 
 ### Optional Flags
 
@@ -188,7 +310,56 @@ console-bridge start localhost:3000 localhost:8080 --output combined.log
 
 ## Common Use Cases
 
-### 1. Debugging a Single Dev Server
+### Extension Mode Use Cases (v2.0.0)
+
+#### 1. Interactive Development with Personal Browser
+
+```bash
+# Start extension mode
+console-bridge start --extension-mode
+
+# Use YOUR Chrome with React DevTools, Vue DevTools, etc.
+# All console logs appear in terminal
+```
+
+Perfect for daily development with your favorite browser setup.
+
+#### 2. Testing with Browser Extensions
+
+```bash
+# Start extension mode
+console-bridge start --extension-mode --output debug.log
+
+# Use React DevTools to inspect components
+# Use Vue DevTools to track state changes
+# Console logs saved to debug.log
+```
+
+#### 3. Cross-Browser Testing (Chromium-based)
+
+```bash
+# Test in Chrome
+console-bridge start --extension-mode
+
+# OR test in Edge, Brave, Opera, Vivaldi
+# (Install extension in each browser)
+```
+
+#### 4. Dual-Mode Workflow
+
+```bash
+# Terminal 1: Automated testing (Puppeteer mode)
+console-bridge start localhost:3000 --levels error
+
+# Terminal 2: Interactive dev (Extension mode)
+console-bridge start --extension-mode --no-timestamp
+```
+
+---
+
+### Puppeteer Mode Use Cases (v1.0.0)
+
+#### 1. Debugging a Single Dev Server
 
 ```bash
 console-bridge start localhost:3000
@@ -403,6 +574,52 @@ console-bridge start localhost:3000 localhost:8080 --max-instances 20
 ---
 
 ## FAQ
+
+### Extension Mode FAQs (v2.0.0)
+
+#### Q: What's the difference between Puppeteer Mode and Extension Mode?
+
+**A:**
+- **Puppeteer Mode (v1):** Console Bridge controls a Chromium browser via Puppeteer. Perfect for CI/CD and automation.
+- **Extension Mode (v2):** Console Bridge monitors YOUR Chrome browser via a Chrome extension. Perfect for interactive development with browser extensions like React DevTools.
+
+#### Q: Can I use Extension Mode with Firefox or Safari?
+
+**A:** Not yet. Extension Mode currently supports Chromium-based browsers only (Chrome, Edge, Brave, Opera, Vivaldi). Firefox and Safari support is planned for Phase 4 (Q1 2026).
+
+#### Q: Do I need to install both the CLI and the extension?
+
+**A:** Yes, for Extension Mode you need:
+1. CLI installed globally: `npm install -g console-bridge`
+2. Chrome extension installed (developer mode or Chrome Web Store)
+
+For Puppeteer Mode, you only need the CLI.
+
+#### Q: Can I use Extension Mode and Puppeteer Mode at the same time?
+
+**A:** Yes! Run them in separate terminals:
+```bash
+# Terminal 1: Puppeteer mode
+console-bridge start localhost:3000
+
+# Terminal 2: Extension mode
+console-bridge start --extension-mode
+```
+
+#### Q: How do I know if the extension is connected?
+
+**A:** Check the "Console Bridge" panel in Chrome DevTools. It shows:
+- ✅ Connected (green) - Logs streaming to terminal
+- ❌ Disconnected (red) - CLI not running or connection lost
+- 🔄 Reconnecting (yellow) - Attempting to reconnect
+
+#### Q: What happens if I close the terminal while the extension is running?
+
+**A:** The extension will detect the disconnection and enter reconnecting mode. It will queue up to 1000 messages and automatically reconnect when you restart the CLI.
+
+---
+
+### General FAQs
 
 ### Q: Does this work with remote servers?
 

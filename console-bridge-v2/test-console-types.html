@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Console Types Test</title>
+</head>
+<body>
+  <h1>Console Types Test</h1>
+  <script>
+    // Test all console types with delays to ensure capture
+    setTimeout(() => console.log('[1s] console.log() test'), 1000);
+    setTimeout(() => console.warn('[2s] console.warn() test'), 2000);
+    setTimeout(() => console.error('[3s] console.error() test'), 3000);
+    setTimeout(() => console.info('[4s] console.info() test'), 4000);
+    setTimeout(() => console.debug('[5s] console.debug() test'), 5000);
+
+    // One more round
+    setTimeout(() => console.log('[6s] Second log test'), 6000);
+    setTimeout(() => console.warn('[7s] Second warn test'), 7000);
+    setTimeout(() => console.error('[8s] Second error test'), 8000);
+  </script>
+</body>
+</html>

@@ -49,6 +49,24 @@ class LogCapturer {
       // Re-attach listeners
       this.attachListeners();
     });
+
+    // Handle page crashes with recovery (Phase 6 - Subtask 6.2)
+    this.page.on('error', async (error) => {
+      console.error(`⚠️  Page crashed for ${this.url}: ${error.message}`);
+      console.log('Attempting to recover...');
+
+      try {
+        // Try to reload the page
+        await this.page.reload({ waitUntil: 'networkidle0', timeout: 5000 });
+        console.log(`✓ Page recovered: ${this.url}`);
+
+        // Re-attach listeners after recovery
+        this.attachListeners();
+      } catch (reloadError) {
+        console.error(`❌ Recovery failed for ${this.url}: ${reloadError.message}`);
+        console.log('Page remains crashed. Manual restart may be required.');
+      }
+    });
   }
 
   /**

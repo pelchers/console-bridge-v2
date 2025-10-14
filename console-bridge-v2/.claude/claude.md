@@ -46,6 +46,53 @@
 
 ---
 
+## 📝 Living Documents Policy
+
+**IMPORTANT:** Many documentation files in this project are **living documents** that should be updated when the project evolves.
+
+### What are Living Documents?
+Living documents are files that serve as ongoing project documentation and reporting. They should be kept up-to-date as the project progresses, rather than remaining static snapshots.
+
+### Where are Living Documents Located?
+1. **`.claude/` directory** - ADRs, PRD, TRD, Implementation Plan, Project Summary, Versions, etc.
+2. **`docs/` directory** - User documentation, guides, explainers, API docs, requirements, etc.
+3. **Subdirectories** - Any `.md` files in subdirectories of the above
+
+### When to Update Living Documents?
+Update these files whenever:
+- New features are implemented (PRD, TRD, README)
+- Architecture changes are made (ADRs, TRD)
+- Testing strategies evolve (Testing docs, README)
+- Project status changes (Project Summary, README)
+- New versions are released (Version comparison docs, CHANGELOG)
+- Requirements change (REQUIREMENTS.md, PRD)
+
+### Which Files are Living Documents?
+**Core Living Documents:**
+- `.claude/PRD.md` - Product Requirements (add v2, v3 sections as features evolve)
+- `.claude/TRD.md` - Technical Requirements (update with new architecture)
+- `.claude/IMPLEMENTATION_PLAN.md` - Update with phase progress
+- `.claude/PROJECT_SUMMARY.md` - Always reflects current state
+- `.claude/versions/comparison/v1-to-v2.md` - Update as v2 evolves
+- `README.md` - Primary project overview (always current)
+- `CHANGELOG.md` - Version history (append, don't overwrite)
+- `docs/REQUIREMENTS.md`, `docs/USAGE.md`, `docs/API.md` - User docs
+
+**Static Documents:**
+- ADR completion files (once subtask complete, document is frozen)
+- Phase summaries in `docs/summaries/` (snapshot at completion)
+- Specific version specs in `docs/versions/` or `.claude/versions/`
+
+### Best Practices:
+1. ✅ Update "Last Updated" date when modifying living documents
+2. ✅ Add version sections (v2.0.0, v3.0.0) rather than overwriting v1
+3. ✅ Keep historical information (show evolution, not just current state)
+4. ✅ Update document status ("Living Document", "Updated for v2.0.0", etc.)
+5. ❌ Don't freeze living documents at version milestones (keep updating)
+6. ❌ Don't remove old version info (append, don't replace)
+
+---
+
 ## 📚 Additional Resources
 
 ### Convention Files (⭐ Critical):

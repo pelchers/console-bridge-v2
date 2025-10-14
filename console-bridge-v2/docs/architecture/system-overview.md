@@ -2,7 +2,17 @@
 
 Complete architectural overview explaining how Console Bridge works, browser modes, terminal output options, and application structure.
 
+**Version:** 2.0.0-beta (Dual-Mode Support)
+
 ## Table of Contents
+
+### v2.0.0 Architecture
+- [Dual-Mode Overview (v2.0.0)](#dual-mode-overview-v200)
+- [Mode 1: Puppeteer Mode (v1 Architecture)](#mode-1-puppeteer-mode-v1-architecture)
+- [Mode 2: Extension Mode (v2 NEW)](#mode-2-extension-mode-v2-new)
+- [When to Use Which Mode](#when-to-use-which-mode)
+
+### v1.0.0 Architecture (Puppeteer Mode)
 - [Chromium vs Chrome (Headless Mode)](#chromium-vs-chrome-headless-mode)
 - [Terminal Output - Combined vs Separate](#terminal-output---combined-vs-separate)
 - [Which Mode Has Visual Output?](#which-mode-has-visual-output)
@@ -13,6 +23,248 @@ Complete architectural overview explaining how Console Bridge works, browser mod
 - [Application Structure](#application-structure)
 - [Data Flow](#data-flow)
 - [Component Architecture](#component-architecture)
+
+---
+
+## Dual-Mode Overview (v2.0.0)
+
+Console Bridge v2.0.0 supports **two independent modes** for console log capture:
+
+### Mode 1: Puppeteer Mode (v1.0.0 - Unchanged)
+```bash
+console-bridge start localhost:3000
+```
+- Launches Puppeteer-controlled Chromium browser
+- Perfect for CI/CD, automated testing, headless workflows
+- Cannot use personal browser or browser extensions
+
+### Mode 2: Extension Mode (v2.0.0 - NEW)
+```bash
+console-bridge start --extension-mode
+```
+- Monitors YOUR Chrome browser via Chrome extension
+- Works with browser extensions (React DevTools, Vue DevTools, etc.)
+- Perfect for interactive development
+
+**Both modes use the same CLI, same output formatting, same flags (where applicable).**
+
+---
+
+## Mode 1: Puppeteer Mode (v1 Architecture)
+
+See sections below for complete Puppeteer mode architecture. Key points:
+- Puppeteer launches and controls Chromium
+- Console events captured via CDP (Chrome DevTools Protocol)
+- Headless (invisible) or headful (visible browser window)
+- Multi-URL support (monitor multiple apps simultaneously)
+
+**Use Cases:**
+- ✅ CI/CD pipelines
+- ✅ Automated testing
+- ✅ Headless browser automation
+- ❌ NOT for: Using YOUR Chrome with React DevTools
+
+---
+
+## Mode 2: Extension Mode (v2 NEW)
+
+### Architecture Diagram
+
+```
+┌──────────────────────────────────────────────────────────┐
+│           YOUR Chrome Browser (localhost:3000)           │
+│                                                          │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  Application (React, Next.js, etc.)             │   │
+│  │  console.log("Button clicked")                  │   │
+│  └──────────────────┬──────────────────────────────┘   │
+│                     │                                    │
+│                     ▼                                    │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  Chrome Extension (Console Bridge)              │   │
+│  │  - DevTools Panel UI                            │   │
+│  │  - Console event capture (chrome.devtools API)  │   │
+│  │  - Advanced serialization (Maps, Sets, DOM)     │   │
+│  │  - Message queuing (1000 messages)              │   │
+│  └──────────────────┬──────────────────────────────┘   │
+│                     │                                    │
+└─────────────────────┼────────────────────────────────────┘
+                      │
+                      │ WebSocket (ws://localhost:9223)
+                      │ JSON Message Protocol v1.0.0
+                      │
+                      ▼
+┌──────────────────────────────────────────────────────────┐
+│              Console Bridge CLI                          │
+│                                                          │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  WebSocketServer (localhost:9223)               │   │
+│  │  - Accepts extension connections                │   │
+│  │  - Ping/pong keep-alive (30s interval)          │   │
+│  │  - Auto-reconnect detection                     │   │
+│  └──────────────────┬──────────────────────────────┘   │
+│                     │                                    │
+│                     ▼                                    │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  LogFormatter (reused from v1)                  │   │
+│  │  - Color-coded output                           │   │
+│  │  - Timestamps, source labels                    │   │
+│  └──────────────────┬──────────────────────────────┘   │
+│                     │                                    │
+│                     ▼                                    │
+│              Terminal Output                             │
+│              [12:34:56] [localhost:3000] log: ...        │
+└──────────────────────────────────────────────────────────┘
+```
+
+### Components
+
+#### 1. Chrome Extension (Frontend)
+
+**Location:** `chrome-extension-poc/`
+
+**Key Files:**
+- `manifest.json` - Manifest V3 configuration
+- `background.js` - WebSocket client service worker
+- `devtools/panel.html` - DevTools panel UI
+- `devtools/panel.js` - Console capture logic
+- `serializer.js` - Advanced object serialization
+
+**Responsibilities:**
+- Capture console events via `chrome.devtools.inspectedWindow`
+- Serialize complex objects (Maps, Sets, Promises, DOM elements, circular refs)
+- Send messages to CLI via WebSocket
+- Queue messages during disconnection (up to 1000)
+- Auto-reconnect with exponential backoff
+- Display connection status in DevTools panel
+
+#### 2. WebSocket Protocol v1.0.0
+
+**Port:** 9223 (localhost only - security)
+
+**Message Types:**
+1. `console_event` - Console log from browser → CLI
+2. `connection_status` - Connection state changes
+3. `ping` - CLI → Extension (keep-alive)
+4. `pong` - Extension → CLI (response)
+5. `welcome` - CLI → Extension (on connection)
+
+**Message Envelope:**
+```json
+{
+  "type": "console_event | connection_status | ping | pong | welcome",
+  "timestamp": 1696345678901,
+  "data": { ... }
+}
+```
+
+**Security:**
+- Localhost-only (127.0.0.1)
+- No external network access
+- JSON-only (no code execution)
+
+#### 3. CLI WebSocketServer (Backend)
+
+**Location:** `src/core/WebSocketServer.js`
+
+**Responsibilities:**
+- Listen on ws://localhost:9223
+- Accept extension connections
+- Send welcome message on connection
+- Send ping every 30 seconds
+- Receive console_event messages
+- Format logs via LogFormatter (reused from v1)
+- Output to terminal (same as v1)
+
+### Data Flow (Extension Mode)
+
+```
+1. User opens Chrome DevTools on localhost:3000
+2. Console Bridge extension panel activates
+3. Extension connects to ws://localhost:9223 (CLI)
+4. CLI sends "welcome" message
+5. User's app calls console.log("Hello")
+6. Extension captures via chrome.devtools.inspectedWindow
+7. Extension serializes arguments (Maps, Sets, DOM, etc.)
+8. Extension sends console_event via WebSocket
+9. CLI receives message
+10. CLI formats with LogFormatter (same as v1)
+11. CLI outputs to terminal: [12:34:56] [localhost:3000] log: Hello
+```
+
+### Advanced Features
+
+**Message Queuing:**
+- Extension queues up to 1000 messages during disconnection
+- FIFO (first in, first out)
+- Auto-flush on reconnection
+
+**Ping/Pong Keep-Alive:**
+- CLI sends ping every 30 seconds
+- Extension must respond with pong within 5 seconds
+- Timeout triggers reconnection
+
+**Auto-Reconnect (Exponential Backoff):**
+- 1st attempt: 1 second
+- 2nd attempt: 2 seconds
+- 3rd attempt: 4 seconds
+- 4th attempt: 8 seconds
+- 5th attempt: 16 seconds
+- Max 5 attempts, then give up
+
+**Advanced Serialization:**
+- Maps → `{ __type__: 'Map', entries: [[key, value], ...] }`
+- Sets → `{ __type__: 'Set', values: [...] }`
+- Promises → `{ __type__: 'Promise', state: 'pending' }`
+- Symbols → `{ __type__: 'Symbol', description: '...' }`
+- BigInt → `{ __type__: 'BigInt', value: '123...' }`
+- Circular refs → `{ __circular__: true }`
+- DOM elements → `{ __type__: 'Element', tagName: 'div', id: 'app', className: '...' }`
+
+### Browser Support (Extension Mode)
+
+| Browser | Supported | Notes |
+|---------|-----------|-------|
+| Chrome/Chromium | ✅ Yes | Primary target |
+| Microsoft Edge | ✅ Yes | Chromium-based |
+| Brave | ✅ Yes | Chromium-based |
+| Opera | ✅ Yes | Chromium-based |
+| Vivaldi | ✅ Yes | Chromium-based |
+| Firefox | ⏳ Planned | Phase 4 (Q1 2026) |
+| Safari | ⏳ Planned | Phase 4 (Q1 2026) |
+
+---
+
+## When to Use Which Mode
+
+### Use Puppeteer Mode When:
+- ✅ Running automated tests in CI/CD
+- ✅ Need headless browser (no GUI)
+- ✅ Monitoring multiple URLs simultaneously
+- ✅ Don't need browser extensions (React DevTools, etc.)
+
+### Use Extension Mode When:
+- ✅ Interactive development with YOUR browser
+- ✅ Using browser extensions (React DevTools, Vue DevTools, Redux DevTools)
+- ✅ Testing in YOUR Chrome with your setup
+- ✅ Cross-browser testing (Chromium-based browsers)
+
+### Use Both Modes (Dual-Mode Workflow)
+```bash
+# Terminal 1: Automated testing (Puppeteer mode)
+console-bridge start localhost:3000 --levels error
+
+# Terminal 2: Interactive development (Extension mode)
+console-bridge start --extension-mode
+```
+
+---
+
+# v1.0.0 Puppeteer Mode Architecture
+
+The sections below detail the Puppeteer mode architecture (v1.0.0), which is 100% preserved in v2.0.0.
+
+---
 
 ---
 
