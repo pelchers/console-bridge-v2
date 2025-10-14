@@ -260,6 +260,63 @@ console-bridge start --extension-mode
 
 ---
 
+## Port and URL Configuration
+
+### Extension Mode: No URL Required
+
+**Key Point:** Extension Mode does NOT require specifying a URL or port.
+
+```bash
+# Start extension mode (no URL needed)
+console-bridge start --extension-mode
+
+# Extension captures from whatever page you browse to:
+# localhost:3000 → Shows [localhost:3000] in terminal
+# localhost:8080 → Shows [localhost:8080] in terminal
+# localhost:3847 → Shows [localhost:3847] in terminal
+```
+
+**How it works:**
+1. WebSocket server starts on port 9090 (configurable with `--port`)
+2. You browse to ANY localhost URL in Chrome
+3. Open DevTools → "Console Bridge" tab → "Connect"
+4. Logs from that page stream to terminal
+5. URL label appears dynamically based on the page
+
+**No URL configuration needed - extension captures from whichever page has DevTools open and connected.**
+
+### Puppeteer Mode: URL Required
+
+**Key Point:** Puppeteer Mode REQUIRES specifying the URL and port.
+
+```bash
+# URL/port REQUIRED
+console-bridge start localhost:3000
+
+# Multiple URLs supported
+console-bridge start localhost:3000 localhost:8080 localhost:5173
+```
+
+**Supported formats:**
+- `localhost:PORT` (recommended)
+- `http://localhost:PORT`
+- `127.0.0.1:PORT`
+- `https://localhost:PORT`
+
+**Security:** Only localhost/127.0.0.1 URLs allowed (no remote sites).
+
+### localhost vs 127.0.0.1
+
+Both work identically:
+```bash
+console-bridge start localhost:3000
+console-bridge start 127.0.0.1:3000  # Equivalent
+```
+
+**See:** [Port and URL Configuration Guide](../guides/port-and-url-configuration.md) for complete details.
+
+---
+
 # v1.0.0 Puppeteer Mode Architecture
 
 The sections below detail the Puppeteer mode architecture (v1.0.0), which is 100% preserved in v2.0.0.

@@ -107,7 +107,7 @@ Extension mode lets you monitor console logs from **YOUR Chrome browser** (with 
      # Click "Load unpacked" → Select C:/Claude/console-bridge-v2/chrome-extension-poc/
      ```
 
-2. Start the CLI in extension mode:
+2. Start the CLI in extension mode (NO URL NEEDED):
    ```bash
    console-bridge start --extension-mode
    ```
@@ -115,17 +115,27 @@ Extension mode lets you monitor console logs from **YOUR Chrome browser** (with 
 **Basic Usage**
 
 ```bash
-# 1. Start CLI in extension mode
+# 1. Start CLI in extension mode (NO URL/PORT SPECIFIED)
 console-bridge start --extension-mode
 
 # Output:
-# WebSocket server listening on ws://localhost:9223
+# WebSocket server listening on ws://localhost:9090
 # Waiting for extension connection...
 
-# 2. Open Chrome DevTools on any localhost page
-# 3. Click "Console Bridge" panel in DevTools
-# 4. Console logs from YOUR Chrome → terminal!
+# 2. Browse to ANY localhost page in Chrome (e.g., localhost:3000, localhost:8080)
+# 3. Open Chrome DevTools (F12)
+# 4. Click "Console Bridge" tab in DevTools
+# 5. Click "Connect" button
+# 6. Console logs from that page → terminal!
 ```
+
+**Key Difference from Puppeteer Mode:**
+- ❌ **NO URL/port specified** when starting Console Bridge
+- ✅ **Extension captures from whatever page you're viewing**
+- ✅ **Works with any localhost port** (3000, 8080, 3847, etc.)
+- ✅ **URL label appears dynamically** based on the page: `[localhost:3000]`
+
+**See:** [Port and URL Configuration Guide](./guides/port-and-url-configuration.md) for details.
 
 **Benefits of Extension Mode:**
 - ✅ Use YOUR Chrome browser (not Puppeteer Chromium)

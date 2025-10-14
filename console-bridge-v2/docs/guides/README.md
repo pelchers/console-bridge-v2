@@ -48,6 +48,21 @@ Learn how to:
 
 ---
 
+### [Port and URL Configuration](./port-and-url-configuration.md)
+**Understand how ports and URLs work in Console Bridge**
+
+Topics covered:
+- Extension Mode: No URL required
+- Puppeteer Mode: URL required
+- localhost vs 127.0.0.1
+- Port discovery and process attachment
+- Multi-port and multi-tab support
+- Common configuration questions
+
+👉 **[Read Port Configuration Guide →](./port-and-url-configuration.md)**
+
+---
+
 ### [Advanced Usage](./advanced-usage.md)
 **Master advanced features and CLI options**
 
