@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Streaming Test Page</title>
+</head>
+<body>
+  <h1>Console Streaming Test</h1>
+  <p>This page logs periodically to test real-time streaming.</p>
+  <p id="counter">Count: 0</p>
+
+  <script>
+    console.log('[Streaming] Page loaded - starting periodic logs');
+
+    let count = 0;
+
+    // Log every second
+    const intervalId = setInterval(() => {
+      count++;
+      console.log(`[Streaming] Periodic log #${count}`);
+
+      // Update counter on page
+      document.getElementById('counter').textContent = `Count: ${count}`;
+
+      // Stop after 10 logs
+      if (count >= 10) {
+        clearInterval(intervalId);
+        console.log('[Streaming] Completed 10 periodic logs');
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

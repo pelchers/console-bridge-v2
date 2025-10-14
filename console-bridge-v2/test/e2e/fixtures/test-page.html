@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>E2E Test Page</title>
+</head>
+<body>
+  <h1>Console Bridge E2E Test Page</h1>
+  <p>This page is used for end-to-end testing of Console Bridge.</p>
+
+  <button id="test-btn">Click Me</button>
+  <button id="warn-btn">Trigger Warning</button>
+  <button id="error-btn">Trigger Error</button>
+
+  <script>
+    // Log on page load
+    console.log('[Test Page] Page loaded successfully');
+    console.log('[Test Page] Console Bridge should capture this');
+
+    // Button click handlers
+    document.getElementById('test-btn').addEventListener('click', () => {
+      console.log('[Test Page] Button clicked!');
+    });
+
+    document.getElementById('warn-btn').addEventListener('click', () => {
+      console.warn('[Test Page] Warning: This is a test warning');
+    });
+
+    document.getElementById('error-btn').addEventListener('click', () => {
+      console.error('[Test Page] Error: This is a test error');
+    });
+
+    // Log console types
+    console.info('[Test Page] Info message');
+    console.debug('[Test Page] Debug message');
+  </script>
+</body>
+</html>

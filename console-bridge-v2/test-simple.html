@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Test</title>
+</head>
+<body>
+  <h1>Console Bridge Test Page</h1>
+  <p>Check your terminal for console logs!</p>
+
+  <script>
+    console.log('[Test] Page loaded successfully!');
+    console.log('[Test] Console Bridge should capture this');
+    console.warn('[Test] This is a warning');
+    console.error('[Test] This is an error');
+
+    // Log every second
+    let count = 0;
+    setInterval(() => {
+      count++;
+      console.log(`[Test] Periodic log #${count}`);
+    }, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Comprehensive Test Page</title>
+</head>
+<body>
+  <h1>Console Bridge Comprehensive Test</h1>
+  <p>Testing all console types and functionality</p>
+
+  <div>
+    <h2>Test Buttons:</h2>
+    <button onclick="testLog()">Test console.log()</button>
+    <button onclick="testWarn()">Test console.warn()</button>
+    <button onclick="testError()">Test console.error()</button>
+    <button onclick="testInfo()">Test console.info()</button>
+    <button onclick="testDebug()">Test console.debug()</button>
+  </div>
+
+  <script>
+    console.log('[INIT] Page loaded - starting comprehensive tests');
+
+    // Test all console types on load
+    console.log('[TEST] console.log() - This is a log message');
+    console.warn('[TEST] console.warn() - This is a warning');
+    console.error('[TEST] console.error() - This is an error');
+    console.info('[TEST] console.info() - This is an info message');
+    console.debug('[TEST] console.debug() - This is a debug message');
+
+    // Test button functions
+    function testLog() {
+      console.log('[BUTTON] User clicked log button');
+    }
+
+    function testWarn() {
+      console.warn('[BUTTON] User clicked warn button');
+    }
+
+    function testError() {
+      console.error('[BUTTON] User clicked error button');
+    }
+
+    function testInfo() {
+      console.info('[BUTTON] User clicked info button');
+    }
+
+    function testDebug() {
+      console.debug('[BUTTON] User clicked debug button');
+    }
+
+    // Periodic logs for streaming test
+    let count = 0;
+    setInterval(() => {
+      count++;
+      console.log(`[STREAMING] Periodic log #${count} at ${new Date().toISOString()}`);
+    }, 2000); // Every 2 seconds
+
+    console.log('[INIT] All tests initialized successfully');
+  </script>
+</body>
+</html>
