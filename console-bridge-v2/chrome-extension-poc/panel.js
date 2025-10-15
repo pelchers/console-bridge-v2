@@ -399,7 +399,7 @@ class ConsoleBridgePOC {
 
             window.__consoleBridgeQueue.push({
               method: 'error',
-              args: [`Unhandled Promise Rejection: ${message}`],
+              args: ['Unhandled Promise Rejection: ' + message],
               timestamp: Date.now(),
               location: {
                 url: window.location.href
@@ -428,7 +428,7 @@ class ConsoleBridgePOC {
 
                   window.__consoleBridgeQueue.push({
                     method: 'error',
-                    args: [`${method} ${url} ${response.status} (${response.statusText})`],
+                    args: [method + ' ' + url + ' ' + response.status + ' (' + response.statusText + ')'],
                     timestamp: Date.now(),
                     location: {
                       url: window.location.href
@@ -449,7 +449,7 @@ class ConsoleBridgePOC {
 
                 window.__consoleBridgeQueue.push({
                   method: 'error',
-                  args: [`Fetch failed loading: ${method} "${url}".`],
+                  args: ['Fetch failed loading: ' + method + ' "' + url + '".'],
                   timestamp: Date.now(),
                   location: {
                     url: window.location.href
@@ -484,7 +484,7 @@ class ConsoleBridgePOC {
 
                 window.__consoleBridgeQueue.push({
                   method: 'error',
-                  args: [`${this.__consoleBridge_method} ${this.__consoleBridge_url} ${this.status} (${this.statusText})`],
+                  args: [this.__consoleBridge_method + ' ' + this.__consoleBridge_url + ' ' + this.status + ' (' + this.statusText + ')'],
                   timestamp: Date.now(),
                   location: {
                     url: window.location.href
@@ -505,7 +505,7 @@ class ConsoleBridgePOC {
 
               window.__consoleBridgeQueue.push({
                 method: 'error',
-                args: [`Network error: ${this.__consoleBridge_method} ${this.__consoleBridge_url}`],
+                args: ['Network error: ' + this.__consoleBridge_method + ' ' + this.__consoleBridge_url],
                 timestamp: Date.now(),
                 location: {
                   url: window.location.href
