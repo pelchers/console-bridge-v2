@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Console Bridge - Comprehensive Capture Test Suite</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    .test-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-section h2 {
+      color: #4CAF50;
+      margin-top: 0;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button.danger {
+      background: #f44336;
+    }
+    button.danger:hover {
+      background: #da190b;
+    }
+    button.warning {
+      background: #ff9800;
+    }
+    button.warning:hover {
+      background: #e68900;
+    }
+    .instructions {
+      background: #e3f2fd;
+      padding: 15px;
+      border-left: 4px solid #2196F3;
+      margin: 20px 0;
+    }
+    .expected {
+      background: #f1f8e9;
+      padding: 10px;
+      border-left: 4px solid #8BC34A;
+      margin: 10px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .status.pass {
+      background: #c8e6c9;
+      color: #2e7d32;
+    }
+    .status.pending {
+      background: #fff9c4;
+      color: #f57f17;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Console Bridge - Comprehensive Capture Test Suite</h1>
+
+  <div class="instructions">
+    <h3>📋 Testing Instructions</h3>
+    <ol>
+      <li>Open Chrome DevTools (F12)</li>
+      <li>Go to the <strong>"Console Bridge"</strong> tab</li>
+      <li>Verify it shows <code>Connected</code> status</li>
+      <li>Check your terminal/CLI where you ran <code>console-bridge start --extension-mode</code></li>
+      <li>Click each test button below</li>
+      <li>Verify the expected output appears in your terminal</li>
+    </ol>
+    <p><strong>Goal:</strong> Achieve 1:1 parity between Chrome Console and terminal output</p>
+  </div>
+
+  <!-- Test 1: Console.log (Baseline - Already Working) -->
+  <div class="test-section">
+    <h2>✅ Test 1: Console.log (Baseline)</h2>
+    <p>This test verifies that existing console.log() capture still works (no breaking changes).</p>
+    <button onclick="test1_consoleLog()">Run Test 1</button>
+    <div class="expected">
+      <strong>Expected Terminal Output:</strong><br>
+      [HH:MM:SS] [localhost:XXXX] log: Hello from Extension Mode! Test 1 passed.
+    </div>
+  </div>
+
+  <!-- Test 2: Uncaught Exception -->
+  <div class="test-section">
+    <h2>🔴 Test 2: Uncaught Exception</h2>
+    <p>This test throws an uncaught error. The extension should capture it with a stack trace.</p>
+    <button class="danger" onclick="test2_uncaughtException()">Run Test 2 (Will cause error)</button>
+    <div class="expected">
+      <strong>Expected Terminal Output:</strong><br>
+      [HH:MM:SS] [localhost:XXXX] error: Uncaught Error: Test uncaught exception from Test 2<br>
+      &nbsp;&nbsp;at test2_uncaughtException (&lt;this-file&gt;:&lt;line&gt;:&lt;col&gt;)<br>
+      &nbsp;&nbsp;at HTMLButtonElement.onclick (&lt;this-file&gt;:1:1)
+    </div>
+  </div>
+
+  <!-- Test 3: Unhandled Promise Rejection -->
+  <div class="test-section">
+    <h2>🟠 Test 3: Unhandled Promise Rejection</h2>
+    <p>This test creates an unhandled promise rejection. The extension should capture it.</p>
+    <button class="warning" onclick="test3_promiseRejection()">Run Test 3</button>
+    <div class="expected">
+      <strong>Expected Terminal Output:</strong><br>
+      [HH:MM:SS] [localhost:XXXX] error: Unhandled Promise Rejection: Test promise rejection from Test 3
+    </div>
+  </div>
+
+  <!-- Test 4: Network 404 Error -->
+  <div class="test-section">
+    <h2>🌐 Test 4: Network 404 Error</h2>
+    <p>This test makes a fetch request to a non-existent endpoint (404 error).</p>
+    <button onclick="test4_network404()">Run Test 4</button>
+    <div class="expected">
+      <strong>Expected Terminal Output:</strong><br>
+      [HH:MM:SS] [localhost:XXXX] error: GET http://localhost:4000/nonexistent 404 (Not Found)
+    </div>
+  </div>
+
+  <!-- Test 5: Fetch Failure (Network Error) -->
+  <div class="test-section">
+    <h2>❌ Test 5: Fetch Failure (Network Error)</h2>
+    <p>This test attempts to fetch from a URL that will cause a network error (connection refused).</p>
+    <button onclick="test5_fetchFailure()">Run Test 5</button>
+    <div class="expected">
+      <strong>Expected Terminal Output:</strong><br>
+      [HH:MM:SS] [localhost:XXXX] error: Fetch failed loading: GET "http://localhost:9999/nonexistent".
+    </div>
+  </div>
+
+  <!-- Test 6: Multiple Errors in Sequence -->
+  <div class="test-section">
+    <h2>🔄 Test 6: Multiple Errors in Sequence</h2>
+    <p>This test combines console.log, console.error, and a 404 fetch in sequence.</p>
+    <button onclick="test6_multipleErrors()">Run Test 6</button>
+    <div class="expected">
+      <strong>Expected Terminal Output:</strong><br>
+      [HH:MM:SS] [localhost:XXXX] log: Starting Test 6: Multiple errors test<br>
+      [HH:MM:SS] [localhost:XXXX] error: Explicit console.error call from Test 6<br>
+      [HH:MM:SS] [localhost:XXXX] warn: This is a warning from Test 6<br>
+      [HH:MM:SS] [localhost:XXXX] error: GET http://localhost:4000/api/components/modal-dialog/source 404 (Not Found)<br>
+      [HH:MM:SS] [localhost:XXXX] log: Test 6 complete
+    </div>
+  </div>
+
+  <!-- Test 7: Real-World Scenario (User's Bug) -->
+  <div class="test-section">
+    <h2>🎯 Test 7: Real-World Scenario (FileViewModal.tsx 404)</h2>
+    <p>This test reproduces the user's exact FileViewModal.tsx 404 error scenario.</p>
+    <button onclick="test7_realWorld()">Run Test 7</button>
+    <div class="expected">
+      <strong>Expected Terminal Output:</strong><br>
+      [HH:MM:SS] [localhost:XXXX] log: Simulating FileViewModal.tsx fetch...<br>
+      [HH:MM:SS] [localhost:XXXX] error: GET http://localhost:4000/api/components/modal-dialog/source 404 (Not Found)<br>
+      [HH:MM:SS] [localhost:XXXX] error: Fetch failed loading: GET "http://localhost:4000/api/components/modal-dialog/source".
+    </div>
+  </div>
+
+  <!-- Run All Tests -->
+  <div class="test-section" style="background: #e8f5e9;">
+    <h2>🚀 Run All Tests</h2>
+    <p>Execute all 7 test cases sequentially with a 2-second delay between each.</p>
+    <button style="font-size: 18px; padding: 15px 30px;" onclick="runAllTests()">▶️ Run All Tests (Auto)</button>
+    <div id="auto-test-status"></div>
+  </div>
+
+  <script>
+    // Test 1: Console.log (Baseline)
+    function test1_consoleLog() {
+      console.log('Hello from Extension Mode! Test 1 passed.');
+    }
+
+    // Test 2: Uncaught Exception
+    function test2_uncaughtException() {
+      // This will throw an error that should be caught by window.addEventListener('error')
+      setTimeout(() => {
+        throw new Error('Test uncaught exception from Test 2');
+      }, 0);
+    }
+
+    // Test 3: Unhandled Promise Rejection
+    function test3_promiseRejection() {
+      // This will trigger window.addEventListener('unhandledrejection')
+      Promise.reject('Test promise rejection from Test 3');
+    }
+
+    // Test 4: Network 404 Error
+    function test4_network404() {
+      fetch('http://localhost:4000/nonexistent')
+        .then(response => {
+          console.log('Test 4: Received response with status:', response.status);
+        })
+        .catch(error => {
+          console.log('Test 4: Fetch error:', error.message);
+        });
+    }
+
+    // Test 5: Fetch Failure (Network Error)
+    function test5_fetchFailure() {
+      fetch('http://localhost:9999/nonexistent')
+        .then(response => {
+          console.log('Test 5: Received response (unexpected)');
+        })
+        .catch(error => {
+          console.log('Test 5: Network error occurred (expected):', error.message);
+        });
+    }
+
+    // Test 6: Multiple Errors in Sequence
+    function test6_multipleErrors() {
+      console.log('Starting Test 6: Multiple errors test');
+      console.error('Explicit console.error call from Test 6');
+      console.warn('This is a warning from Test 6');
+
+      fetch('http://localhost:4000/api/components/modal-dialog/source')
+        .then(response => {
+          console.log('Test 6: Fetch response status:', response.status);
+        })
+        .catch(error => {
+          console.log('Test 6: Fetch error:', error.message);
+        })
+        .finally(() => {
+          console.log('Test 6 complete');
+        });
+    }
+
+    // Test 7: Real-World Scenario (User's FileViewModal.tsx bug)
+    function test7_realWorld() {
+      console.log('Simulating FileViewModal.tsx fetch...');
+
+      fetch('http://localhost:4000/api/components/modal-dialog/source')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .catch(error => {
+          // In the real app, this is where the error would be logged
+          console.log('FileViewModal error handling:', error.message);
+        });
+    }
+
+    // Run all tests sequentially
+    async function runAllTests() {
+      const statusDiv = document.getElementById('auto-test-status');
+      statusDiv.innerHTML = '<p style="color: #1976d2; font-weight: bold;">🔄 Running all tests...</p>';
+
+      const tests = [
+        { name: 'Test 1: Console.log', fn: test1_consoleLog },
+        { name: 'Test 2: Uncaught Exception', fn: test2_uncaughtException },
+        { name: 'Test 3: Promise Rejection', fn: test3_promiseRejection },
+        { name: 'Test 4: Network 404', fn: test4_network404 },
+        { name: 'Test 5: Fetch Failure', fn: test5_fetchFailure },
+        { name: 'Test 6: Multiple Errors', fn: test6_multipleErrors },
+        { name: 'Test 7: Real-World Scenario', fn: test7_realWorld }
+      ];
+
+      for (let i = 0; i < tests.length; i++) {
+        statusDiv.innerHTML = `<p style="color: #1976d2; font-weight: bold;">⏳ Running ${tests[i].name}... (${i + 1}/${tests.length})</p>`;
+        console.log(`\n========== ${tests[i].name} ==========`);
+        tests[i].fn();
+        await new Promise(resolve => setTimeout(resolve, 2000)); // 2-second delay
+      }
+
+      statusDiv.innerHTML = '<p style="color: #2e7d32; font-weight: bold;">✅ All tests complete! Check your terminal for output.</p>';
+      console.log('\n========== All Tests Complete ==========');
+    }
+  </script>
+</body>
+</html>
