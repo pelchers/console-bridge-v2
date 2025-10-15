@@ -234,9 +234,14 @@ class ConsoleBridgePOC {
       (result, isException) => {
         if (isException) {
           console.error('[Console Bridge POC] Failed to inject capture script:', isException);
-          this.showError('Failed to inject console capture script');
+          this.showError(`Failed to inject console capture script: ${JSON.stringify(isException)}`);
           this.stats.errors++;
           this.updateStats();
+
+          // Try alternative monitoring method
+          console.log('[Console Bridge POC] Trying alternative monitoring method...');
+          this.monitorConsoleAPI();
+          this.listenForConsoleEvents(); // Start polling for events
         } else {
           console.log('[Console Bridge POC] Console capture injected successfully');
           this.listenForConsoleEvents();
@@ -342,7 +347,7 @@ class ConsoleBridgePOC {
               }
 
               window.__consoleBridgeQueue.push({
-                method: '${method}',
+                method: method,
                 args: serializedArgs,
                 timestamp: Date.now(),
                 location: {
