@@ -1,9 +1,10 @@
 # ADR: Comprehensive Console Capture - Phase 2, Subtask 2.5
 
 **Date:** 2025-10-15
-**Status:** 🚧 In Progress (P0 - Critical Blocker for v2.0.0)
+**Status:** ✅ Implementation Complete - Awaiting Testing (P0 - Critical Blocker for v2.0.0)
 **Context:** Phase 2 - Extension Mode Development
 **Subtask:** 2.5 - Comprehensive Console Capture (All Chrome Console Events)
+**Implementation Date:** 2025-10-15
 
 ---
 
@@ -512,20 +513,20 @@ fetch('http://localhost:4000/api/components/modal-dialog/source');
 ## Implementation Checklist
 
 ### Before Starting
-- [ ] Create branch: `phase-2-subtask-2.5-comprehensive-console-capture`
-- [ ] Review existing panel.js implementation
+- [x] Create branch: `phase-2-subtask-2.5-comprehensive-console-capture`
+- [x] Review existing panel.js implementation
 - [ ] Set up test environment (localhost app with errors)
 
 ### Phase 1: Error Handlers
-- [ ] Add `window.addEventListener('error')` handler
-- [ ] Add `window.addEventListener('unhandledrejection')` handler
+- [x] Add `window.addEventListener('error')` handler
+- [x] Add `window.addEventListener('unhandledrejection')` handler
 - [ ] Test uncaught exception capture
 - [ ] Test promise rejection capture
 - [ ] Verify stack traces included
 
 ### Phase 2: Network Interception
-- [ ] Intercept `window.fetch` API
-- [ ] Intercept `XMLHttpRequest` API
+- [x] Intercept `window.fetch` API
+- [x] Intercept `XMLHttpRequest` API
 - [ ] Test 404 error capture
 - [ ] Test fetch failure capture
 - [ ] Test CORS error capture (if applicable)
@@ -539,12 +540,185 @@ fetch('http://localhost:4000/api/components/modal-dialog/source');
 - [ ] Stack traces properly formatted
 
 ### Documentation & Merge
-- [ ] Update ADR with final implementation notes
-- [ ] Add code comments explaining error handlers
+- [x] Update ADR with implementation completion status
+- [x] Add code comments explaining error handlers
 - [ ] Test in clean Chrome profile (no conflicts)
-- [ ] Commit with descriptive message
+- [x] Commit with descriptive message
 - [ ] Merge to `phase-8-chrome-web-store-submission`
 - [ ] Push to all relevant branches (master, pre-release, phase-8, snapshot)
+
+---
+
+## Implementation Complete (October 15, 2025)
+
+### What Was Implemented
+
+**File Modified:** `chrome-extension-poc/panel.js` (lines 364-520 in `monitorConsoleAPI()` function)
+
+**Phase 1: Global Error Handlers** ✅
+- Added `window.addEventListener('error')` to capture uncaught exceptions
+- Added `window.addEventListener('unhandledrejection')` to capture promise rejections
+- Both handlers include stack trace capture and location information
+- Errors pushed to `window.__consoleBridgeQueue` with proper structure
+
+**Phase 2: Network Error Interception** ✅
+- Intercepted `window.fetch` API to capture HTTP errors (404, 500, etc.)
+- Intercepted `XMLHttpRequest` API to capture XHR errors
+- Both HTTP status code errors and network failures captured
+- Original behavior preserved (re-throw errors to maintain app functionality)
+
+### Code Additions
+
+**Error Handler (lines 364-386):**
+```javascript
+window.addEventListener('error', function(event) {
+  try {
+    if (!window.__consoleBridgeQueue) {
+      window.__consoleBridgeQueue = [];
+    }
+
+    window.__consoleBridgeQueue.push({
+      method: 'error',
+      args: [event.message],
+      timestamp: Date.now(),
+      location: {
+        url: window.location.href,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno
+      },
+      stackTrace: event.error ? event.error.stack : null
+    });
+  } catch (error) {
+    console.error('[Console Bridge] Error handler failed:', error);
+  }
+}, true);
+```
+
+**Promise Rejection Handler (lines 388-412):**
+```javascript
+window.addEventListener('unhandledrejection', function(event) {
+  try {
+    if (!window.__consoleBridgeQueue) {
+      window.__consoleBridgeQueue = [];
+    }
+
+    const reason = event.reason;
+    const message = reason instanceof Error
+      ? reason.message
+      : String(reason);
+
+    window.__consoleBridgeQueue.push({
+      method: 'error',
+      args: [`Unhandled Promise Rejection: ${message}`],
+      timestamp: Date.now(),
+      location: {
+        url: window.location.href
+      },
+      stackTrace: reason instanceof Error ? reason.stack : null
+    });
+  } catch (error) {
+    console.error('[Console Bridge] Promise rejection handler failed:', error);
+  }
+});
+```
+
+**Fetch Interception (lines 414-464):**
+```javascript
+const originalFetch = window.fetch;
+window.fetch = function(...args) {
+  const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || 'unknown';
+  const method = args[1] && args[1].method ? args[1].method.toUpperCase() : 'GET';
+
+  return originalFetch.apply(this, args)
+    .then(response => {
+      if (!response.ok) {
+        // Capture HTTP errors
+        window.__consoleBridgeQueue.push({
+          method: 'error',
+          args: [`${method} ${url} ${response.status} (${response.statusText})`],
+          timestamp: Date.now(),
+          location: { url: window.location.href }
+        });
+      }
+      return response;
+    })
+    .catch(error => {
+      // Capture network failures
+      window.__consoleBridgeQueue.push({
+        method: 'error',
+        args: [`Fetch failed loading: ${method} "${url}".`],
+        timestamp: Date.now(),
+        location: { url: window.location.href },
+        stackTrace: error.stack || null
+      });
+      throw error; // Preserve original behavior
+    });
+};
+```
+
+**XHR Interception (lines 466-520):**
+```javascript
+const originalXHROpen = XMLHttpRequest.prototype.open;
+const originalXHRSend = XMLHttpRequest.prototype.send;
+
+XMLHttpRequest.prototype.open = function(method, url, ...args) {
+  this.__consoleBridge_url = url;
+  this.__consoleBridge_method = method;
+  return originalXHROpen.apply(this, [method, url, ...args]);
+};
+
+XMLHttpRequest.prototype.send = function(...args) {
+  this.addEventListener('load', function() {
+    if (this.status >= 400) {
+      // Capture HTTP errors
+      window.__consoleBridgeQueue.push({
+        method: 'error',
+        args: [`${this.__consoleBridge_method} ${this.__consoleBridge_url} ${this.status} (${this.statusText})`],
+        timestamp: Date.now(),
+        location: { url: window.location.href }
+      });
+    }
+  });
+
+  this.addEventListener('error', function() {
+    // Capture network failures
+    window.__consoleBridgeQueue.push({
+      method: 'error',
+      args: [`Network error: ${this.__consoleBridge_method} ${this.__consoleBridge_url}`],
+      timestamp: Date.now(),
+      location: { url: window.location.href }
+    });
+  });
+
+  return originalXHRSend.apply(this, args);
+};
+```
+
+### Expected Coverage Improvement
+
+**Before:** ~20% console coverage (only explicit `console.*()` calls)
+**After:** ~95-100% console coverage including:
+- ✅ console.log/info/warn/error/debug (already working)
+- ✅ Uncaught exceptions
+- ✅ Unhandled promise rejections
+- ✅ HTTP errors (404, 500, etc.)
+- ✅ Network failures (CORS, connection refused)
+- ✅ Stack traces
+
+### Next Steps
+
+**Required Testing:**
+1. Load extension in Chrome (chrome://extensions/ → Reload)
+2. Start CLI in extension mode: `console-bridge start --extension-mode`
+3. Run 6 test cases (see Testing Strategy section above)
+4. Validate user's FileViewModal.tsx 404 error is captured
+5. Verify no breaking changes to existing console.log() capture
+
+**On Test Success:**
+- Merge to `phase-8-chrome-web-store-submission`
+- Push to all 4 branches (master, pre-release, phase-8, snapshot)
+- Proceed with Chrome Web Store screenshots and submission
 
 ---
 
@@ -557,4 +731,4 @@ fetch('http://localhost:4000/api/components/modal-dialog/source');
 
 ---
 
-**Status:** Ready for implementation (awaiting branch creation and user approval)
+**Status:** ✅ Implementation Complete - Awaiting Testing (October 15, 2025)
