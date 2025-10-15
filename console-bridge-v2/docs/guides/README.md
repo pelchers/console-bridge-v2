@@ -20,16 +20,17 @@ Step-by-step instructions:
 
 ---
 
-### 2. [Usage Guide](./2-usage-guide.md)
-**Learn the 4 ways to run Console Bridge**
+### 2. [Workflow Guide](./2-workflow-guide.md)
+**Learn the 5 ways to run Console Bridge**
 
 Choose your method:
-- **Method 1:** Basic (2 terminals) - Simple learning
+- **Method 1:** Basic Puppeteer (2 terminals) - Simple learning
 - **Method 2:** Manual merge (2 terminals) - Advanced
-- **Method 3:** Unified terminal (1 terminal) - **Recommended**
+- **Method 3:** Unified Puppeteer (1 terminal) - Recommended for automation
 - **Method 4:** Headful debug - Visual debugging
+- **Method 5:** Extension Mode (1 terminal) - **Recommended for daily development**
 
-👉 **[Read Usage Guide →](./2-usage-guide.md)**
+👉 **[Read Workflow Guide →](./2-workflow-guide.md)**
 
 ---
 

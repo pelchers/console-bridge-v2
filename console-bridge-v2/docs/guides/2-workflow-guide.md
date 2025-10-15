@@ -1,19 +1,22 @@
-# Usage Guide - Console Bridge
+# Workflow Guide - Console Bridge
 
-**Learn the 4 ways to run Console Bridge and when to use each**
+**Learn the 5 ways to run Console Bridge and when to use each**
 
-This guide shows you exactly how to use Console Bridge in different scenarios.
+This guide shows you exactly how to use Console Bridge in different scenarios across both Puppeteer Mode and Extension Mode.
 
 ---
 
-## The 4 Methods
+## The 5 Methods
 
-| Method | Terminals | Use Case | Complexity |
-|--------|-----------|----------|------------|
-| **Method 1: Basic** | 2 separate | Quick testing, learning | ⭐ Easy |
-| **Method 2: Manual Merge** | 2 separate | When concurrently unavailable | ⭐⭐ Medium |
-| **Method 3: Unified** | 1 unified | **Recommended for daily use** | ⭐ Easy |
-| **Method 4: Headful Debug** | 1 or 2 | Debugging Console Bridge | ⭐⭐⭐ Advanced |
+| Method | Mode | Terminals | Use Case | Complexity |
+|--------|------|-----------|----------|------------|
+| **Method 1: Basic Puppeteer** | Puppeteer | 2 separate | Quick testing, learning | ⭐ Easy |
+| **Method 2: Manual Merge** | Puppeteer | 2 separate | When concurrently unavailable | ⭐⭐ Medium |
+| **Method 3: Unified** | Puppeteer | 1 unified | Recommended for automation | ⭐ Easy |
+| **Method 4: Headful Debug** | Puppeteer | 1 or 2 | Debugging Console Bridge | ⭐⭐⭐ Advanced |
+| **Method 5: Extension Mode** | Extension | 1 terminal | **Recommended for daily development** | ⭐ Easy |
+
+**Note:** Methods 1-4 use Puppeteer Mode (automated browser). Method 5 uses Extension Mode (YOUR browser).
 
 ---
 
@@ -271,7 +274,193 @@ Press `Ctrl+C` - browser closes automatically.
 
 ---
 
+## Method 5: Extension Mode (v2.0.0 - Recommended for Daily Development)
+
+**What it is:** Use YOUR Chrome browser with the Console Bridge extension to capture logs from whatever page you're viewing.
+
+**When to use:**
+- **Daily interactive development (HIGHLY RECOMMENDED)**
+- Using browser extensions (React DevTools, Vue DevTools, etc.)
+- Testing with YOUR Chrome setup
+- Clicking around and interacting with your app manually
+
+### Prerequisites
+
+1. **Install the Chrome extension** (one-time setup):
+   - Open Chrome → `chrome://extensions`
+   - Enable "Developer mode" (top right toggle)
+   - Click "Load unpacked"
+   - Select folder: `C:/Claude/console-bridge-v2/chrome-extension-poc`
+   - See "Console Bridge" extension card (enabled ✓)
+
+2. **Install Console Bridge CLI** (if not already):
+   ```bash
+   npm install -g console-bridge
+   ```
+
+### Step-by-Step
+
+**Terminal 1 - Start Extension Mode (NO URL NEEDED):**
+```bash
+console-bridge start --extension-mode
+```
+
+You'll see:
+```
+🚀 Console Bridge v2.0.0
+📡 Extension Mode
+🔌 WebSocket server listening on ws://localhost:9090
+⏳ Waiting for extension connection...
+```
+
+**Notice:** NO URL or port specified! Extension captures from whatever page you browse to.
+
+**Browser - Connect the Extension:**
+1. **Start your dev server** (in another terminal or background):
+   ```bash
+   npm run dev
+   # Output: Local: http://localhost:3000
+   ```
+
+2. **Browse to your app** (ANY localhost port):
+   ```
+   http://localhost:3000
+   ```
+   (Or localhost:8080, localhost:3847, etc.)
+
+3. **Open DevTools** (F12)
+
+4. **Click "Console Bridge" tab** (top tabs in DevTools):
+   ```
+   Elements | Console | Sources | ... | Console Bridge  ← Click this
+   ```
+
+5. **Click "Connect" button** in the panel
+   - Button turns green: "Connected ✓"
+   - Terminal shows: "Extension connected"
+
+### Testing It
+
+1. In Chrome DevTools **Console tab** (not Console Bridge tab), type:
+   ```javascript
+   console.log('Hello from Extension Mode!');
+   ```
+
+2. **Look at your terminal** - you'll see:
+   ```
+   [timestamp] [localhost:3000] log: Hello from Extension Mode!
+   ```
+
+3. Click buttons on your site, navigate pages - all logs appear in terminal!
+
+### What You'll See
+
+**Terminal (Console Bridge):**
+```
+✓ Extension connected from chrome-extension://abcdefg...
+[14:32:15] [localhost:3000] log: Page loaded
+[14:32:16] [localhost:3000] info: Button clicked
+[14:32:17] [localhost:3000] error: API call failed
+```
+
+**Chrome DevTools "Console Bridge" Panel:**
+```
+Connected ✓
+
+Logs are streaming to your terminal.
+```
+
+### Key Differences from Puppeteer Mode
+
+**Extension Mode:**
+- ❌ **NO URL/port needed** when starting Console Bridge
+- ✅ **YOUR Chrome browser** (not Puppeteer Chromium)
+- ✅ **Works with any port** (3000, 8080, 3847 - just browse to it)
+- ✅ **Works with browser extensions** (React DevTools, Vue DevTools, etc.)
+- ✅ **Manual interactions** (click around your app yourself)
+
+**Puppeteer Mode (Methods 1-4):**
+- ✅ **URL required:** `console-bridge start localhost:3000`
+- ✅ **Automated browser** (Puppeteer controls it)
+- ❌ **Can't use browser extensions**
+- ❌ **Limited manual interaction** (headful mode only)
+
+### Multi-Tab Support
+
+Extension Mode works with **multiple tabs** simultaneously:
+
+```bash
+# Terminal: Start extension mode once
+console-bridge start --extension-mode
+
+# Browser: Open multiple tabs
+Tab 1: localhost:3000 → Open DevTools → Connect → Logs stream
+Tab 2: localhost:8080 → Open DevTools → Connect → Logs stream
+Tab 3: localhost:5173 → Open DevTools → Connect → Logs stream
+
+# All logs appear in same terminal with different labels:
+# [localhost:3000] log: ...
+# [localhost:8080] info: ...
+# [localhost:5173] error: ...
+```
+
+### When to Use Extension Mode
+
+✅ **Perfect for:**
+- Daily development with React DevTools
+- Testing user interactions manually
+- Debugging with Vue DevTools, Redux DevTools, etc.
+- Using YOUR Chrome with your extensions
+- Cross-browser testing (Chrome, Edge, Brave, Opera)
+
+❌ **NOT ideal for:**
+- CI/CD pipelines (use Puppeteer Mode)
+- Automated testing (use Puppeteer Mode)
+- Monitoring without manual interaction (use Puppeteer Mode)
+
+### To Stop
+
+Press `Ctrl+C` in terminal - extension detects disconnection.
+
+**See:** [Port and URL Configuration Guide](./port-and-url-configuration.md) for complete Extension Mode details.
+
+---
+
 ## Quick Comparison
+
+### Puppeteer Mode vs Extension Mode
+
+| Feature | Puppeteer Mode (Methods 1-4) | Extension Mode (Method 5) |
+|---------|------------------------------|---------------------------|
+| **URL Required?** | ✅ YES - Must specify port | ❌ NO - Browse to any port |
+| **Browser** | Puppeteer Chromium (automated) | YOUR Chrome (manual) |
+| **Browser Extensions** | ❌ Not available | ✅ React DevTools, Vue DevTools, etc. |
+| **Manual Interaction** | ⚠️ Limited (headful mode only) | ✅ Full manual control |
+| **Use Case** | CI/CD, automation, testing | **Daily development** |
+| **Setup Complexity** | ⭐ Easy | ⭐ Easy (one-time extension load) |
+
+**Recommendation:** Use **Extension Mode (Method 5)** for daily development, **Puppeteer Mode (Methods 1-3)** for automation/CI/CD.
+
+### Method 1 vs Method 3 vs Method 5
+
+**Method 1 (Basic Puppeteer - Separate terminals):**
+```
+Terminal 1: Next.js logs
+Terminal 2: Browser console logs (Puppeteer)
+```
+👉 Switch between terminals, automated browser
+
+**Method 3 (Unified Puppeteer):**
+```
+Terminal 1: Next.js logs + Browser console logs (together!)
+```
+👉 See everything in one place, automated browser
+
+**Method 5 (Extension Mode - RECOMMENDED):**
+```
+Terminal 1: Browser console logs (YOUR Chrome)
+```
+👉 Use YOUR browser with React DevTools, click around manually
 
 ### Method 1 vs Method 3
 
