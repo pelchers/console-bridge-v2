@@ -361,6 +361,164 @@ class ConsoleBridgePOC {
           };
         });
 
+        // Global error handler for uncaught exceptions
+        window.addEventListener('error', function(event) {
+          try {
+            if (!window.__consoleBridgeQueue) {
+              window.__consoleBridgeQueue = [];
+            }
+
+            window.__consoleBridgeQueue.push({
+              method: 'error',
+              args: [event.message],
+              timestamp: Date.now(),
+              location: {
+                url: window.location.href,
+                filename: event.filename,
+                lineno: event.lineno,
+                colno: event.colno
+              },
+              stackTrace: event.error ? event.error.stack : null
+            });
+          } catch (error) {
+            console.error('[Console Bridge] Error handler failed:', error);
+          }
+        }, true); // useCapture = true to catch all errors
+
+        // Unhandled promise rejection handler
+        window.addEventListener('unhandledrejection', function(event) {
+          try {
+            if (!window.__consoleBridgeQueue) {
+              window.__consoleBridgeQueue = [];
+            }
+
+            const reason = event.reason;
+            const message = reason instanceof Error
+              ? reason.message
+              : String(reason);
+
+            window.__consoleBridgeQueue.push({
+              method: 'error',
+              args: [`Unhandled Promise Rejection: ${message}`],
+              timestamp: Date.now(),
+              location: {
+                url: window.location.href
+              },
+              stackTrace: reason instanceof Error ? reason.stack : null
+            });
+          } catch (error) {
+            console.error('[Console Bridge] Promise rejection handler failed:', error);
+          }
+        });
+
+        // Intercept Fetch API for network error capture
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+          const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url) || 'unknown';
+          const method = args[1] && args[1].method ? args[1].method.toUpperCase() : 'GET';
+
+          return originalFetch.apply(this, args)
+            .then(response => {
+              // Capture HTTP error status codes (4xx, 5xx)
+              if (!response.ok) {
+                try {
+                  if (!window.__consoleBridgeQueue) {
+                    window.__consoleBridgeQueue = [];
+                  }
+
+                  window.__consoleBridgeQueue.push({
+                    method: 'error',
+                    args: [`${method} ${url} ${response.status} (${response.statusText})`],
+                    timestamp: Date.now(),
+                    location: {
+                      url: window.location.href
+                    }
+                  });
+                } catch (error) {
+                  console.error('[Console Bridge] Fetch error handler failed:', error);
+                }
+              }
+              return response;
+            })
+            .catch(error => {
+              // Capture network failures (CORS, connection refused, etc.)
+              try {
+                if (!window.__consoleBridgeQueue) {
+                  window.__consoleBridgeQueue = [];
+                }
+
+                window.__consoleBridgeQueue.push({
+                  method: 'error',
+                  args: [`Fetch failed loading: ${method} "${url}".`],
+                  timestamp: Date.now(),
+                  location: {
+                    url: window.location.href
+                  },
+                  stackTrace: error.stack || null
+                });
+              } catch (handlerError) {
+                console.error('[Console Bridge] Fetch catch handler failed:', handlerError);
+              }
+              throw error; // Re-throw to preserve original behavior
+            });
+        };
+
+        // Intercept XMLHttpRequest API for XHR error capture
+        const originalXHROpen = XMLHttpRequest.prototype.open;
+        const originalXHRSend = XMLHttpRequest.prototype.send;
+
+        XMLHttpRequest.prototype.open = function(method, url, ...args) {
+          this.__consoleBridge_url = url;
+          this.__consoleBridge_method = method;
+          return originalXHROpen.apply(this, [method, url, ...args]);
+        };
+
+        XMLHttpRequest.prototype.send = function(...args) {
+          this.addEventListener('load', function() {
+            // Capture HTTP error status codes (4xx, 5xx)
+            if (this.status >= 400) {
+              try {
+                if (!window.__consoleBridgeQueue) {
+                  window.__consoleBridgeQueue = [];
+                }
+
+                window.__consoleBridgeQueue.push({
+                  method: 'error',
+                  args: [`${this.__consoleBridge_method} ${this.__consoleBridge_url} ${this.status} (${this.statusText})`],
+                  timestamp: Date.now(),
+                  location: {
+                    url: window.location.href
+                  }
+                });
+              } catch (error) {
+                console.error('[Console Bridge] XHR load handler failed:', error);
+              }
+            }
+          });
+
+          this.addEventListener('error', function() {
+            // Capture network failures
+            try {
+              if (!window.__consoleBridgeQueue) {
+                window.__consoleBridgeQueue = [];
+              }
+
+              window.__consoleBridgeQueue.push({
+                method: 'error',
+                args: [`Network error: ${this.__consoleBridge_method} ${this.__consoleBridge_url}`],
+                timestamp: Date.now(),
+                location: {
+                  url: window.location.href
+                }
+              });
+            } catch (error) {
+              console.error('[Console Bridge] XHR error handler failed:', error);
+            }
+          });
+
+          return originalXHRSend.apply(this, args);
+        };
+
         return 'Console monitoring active';
       })();
     `;
