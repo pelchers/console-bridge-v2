@@ -60,15 +60,15 @@ After successfully publishing Console Bridge v2.0.0 to the Chrome Web Store on O
 
 ### New Repository Specifications
 
-**Repository Name:** `pelchers/console-bridge`
-**URL:** `https://github.com/pelchers/console-bridge` (to be created)
+**Repository Name:** `pelchers/console-bridge-2`
+**URL:** `https://github.com/pelchers/console-bridge-2` (to be created)
 **Purpose:** Single-purpose repository for Console Bridge extension and CLI
 
 **Structure:**
 ```
-pelchers/console-bridge/
+pelchers/console-bridge-2/
 ├── .claude/                 # Project configuration and ADRs
-├── chrome-extension/        # Extension source (renamed from chrome-extension-poc)
+├── chrome-extension-poc/    # Extension source (keep original name)
 │   ├── icons/
 │   ├── devtools.html
 │   ├── devtools.js
@@ -77,10 +77,12 @@ pelchers/console-bridge/
 │   ├── manifest.json
 │   ├── PRIVACY_POLICY.md
 │   └── README.md
-├── cli/                     # CLI source (from src/)
+├── src/                     # CLI source (keep original structure)
 │   ├── commands/
+│   ├── core/
 │   ├── services/
-│   └── utils/
+│   ├── utils/
+│   └── formatters/
 ├── bin/                     # CLI executables
 ├── docs/                    # Documentation
 ├── examples/                # Usage examples
@@ -95,9 +97,9 @@ pelchers/console-bridge/
 ```
 
 **What Gets Migrated:**
-- ✅ All source code from `console-bridge-v2/` subdirectory
+- ✅ All source code from `console-bridge-v2/` subdirectory of monorepo
 - ✅ LICENSE (proprietary source-available)
-- ✅ Documentation (cleaned and reorganized)
+- ✅ Documentation from `console-bridge-v2/` subdirectory
 - ✅ Phase B deliverables (screenshots, ADRs, checklists)
 - ✅ Git history for v2.0.0 work (via selected branch migration)
 
@@ -135,18 +137,20 @@ pelchers/console-bridge/
 ### Phase 2: Create New Repository
 
 **Step 2.1: User Creates GitHub Repository**
-- User creates new repo: `pelchers/console-bridge`
+- User creates new repo: `pelchers/console-bridge-2`
 - Visibility: Public
 - No initialization (no README, .gitignore, LICENSE - we'll push our own)
 
 **Step 2.2: Prepare Clean Local Repository**
-- Create new local directory structure
-- Copy only relevant files from `console-bridge-v2/` subdirectory
-- Reorganize directory structure for clarity:
-  - `chrome-extension-poc/` → `chrome-extension/`
-  - `src/` → `cli/`
-- Initialize git repository
-- Add new remote pointing to `pelchers/console-bridge`
+- Copy `console-bridge-v2/` subdirectory from monorepo to new local directory
+- Source: `C:\Claude\console-bridge-v2\console-bridge-v2\` (subdirectory inside monorepo)
+- Destination: `C:\Claude\console-bridge-2\` (new directory at same level as monorepo)
+- Keep original directory structure (no renaming):
+  - `chrome-extension-poc/` stays as-is
+  - `src/` stays as-is
+  - All files and folders copied exactly
+- Initialize fresh git repository in `C:\Claude\console-bridge-2\`
+- No connection to old monorepo git history
 
 **Step 2.3: Create Initial Branches**
 - Create `master` branch (default, production-ready)
@@ -185,9 +189,9 @@ Support: https://github.com/pelchers/console-bridge-v2/issues
 
 **NEW URLs:**
 ```
-Privacy Policy: https://github.com/pelchers/console-bridge/blob/master/chrome-extension/PRIVACY_POLICY.md
-Homepage: https://github.com/pelchers/console-bridge
-Support: https://github.com/pelchers/console-bridge/issues
+Privacy Policy: https://github.com/pelchers/console-bridge-2/blob/master/chrome-extension-poc/PRIVACY_POLICY.md
+Homepage: https://github.com/pelchers/console-bridge-2
+Support: https://github.com/pelchers/console-bridge-2/issues
 ```
 
 **Step 4.2: Save Changes**
@@ -197,33 +201,31 @@ Support: https://github.com/pelchers/console-bridge/issues
 
 ### Phase 5: Manage Git Remotes
 
-**Step 5.1: Configure Multiple Remotes**
-In local working directory (`C:\Claude\console-bridge-v2\`):
+**Step 5.1: Two Separate Working Directories**
+After migration, we'll have two distinct local directories:
 
-```bash
-# Add new repo as "console-bridge" remote
-git remote add console-bridge git@github.com:pelchers/console-bridge.git
+**Monorepo (keep as-is):**
+- Location: `C:\Claude\console-bridge-v2\`
+- Connected to: `pelchers/console-bridge-v2` (monorepo remote)
+- Purpose: Archive, reference, old development work
+- Status: Keep but no active v2.0.0 development
 
-# Keep existing remotes for reference:
-# - origin → pelchers/console-bridge-v2 (old monorepo)
-# - console-bridge → pelchers/console-bridge (new clean repo)
-```
+**New Clean Repo:**
+- Location: `C:\Claude\console-bridge-2\`
+- Connected to: `pelchers/console-bridge-2` (new clean remote)
+- Purpose: All future Console Bridge v2.0.0+ development
+- Status: Active development directory
 
-**Step 5.2: Default Working Remote**
-- Future work: Push to `console-bridge` remote
-- Old repo (`console-bridge-v2`): Keep as archive, no new development
-- If needed, can still access old repo for history/reference
+**Step 5.2: Working Strategy**
+- **Future development:** Work in `C:\Claude\console-bridge-2\`
+- **Monorepo:** Keep `C:\Claude\console-bridge-v2\` as archive
+- **No remote mixing:** Each directory connected to only one remote
+- **Clean separation:** No git submodules or nested repos
 
-**Step 5.3: Local Working Directory Strategy**
-- **Option A:** Continue using `C:\Claude\console-bridge-v2\` (keep current directory)
-  - Advantage: No file moves, existing setup works
-  - Disadvantage: Directory name doesn't match new repo
-
-- **Option B:** Create new `C:\Claude\console-bridge\` directory
-  - Advantage: Clean start, matches new repo name
-  - Disadvantage: Need to reconfigure tools/paths
-
-**Decision:** Option A (continue using current directory, just switch remote)
+**Step 5.3: No Git Remote Confusion**
+- Monorepo (`console-bridge-v2\`) pushes ONLY to `pelchers/console-bridge-v2`
+- New repo (`console-bridge-2\`) pushes ONLY to `pelchers/console-bridge-2`
+- Clean, simple, no risk of pushing to wrong remote
 
 ---
 
